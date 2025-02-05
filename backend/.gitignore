@@ -1,0 +1,54 @@
+# Node modules directory
+node_modules/
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# Dependency directory for production builds
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Test and coverage directories
+coverage/
+*.lcov
+
+# Build and dist files
+dist/
+build/
+
+# IDE or editor-specific files (e.g., VSCode, WebStorm)
+.vscode/
+.idea/
+
+# Temporary files
+*.swp
+*.swo
+
+# Package-lock or yarn.lock for specific environments (optional)
+package-lock.json
+yarn.lock
+
+# .npmrc or other config files
+.npmrc
+
+# NPM package output files
+*.tgz
+
+# Coverage folder created by code coverage tools
+coverage/
+
+# Other temporary files
+tmp/
+temp/

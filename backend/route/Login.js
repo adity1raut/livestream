@@ -8,7 +8,7 @@ dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
 const router = express.Router();
 
-
+// Login Controller
 const login = async (req, res) => {
     const { email, password } = req.body;
 
@@ -38,10 +38,11 @@ const login = async (req, res) => {
     }
 };
 
+// Profile Controller
 const profile = async (req, res) => {
     try {
         const { username } = req.params;
-        
+
         if (!username) {
             return res.status(400).json({ error: true, message: 'Username is required.' });
         }
@@ -58,8 +59,40 @@ const profile = async (req, res) => {
     }
 };
 
+// Profile Update Controller
+const updateProfile = async (req, res) => {
+    try {
+        const { username } = req.params;
+        const { firstName, lastName, email } = req.body;
 
+        if (!username) {
+            return res.status(400).json({ error: true, message: 'Username is required.' });
+        }
+
+        // Find the user by username
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(404).json({ error: true, message: 'User not found.' });
+        }
+
+        // Update user fields
+        if (firstName) user.firstName = firstName;
+        if (lastName) user.lastName = lastName;
+        if (email) user.email = email;
+
+        // Save the updated user
+        await user.save();
+
+        res.status(200).json({ success: true, message: 'Profile updated successfully.', data: user });
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).json({ error: true, message: 'Server error, please try again later.' });
+    }
+};
+
+// Routes
 router.post('/api/login', login);
 router.get('/api/profile/:username', authenticateToken, profile);
+router.put('/api/profile/:username', authenticateToken, updateProfile); // Add profile update route
 
 export default router;

@@ -16,12 +16,8 @@ router.post('/api/send-otp', async (req, res) => {
     if (!email || !fname || !lname) {
       return res.status(400).send({ message: "Email, first name, and last name are required" });
     }
-
-    // Generate a 4-digit OTP
     const otp = crypto.randomInt(1000, 9999).toString();
     otpStore.set(email, { otp, expiresAt: Date.now() + 2 * 60 * 1000 }); // OTP expires in 2 minutes
-
-    // Send OTP via email
     await transporter.sendMail({
       from: 'your-email@gmail.com',
       to: email,
@@ -54,11 +50,11 @@ router.post('/api/verify-otp', (req, res) => {
     }
 
     if (storedOtpData.expiresAt < Date.now()) {
-      otpStore.delete(email); // Clean up expired OTP
+      otpStore.delete(email); 
       return res.status(400).send({ message: "OTP expired" });
     }
 
-    otpStore.delete(email); // OTP verified successfully, delete from store
+    otpStore.delete(email); 
     res.status(200).send({ success: true, message: "OTP verified successfully" });
   } catch (error) {
     console.error("Error verifying OTP:", error);

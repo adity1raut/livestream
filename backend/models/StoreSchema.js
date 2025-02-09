@@ -22,7 +22,8 @@ const storeItemSchema = new mongoose.Schema({
     required: true
   },
   oner: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref :"User",
     required: true
   }
 }, {

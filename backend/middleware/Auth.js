@@ -12,7 +12,7 @@ const authenticateToken = (req, res, next) => {
         return res.status(401).json({ message: 'Access Denied: No token provided' });
     }
 
-    const token = authHeader.split(' ')[1]; // Extract the actual token
+    const token = authHeader.split(' ')[1];
 
     try {
         const verified = jwt.verify(token, JWT_SECRET);

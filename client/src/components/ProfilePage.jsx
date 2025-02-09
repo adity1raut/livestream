@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
-import {useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const ProfilePage = () => {
-  // const { username } = useParams();
   const username = localStorage.getItem("username");
-
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -14,11 +12,11 @@ const ProfilePage = () => {
     firstName: "",
     lastName: "",
     email: "",
+    profileImage: null,
   });
   const [profileImage, setProfileImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
 
-  // Fetch user profile data
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem("token");
@@ -57,34 +55,38 @@ const ProfilePage = () => {
     fetchProfile();
   }, [username, navigate]);
 
-  // Handle input changes for profile update form
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // Handle profile image change
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setProfileImage(file);
-      setImagePreview(URL.createObjectURL(file)); // Preview the selected image
+      setImagePreview(URL.createObjectURL(file));
     }
   };
 
-  // Handle profile update submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
+
+    const formDataToSend = new FormData();
+    formDataToSend.append("firstName", formData.firstName);
+    formDataToSend.append("lastName", formData.lastName);
+    formDataToSend.append("email", formData.email);
+    if (profileImage) {
+      formDataToSend.append("profileImage", profileImage);
+    }
 
     try {
       const response = await fetch(`http://localhost:5000/api/profile/${username}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: formDataToSend,
       });
 
       const data = await response.json();
@@ -101,35 +103,6 @@ const ProfilePage = () => {
     }
   };
 
-  // Handle profile image upload
-  const handleImageUpload = async () => {
-    const token = localStorage.getItem("token");
-    const formData = new FormData();
-    formData.append("profileImage", profileImage);
-
-    try {
-      const response = await fetch(`http://localhost:5000/api/profile/${username}/upload`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setUserData(data.data);
-        setImagePreview(data.data.profileImage);
-        toast.success("Profile image updated successfully!");
-      } else {
-        toast.error(data.message || "Error uploading image.");
-      }
-    } catch (error) {
-      toast.error("An error occurred. Please try again.");
-    }
-  };
-
   if (!userData) {
     return <p className="text-center mt-8">Loading profile...</p>;
   }
@@ -140,31 +113,16 @@ const ProfilePage = () => {
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
           Profile of {userData.firstName} {userData.lastName}
         </h1>
-
-        {/* Profile Image */}
         <div className="flex flex-col items-center mb-6">
           <div className="relative w-32 h-32 rounded-full overflow-hidden shadow-lg">
             <img
-              src={imagePreview || "https://via.placeholder.com/150"}
+              src={imagePreview || userData.profileImage || "https://via.placeholder.com/150"}
               alt="Profile"
               className="w-full h-full object-cover"
             />
           </div>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="mt-4 text-sm text-gray-500"
-          />
-          <button
-            onClick={handleImageUpload}
-            className="mt-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
-          >
-            Upload Image
-          </button>
         </div>
 
-        {/* Profile Details */}
         {isEditing ? (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="bg-gray-50 p-4 rounded-lg">
@@ -195,6 +153,15 @@ const ProfilePage = () => {
                 value={formData.email}
                 onChange={handleInputChange}
                 className="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <label className="text-sm font-medium text-gray-500">Upload Profile Image :</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="mt-1 text-sm text-gray-500"
               />
             </div>
             <div className="flex justify-end space-x-4">
@@ -238,7 +205,6 @@ const ProfilePage = () => {
           </div>
         )}
 
-        {/* Additional Information */}
         {userData.extraFields && userData.extraFields.length > 0 && (
           <div className="mt-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">Additional Information</h2>
@@ -253,7 +219,6 @@ const ProfilePage = () => {
           </div>
         )}
       </div>
-
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );

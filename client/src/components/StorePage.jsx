@@ -14,6 +14,8 @@ const StorePage = () => {
   const [preview, setPreview] = useState(null);
   const [formError, setFormError] = useState(null);
   const [formSuccess, setFormSuccess] = useState(false);
+  const [cart, setCart] = useState([]);
+  const [cartSuccess, setCartSuccess] = useState(false);
 
   useEffect(() => {
     fetchItems();
@@ -113,6 +115,12 @@ const StorePage = () => {
     setPreview(null);
     setFormError(null);
     setFormSuccess(false);
+  };
+
+  const handleAddToCart = (item) => {
+    setCart((prev) => [...prev, item]);
+    setCartSuccess(true);
+    setTimeout(() => setCartSuccess(false), 2000);
   };
 
   return (
@@ -221,10 +229,18 @@ const StorePage = () => {
               <h3 className="text-lg font-semibold mb-2">{title}</h3>
               <p className="text-2xl font-bold mb-2">${price}</p>
               <p className="text-yellow-500">Rating: {rating}/5</p>
+              <button
+                onClick={() => handleAddToCart({ _id, image, title, price, rating })}
+                className="mt-4 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
+              >
+                Add to Cart
+              </button>
             </div>
           </div>
         ))}
       </div>
+
+      {cartSuccess && <div className="text-green-600 mt-4">Item added to cart successfully!</div>}
     </div>
   );
 };

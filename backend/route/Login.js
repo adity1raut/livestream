@@ -106,7 +106,6 @@ const updateProfile = async (req, res) => {
 
 router.post('/api/login', login);
 router.get('/api/profile/:username', authenticateToken, profile);
-// router.put('/api/profile/:username', authenticateToken, updateProfile); 
 router.put('/api/profile/:username', upload.single('profileImage'), updateProfile);
 
 export default router;

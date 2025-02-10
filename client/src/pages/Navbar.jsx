@@ -109,7 +109,6 @@ const Navbar = () => {
           )}
         </ul>
 
-        {/* Hamburger Menu (Mobile) */}
         <button className="md:hidden text-gray-700 focus:outline-none" onClick={toggleMenu}>
           {menuOpen ? "✕" : "☰"}
         </button>

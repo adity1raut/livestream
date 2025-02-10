@@ -7,6 +7,7 @@ import router from './route/ForgetPass.js';
 import cors from "cors";
 import router4 from "./route/StroreRoute.js"
 import env from 'dotenv';
+import videoroute from "./route/videoRoute.js"
 
 env.config();
 
@@ -25,6 +26,7 @@ app.use(userRoutes);
 app.use(router1);
 app.use(router);
 app.use(router4);
+app.use("/api" , videoroute);
 
 
 const PORT = process.env.PORT || 5000;

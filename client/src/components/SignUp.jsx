@@ -137,7 +137,6 @@ const SignUp = () => {
             />
           </div>
 
-          {/* OTP Field */}
           {otpSent && (
             <div>
               <label className="block text-sm font-medium text-gray-700">OTP</label>
@@ -153,7 +152,6 @@ const SignUp = () => {
             </div>
           )}
 
-          {/* Password Fields */}
           {otpSent && (
             <>
               <div>
@@ -183,7 +181,6 @@ const SignUp = () => {
             </>
           )}
 
-          {/* Extra Fields */}
           {formData.extraFields.map((field, index) => (
             <div key={index}>
               <label className="block text-sm font-medium text-gray-700">Custom Field</label>

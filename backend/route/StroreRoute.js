@@ -38,7 +38,7 @@ router.post('/api/items', authenticateToken, upload.single('image'), async (req,
       price,
       rating,
       image: req.file.path,
-      oner: req.user.username,  // Storing username as a string
+      oner: req.user.username,  
     });
 
     const savedItem = await newItem.save();

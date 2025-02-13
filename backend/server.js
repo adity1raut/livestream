@@ -2,12 +2,12 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import ConnectDB from "./db/DbConnection.js";
 import userRoutes from "./route/Login.js";
-import router1 from "./route/Signin.js";
-import router from './route/ForgetPass.js';
-import cors from "cors";
-import router4 from "./route/StroreRoute.js"
+import useSignin from "./route/Signin.js";
+import useForget from './route/ForgetPass.js';
+import useStore from "./route/StroreRoute.js"
+import useVideo from "./route/videoRoute.js"
 import env from 'dotenv';
-import videoroute from "./route/videoRoute.js"
+import cors from "cors";
 
 env.config();
 
@@ -23,10 +23,10 @@ app.use('/uploads', express.static('uploads'));
 ConnectDB();
 
 app.use(userRoutes);
-app.use(router1);
-app.use(router);
-app.use(router4);
-app.use("/api" , videoroute);
+app.use(useSignin);
+app.use(useStore);
+app.use(useForget);
+app.use("/api" , useVideo);
 
 
 const PORT = process.env.PORT || 5000;

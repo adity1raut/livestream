@@ -9,6 +9,7 @@ import Navbar from "./pages/Navbar";
 import SignUp from "./components/Signup";
 import StorePage from "./components/StorePage"
 import Forget from "./components/Forget";
+import LivePage from "./components/Live";
 import VideoUpload from "./components/videoUplode";
 const App = () => {
   return (
@@ -23,8 +24,9 @@ const App = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route element={<PrivateRoute />}>
             <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/video" element={<VideoUpload />} />
+            <Route path="/uplode-video" element={<VideoUpload />} />
             <Route path="/store" element={<StorePage />} />
+            <Route path="/live" element={<LivePage />} />
           </Route>
         </Routes>
       </BrowserRouter>

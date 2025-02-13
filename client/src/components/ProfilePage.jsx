@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate  , Link} from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 
 const ProfilePage = () => {
   const username = localStorage.getItem("username");
@@ -201,6 +202,12 @@ const ProfilePage = () => {
               className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
             >
               Edit Profile
+            </button>
+            <button
+              
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
+            >
+              <Link to="/uplode-video">Uplode Video</Link>
             </button>
           </div>
         )}

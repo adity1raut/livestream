@@ -1,5 +1,5 @@
 import express from 'express';
-import upload from '../connection/multerConfig.js'; // Adjust the import path as necessary
+import upload from '../connection/multrer.js'; // Adjust the import path as necessary
 import Video from '../models/VideoSchema.js'; // Adjust the import path as necessary
 
 const router = express.Router();

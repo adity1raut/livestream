@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 
 const StorePage = () => {
+  const { isAuthenticated } = useContext(AuthContext);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -9,6 +11,7 @@ const StorePage = () => {
     title: '',
     price: '',
     rating: '',
+    description: '',
   });
   const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -16,10 +19,12 @@ const StorePage = () => {
   const [formSuccess, setFormSuccess] = useState(false);
   const [cart, setCart] = useState([]);
   const [cartSuccess, setCartSuccess] = useState(false);
+  const [viewMode, setViewMode] = useState('all'); // 'all' or 'my-items'
+  const [selectedItem, setSelectedItem] = useState(null);
 
   useEffect(() => {
     fetchItems();
-  }, []);
+  }, [viewMode]);
 
   useEffect(() => {
     if (selectedFile) {
@@ -31,7 +36,11 @@ const StorePage = () => {
 
   const fetchItems = async () => {
     try {
-      const response = await fetch('/api/items');
+      const endpoint = viewMode === 'my-items' ? '/api/items/my-items' : '/api/items';
+      const token = localStorage.getItem('token');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      
+      const response = await fetch(endpoint, { headers });
       if (!response.ok) throw new Error('Failed to fetch items');
       const data = await response.json();
       setItems(Array.isArray(data) ? data : []);
@@ -68,7 +77,7 @@ const StorePage = () => {
     setFormError(null);
     setFormSuccess(false);
 
-    if (!selectedFile) {
+    if (!selectedFile && !selectedItem) {
       setFormError('Please select an image');
       return;
     }
@@ -76,20 +85,29 @@ const StorePage = () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        setFormError('User is not authenticated. Please log in.');
+        setFormError('Please log in to add or edit items');
         return;
       }
 
       const formDataToSend = new FormData();
-      formDataToSend.append('image', selectedFile);
+      if (selectedFile) {
+        formDataToSend.append('image', selectedFile);
+      }
       formDataToSend.append('title', formData.title);
       formDataToSend.append('price', formData.price);
       formDataToSend.append('rating', formData.rating);
+      formDataToSend.append('description', formData.description);
 
-      const response = await fetch('/api/items', {
-        method: 'POST',
+      const url = selectedItem 
+        ? `/api/items/${selectedItem._id}`
+        : '/api/items';
+      
+      const method = selectedItem ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: formDataToSend,
       });
@@ -99,22 +117,67 @@ const StorePage = () => {
         throw new Error(error.message);
       }
 
-      const newItem = await response.json();
-      setItems((prev) => [newItem, ...prev]);
+      const responseData = await response.json();
+      
+      if (selectedItem) {
+        setItems(prev => prev.map(item => 
+          item._id === selectedItem._id ? responseData : item
+        ));
+      } else {
+        setItems(prev => [responseData, ...prev]);
+      }
+
       setFormSuccess(true);
       resetForm();
       setShowForm(false);
+      setSelectedItem(null);
     } catch (err) {
       setFormError(err.message);
     }
   };
 
+  const handleDelete = async (itemId) => {
+    if (!window.confirm('Are you sure you want to delete this item?')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/items/${itemId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
+
+      setItems(prev => prev.filter(item => item._id !== itemId));
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleEdit = (item) => {
+    setSelectedItem(item);
+    setFormData({
+      title: item.title,
+      price: item.price,
+      rating: item.rating,
+      description: item.description || '',
+    });
+    setPreview(item.image); // Set preview to the current image
+    setShowForm(true);
+  };
+
   const resetForm = () => {
-    setFormData({ title: '', price: '', rating: '' });
+    setFormData({ title: '', price: '', rating: '', description: '' });
     setSelectedFile(null);
     setPreview(null);
     setFormError(null);
     setFormSuccess(false);
+    setSelectedItem(null);
   };
 
   const handleAddToCart = (item) => {
@@ -123,21 +186,52 @@ const StorePage = () => {
     setTimeout(() => setCartSuccess(false), 2000);
   };
 
+  const isItemOwner = (item) => {
+    const username = localStorage.getItem('username');
+    return username === item.owner;
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <button
-        onClick={() => {
-          setShowForm((prev) => !prev);
-          if (!showForm) resetForm();
-        }}
-        className="mb-4 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
-      >
-        {showForm ? 'Close Form' : 'Add New Item'}
-      </button>
+      {isAuthenticated && (
+        <div className="flex gap-4 mb-6">
+          <button
+            onClick={() => setViewMode('all')}
+            className={`py-2 px-4 rounded-md ${
+              viewMode === 'all' 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-200 text-gray-800'
+            }`}
+          >
+            All Items
+          </button>
+          <button
+            onClick={() => setViewMode('my-items')}
+            className={`py-2 px-4 rounded-md ${
+              viewMode === 'my-items' 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-200 text-gray-800'
+            }`}
+          >
+            My Items
+          </button>
+          <button
+            onClick={() => {
+              setShowForm((prev) => !prev);
+              if (!showForm) resetForm();
+            }}
+            className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700"
+          >
+            {showForm ? 'Close Form' : 'Add New Item'}
+          </button>
+        </div>
+      )}
 
       {showForm && (
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-2xl font-bold mb-6">Add New Item</h2>
+          <h2 className="text-2xl font-bold mb-6">
+            {selectedItem ? 'Edit Item' : 'Add New Item'}
+          </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
               name="title"
@@ -170,6 +264,14 @@ const StorePage = () => {
               placeholder="Rating"
               className="w-full px-4 py-2 border rounded-md"
             />
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleInputChange}
+              placeholder="Description"
+              className="w-full px-4 py-2 border rounded-md"
+              rows="4"
+            />
             <div className="space-y-2">
               <input
                 type="file"
@@ -187,17 +289,31 @@ const StorePage = () => {
                   />
                 </div>
               )}
+              {selectedItem && !preview && (
+                <div className="mt-2">
+                  <p className="text-sm text-gray-600 mb-2">Current Image:</p>
+                  <img
+                    src={selectedItem.image}
+                    alt={selectedItem.title}
+                    className="max-w-xs rounded-md border"
+                  />
+                </div>
+              )}
             </div>
 
             {formError && <div className="text-red-600">{formError}</div>}
-            {formSuccess && <div className="text-green-600">Item added successfully!</div>}
+            {formSuccess && (
+              <div className="text-green-600">
+                Item {selectedItem ? 'updated' : 'added'} successfully!
+              </div>
+            )}
 
             <div className="flex gap-4">
               <button
                 type="submit"
                 className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
               >
-                Submit
+                {selectedItem ? 'Update' : 'Submit'}
               </button>
               <button
                 type="button"
@@ -211,36 +327,66 @@ const StorePage = () => {
         </div>
       )}
 
-      <h2 className="text-2xl font-bold mb-6">Store Items</h2>
+      <h2 className="text-2xl font-bold mb-6">
+        {viewMode === 'my-items' ? 'My Items' : 'Store Items'}
+      </h2>
       {loading && <p className="text-gray-600">Loading items...</p>}
       {error && <div className="text-red-600">{error}</div>}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {items.map(({ _id, image, title, price, rating }) => (
-          <div key={_id} className="bg-white rounded-lg shadow-md overflow-hidden">
+        {items.map((item) => (
+          <div key={item._id} className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="aspect-w-16 aspect-h-9">
               <img
-                src={image}
-                alt={title}
+                src={item.image}
+                alt={item.title}
                 className="object-cover w-full h-48"
               />
             </div>
             <div className="p-4">
-              <h3 className="text-lg font-semibold mb-2">{title}</h3>
-              <p className="text-2xl font-bold mb-2">${price}</p>
-              <p className="text-yellow-500">Rating: {rating}/5</p>
-              <button
-                onClick={() => handleAddToCart({ _id, image, title, price, rating })}
-                className="mt-4 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
-              >
-                Add to Cart
-              </button>
+              <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
+              <p className="text-2xl font-bold mb-2">${item.price}</p>
+              <p className="text-yellow-500 mb-2">Rating: {item.rating}/5</p>
+              <p className="text-gray-600 mb-2">{item.description}</p>
+              <p className="text-sm text-gray-500 mb-4">
+                Posted by: {item.owner}
+              </p>
+              
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleAddToCart(item)}
+                  className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
+                >
+                  Add to Cart
+                </button>
+                
+                {isAuthenticated && isItemOwner(item) && (
+                  <>
+                    <button
+                      onClick={() => handleEdit(item)}
+                      className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item._id)}
+                      className="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors"
+                    >
+                      Delete
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      {cartSuccess && <div className="text-green-600 mt-4">Item added to cart successfully!</div>}
+      {cartSuccess && (
+        <div className="fixed bottom-4 right-4 bg-green-600 text-white py-2 px-4 rounded-md shadow-lg">
+          Item added to cart successfully!
+        </div>
+      )}
     </div>
   );
 };

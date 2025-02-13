@@ -197,6 +197,7 @@ const ProfilePage = () => {
                 {new Date(userData.createdAt).toLocaleDateString()}
               </p>
             </div>
+            <div className="flex flex-row justify-between ">
             <button
               onClick={() => setIsEditing(true)}
               className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
@@ -209,6 +210,12 @@ const ProfilePage = () => {
             >
               <Link to="/uplode-video">Uplode Video</Link>
             </button>
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
+            >
+             Stream Live
+            </button>
+            </div>
           </div>
         )}
 

@@ -11,6 +11,7 @@ import StorePage from "./components/StorePage"
 import Forget from "./components/Forget";
 import LivePage from "./components/Live";
 import VideoUpload from "./components/videoUplode";
+import LiveStream from "./components/LiveStream";
 const App = () => {
   return (
     <AuthProvider>
@@ -27,6 +28,7 @@ const App = () => {
             <Route path="/uplode-video" element={<VideoUpload />} />
             <Route path="/store" element={<StorePage />} />
             <Route path="/live" element={<LivePage />} />
+            <Route path="/live-stream" element={<LiveStream/>} />
           </Route>
         </Routes>
       </BrowserRouter>

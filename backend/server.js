@@ -6,6 +6,7 @@ import useSignin from "./route/Signin.js";
 import useForget from './route/ForgetPass.js';
 import useStore from "./route/StroreRoute.js"
 import useVideo from "./route/videoRoute.js"
+import useCard from "./route/AddtoCard.js"
 import env from 'dotenv';
 import cors from "cors";
 
@@ -27,7 +28,7 @@ app.use(useSignin);
 app.use(useStore);
 app.use(useForget);
 app.use("/api" , useVideo);
-
+app.use("/api" , useCard)
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

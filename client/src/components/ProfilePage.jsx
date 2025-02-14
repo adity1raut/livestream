@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate  , Link} from "react-router-dom";
+import React, { useRef, useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -9,6 +9,9 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const videoRef = useRef(null); // Reference to the video element
+  const [stream, setStream] = useState(null); // State to store the media stream
+  const [isRecording, setIsRecording] = useState(false); // State to track recording status
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -17,6 +20,40 @@ const ProfilePage = () => {
   });
   const [profileImage, setProfileImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
+  const startScreenRecording = async () => {
+    try {
+      // Request screen recording permission
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true, // Include audio if needed
+      });
+
+      // Set the stream to state
+      setStream(screenStream);
+
+      // Display the screen recording in the video element
+      if (videoRef.current) {
+        videoRef.current.srcObject = screenStream;
+      }
+
+      setIsRecording(true);
+
+      // Optional: Send the stream to a server for live streaming
+      // You can use WebRTC, WebSocket, or a third-party service here
+    } catch (error) {
+      console.error("Error accessing screen:", error);
+    }
+  };
+
+  // Function to stop screen recording
+  const stopScreenRecording = () => {
+    if (stream) {
+      const tracks = stream.getTracks();
+      tracks.forEach((track) => track.stop()); // Stop all tracks
+      setStream(null);
+      setIsRecording(false);
+    }
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -114,6 +151,8 @@ const ProfilePage = () => {
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
           Profile of {userData.firstName} {userData.lastName}
         </h1>
+
+        {/* Profile Image */}
         <div className="flex flex-col items-center mb-6">
           <div className="relative w-32 h-32 rounded-full overflow-hidden shadow-lg">
             <img
@@ -125,6 +164,7 @@ const ProfilePage = () => {
         </div>
 
         {isEditing ? (
+          // Edit Profile Form
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="bg-gray-50 p-4 rounded-lg">
               <label className="text-sm font-medium text-gray-500">First Name</label>
@@ -157,7 +197,7 @@ const ProfilePage = () => {
               />
             </div>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <label className="text-sm font-medium text-gray-500">Upload Profile Image :</label>
+              <label className="text-sm font-medium text-gray-500">Upload Profile Image</label>
               <input
                 type="file"
                 accept="image/*"
@@ -182,6 +222,7 @@ const ProfilePage = () => {
             </div>
           </form>
         ) : (
+          
           <div className="space-y-4">
             <div className="bg-gray-50 p-4 rounded-lg">
               <p className="text-sm font-medium text-gray-500">Username</p>
@@ -197,24 +238,36 @@ const ProfilePage = () => {
                 {new Date(userData.createdAt).toLocaleDateString()}
               </p>
             </div>
-            <div className="flex flex-row justify-between ">
-            <button
-              onClick={() => setIsEditing(true)}
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
-            >
-              Edit Profile
-            </button>
-            <button
-              
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
-            >
-              <Link to="/uplode-video">Uplode Video</Link>
-            </button>
-            <button
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
-            >
-             Stream Live
-            </button>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row justify-between gap-4">
+              <button
+                onClick={() => setIsEditing(true)}
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all flex-1"
+              >
+                Edit Profile
+              </button>
+              <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all flex-1">
+                <Link to="/upload-video" className="block w-full">
+                  Upload Video
+                </Link>
+              </button>
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all flex-1"
+                onClick={isRecording ? stopScreenRecording : startScreenRecording}
+              >
+                {isRecording ? "Stop Streaming" : "Start Live Streaming"}
+              </button>
+            </div>
+
+            <div className="mt-6">
+              <video
+                ref={videoRef}
+                autoPlay
+                muted
+                className="w-full rounded-lg shadow-lg"
+                style={{ maxWidth: "600px" }}
+              />
             </div>
           </div>
         )}
@@ -233,6 +286,7 @@ const ProfilePage = () => {
           </div>
         )}
       </div>
+
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );

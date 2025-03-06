@@ -91,8 +91,8 @@ const SignUp = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-50 to-purple-50 p-4">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-2xl">
+    <div className="flex items-center justify-center min-h-screen ">
+      <div className="w-full max-w-md p-8 space-y-6 bg-black bg-opacity-75 rounded-lg shadow-2xl text-white">
         <h2 className="text-3xl font-bold text-center text-gray-800">Sign Up</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* First Name */}
@@ -198,7 +198,7 @@ const SignUp = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300"
+            className="w-full px-4 py-2 text-white bg-green-500 rounded-lg hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300"
           >
             {loading ? "Processing..." : otpSent ? "Create Account" : "Send OTP"}
           </button>

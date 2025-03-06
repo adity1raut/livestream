@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 const Header = ({ isAuthenticated, viewMode, setViewMode, showForm, setShowForm, resetForm, setDetailsView, cart }) => {
   return (
     <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-      <h1 className="text-3xl font-bold text-indigo-700">Beautiful Store</h1>
+      <h1 className="text-3xl font-bold text-white">Gaming Store</h1>
       
       <div className="flex flex-wrap gap-2">
         {isAuthenticated && (

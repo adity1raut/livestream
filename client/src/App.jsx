@@ -10,9 +10,9 @@ import SignUp from "./Forms/SignUp";
 import StorePage from "./Store/StorePage";
 import Forget from "./Forms/Forget";
 import LivePage from "./components/Live";
-import VideoUpload from "./components/videoUplode";
 import LiveStream from "./components/LiveStream";
-import "./styles.css"; // Import the CSS file
+import "./styles.css"; 
+import VideoUploadForm from "./Forms/VideoUploadForm";
 
 const App = () => {
   return (
@@ -28,7 +28,7 @@ const App = () => {
             <Route path="/login" element={<LoginPage />} />
             <Route element={<PrivateRoute />}>
               <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/uplode-video" element={<VideoUpload />} />
+              <Route path="/uplode-video" element={<VideoUploadForm />} />
               <Route path="/store" element={<StorePage />} />
               <Route path="/live" element={<LivePage />} />
               <Route path="/live-stream" element={<LiveStream />} />

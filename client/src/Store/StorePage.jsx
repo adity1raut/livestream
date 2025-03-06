@@ -43,7 +43,7 @@ const StorePage = () => {
 
   const fetchItems = async () => {
     try {
-      const endpoint = viewMode === 'my-items' ? '/api/items/my-items' : '/api/items';
+      const endpoint = viewMode === 'my-items' ? 'http://localhost:5000/api/items/my-items' : 'http://localhost:5000/api/items';
       const token = localStorage.getItem('token');
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
@@ -106,8 +106,8 @@ const StorePage = () => {
       formDataToSend.append('description', formData.description);
 
       const url = selectedItem
-        ? `/api/items/${selectedItem._id}`
-        : '/api/items';
+        ? `http://localhost:5000/api/items/${selectedItem._id}`
+        : 'http://localhost:5000/api/items';
 
       const method = selectedItem ? 'PUT' : 'POST';
 
@@ -148,7 +148,7 @@ const StorePage = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/items/${itemId}`, {
+      const response = await fetch(`http://localhost:5000/api/items/${itemId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,

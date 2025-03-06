@@ -1,4 +1,4 @@
-// components/SuccessToast.js
+
 import { motion, AnimatePresence } from 'framer-motion';
 
 const SuccessToast = ({ cartSuccess }) => {

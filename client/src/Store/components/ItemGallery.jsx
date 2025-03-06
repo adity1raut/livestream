@@ -1,4 +1,4 @@
-// components/ItemGallery.js
+
 import { motion } from 'framer-motion';
 
 const ItemGallery = ({ items, showItemDetails, loading, error }) => {

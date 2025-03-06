@@ -1,4 +1,4 @@
-// components/Header.js
+
 import { motion } from 'framer-motion';
 
 const Header = ({ isAuthenticated, viewMode, setViewMode, showForm, setShowForm, resetForm, setDetailsView, cart }) => {

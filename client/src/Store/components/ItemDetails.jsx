@@ -1,4 +1,4 @@
-// components/ItemDetails.js
+
 import { motion } from 'framer-motion';
 
 const ItemDetails = ({ detailsView, setDetailsView, handleAddToCart, isAuthenticated, isItemOwner, handleEdit, handleDelete }) => {

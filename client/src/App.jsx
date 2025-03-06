@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext"; 
 import HomePage from "./components/HomePage";
 import LoginPage from "./Forms/Login";
-import ProfilePage from "./components/ProfilePage";
+import ProfilePage from "./Profile/ProfilePage";
 import PrivateRoute from "./utils/PrivateRoute";
 import Navbar from "./pages/Navbar";
 import SignUp from "./Forms/SignUp";

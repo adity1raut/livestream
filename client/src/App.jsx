@@ -1,9 +1,174 @@
-import React from 'react'
+import React, { useState } from 'react';
+import { useAuth } from './context/AuthContext';
+import { Eye, EyeOff, Lock, Mail, AlertCircle } from 'lucide-react';
 
-function App() {
+const LoginForm = () => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const { login, error, clearError } = useAuth();
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Clear error when user starts typing
+    if (error) {
+      clearError();
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      const result = await login(formData.email, formData.password);
+      
+      if (result.success) {
+        // Redirect will be handled by your auth context or app routing
+        console.log('Login successful');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && formData.email && formData.password && !isSubmitting) {
+      handleSubmit(e);
+    }
+  };
+
   return (
-    <div>App</div>
-  )
-}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6">
+          <h2 className="text-2xl font-bold text-white text-center">Welcome Back</h2>
+          <p className="text-blue-100 text-center mt-2">Sign in to your account</p>
+        </div>
 
-export default App
+        {/* Form */}
+        <div className="px-8 py-6">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
+              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+              <span className="text-sm">{error}</span>
+            </div>
+          )}
+
+          <div className="space-y-4" onKeyPress={handleKeyPress}>
+            {/* Email Field */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  placeholder="Enter your email"
+                  disabled={isSubmitting}
+                />
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  placeholder="Enter your password"
+                  disabled={isSubmitting}
+                />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                  disabled={isSubmitting}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              onClick={handleSubmit}
+              disabled={isSubmitting || !formData.email || !formData.password}
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Signing In...
+                </>
+              ) : (
+                'Sign In'
+              )}
+            </button>
+          </div>
+
+          {/* Additional Links */}
+          <div className="mt-6 text-center space-y-2">
+            <a
+              href="/forgot-password"
+              className="text-sm text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+            >
+              Forgot your password?
+            </a>
+            <div className="text-sm text-gray-600">
+              Don't have an account?{' '}
+              <a
+                href="/register"
+                className="text-blue-600 hover:text-blue-700 hover:underline transition-colors font-medium"
+              >
+                Sign up
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LoginForm;

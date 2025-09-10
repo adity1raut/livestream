@@ -8,21 +8,24 @@ dotenv.config();
 const router = express.Router();
 
 //Login
-export async function loginUser(email, password) {
+export async function loginUser(identifier, password) {
   try {
-    if (!email || !password) throw new Error('Email and password required');
+    if (!identifier || !password) throw new Error('Username/Email and password required');
 
-    const user = await User.findOne({ email });
-    if (!user) throw new Error('Invalid email or password');
+    const user = await User.findOne({ 
+      $or: [{ email: identifier }, { username: identifier }] 
+    });
+
+    if (!user) throw new Error('Invalid username/email or password');
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) throw new Error('Invalid email or password');
+    if (!isMatch) throw new Error('Invalid username/email or password');
 
     return { 
       success: true, 
       message: 'Login successful', 
       username: user.username,
-      user: user 
+      user 
     };
   } catch (error) {
     console.error('Login error:', error);
@@ -35,49 +38,50 @@ export function logoutUser() {
   return { success: true, message: 'Logged out successfully' };
 }
 
-//Profile
-export async function getProfile(username) {
+//Profile - Fixed: This should be a controller function, not middleware
+export async function getProfile(req, res) {
   try {
-    if (!username) throw new Error('Username required');
+    // The user should already be available from authenticateToken middleware
+    const userId = req.user.id;
+    
+    const user = await User.findById(userId).select("-password").lean();
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
 
-    const user = await User.findOne({ username }).select('-password').lean();
-    if (!user) throw new Error('User not found');
-
-    return { success: true, data: user };
+    return res.json({ success: true, data: user });
   } catch (error) {
-    console.error('Profile error:', error);
-    throw error;
+    console.error("Profile error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 }
 
-// Update Profle
-export async function updateProfile(username, updateData, profileImage) {
+// Update Profile - Fixed: Function signature should match usage
+export async function updateProfile(req, res) {
   try {
-    if (!username) throw new Error('Username required');
+    const userId = req.user.id;
 
-    const user = await User.findOne({ username });
-    if (!user) throw new Error('User not found');
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-    const { firstName, lastName, email } = updateData;
-    
+    const { firstName, lastName, email } = req.body;
+
     if (firstName) user.firstName = firstName;
     if (lastName) user.lastName = lastName;
     if (email) user.email = email;
 
-    if (profileImage) {
-      const uploadResponse = await cloudinary.uploader.upload(profileImage.path, {
+    if (req.file) {
+      const uploadResponse = await cloudinary.uploader.upload(req.file.path, {
         folder: 'profile_pictures',
         use_filename: true,
-        unique_filename: false,
       });
       user.profileImage = uploadResponse.secure_url;
     }
 
     await user.save();
-    return { success: true, message: 'Profile updated', data: user };
+    res.status(200).json({ success: true, message: 'Profile updated', data: user });
   } catch (error) {
     console.error('Update profile error:', error);
-    throw error;
+    res.status(500).json({ success: false, message: error.message });
   }
 }
-

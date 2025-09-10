@@ -5,9 +5,9 @@ import ForgetPassrouter from "../route/ForgetPass.js"
 
 const router = express() ;
 
-router.use("/api/auth/" , SignInrouter)
-router.use("/api/auth/" , SignUprouter)
-router.use("/api/auth/" , ForgetPassrouter)
+router.use("/api/auth" , SignInrouter)
+router.use("/api/auth" , SignUprouter)
+router.use("/api/auth" , ForgetPassrouter)
 
 
 export default router ;

@@ -1,24 +1,27 @@
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
-const JWT_SECRET = process.env.JWT_SECRET || "araut@12";
+dotenv.config();
 
 const generateToken = (res, user) => {
-  const payload = {
-    user: {
-      id: user.id,
+  const token = jwt.sign(
+    { 
+      id: user._id,
       username: user.username,
-      role: user.role,
+      email: user.email 
     },
-  };
+    process.env.JWT_SECRET,
+    { expiresIn: '7d' }
+  );
 
-  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "72h" });
-
-  res.cookie("token", token, {
+  res.cookie('token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "development",
-    sameSite: "strict",
-    maxAge: 3600000,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000 
   });
+
+  return token;
 };
 
 export default generateToken;

@@ -11,18 +11,18 @@ const LoadingSpinner = () => (
   </div>
 );
 
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading, user } = useAuth();
+const PublicRoute = ({ children }) => {
+  const { loading, isAuthenticated } = useAuth();
 
   if (loading) {
     return <LoadingSpinner />;
   }
 
-  if (!isAuthenticated || !user) {
-    return <Navigate to="/login" replace />;
+  if (isAuthenticated) {
+    return <Navigate to="/profile" replace />;
   }
 
   return children;
 };
 
-export default ProtectedRoute;
+export default PublicRoute;

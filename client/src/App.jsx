@@ -9,6 +9,7 @@ import GamingDashboard from "./components/Home";
 import Navbar from "./components/Navbar/Navbar";
 import { AuthProvider } from "./context/AuthContext";
 import ForgetPassword from "./components/ForgetPassword/ForgetPass"
+import ChatApp from "./components/ChatPAge/ChatApp";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
               </PublicRoute>
             }
           />
+        
           <Route
             path="/forgot-password"
             element={
@@ -45,6 +47,15 @@ function App() {
           />
 
           {/* Protected Routes */}
+          <Route
+            path="/chat"
+            element={
+              <ProtectedRoute>
+                <ChatApp />
+              </ProtectedRoute>
+            }
+          />
+          
           <Route
             path="/profile"
             element={

@@ -11,16 +11,12 @@ const LoadingSpinner = () => (
   </div>
 );
 
-const PublicRoute = ({ children }) => {
+const PublicRoute = ({ children, redirectPath = "/profile" }) => {
   const { loading, isAuthenticated } = useAuth();
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  if (loading) return <LoadingSpinner />;
 
-  if (isAuthenticated) {
-    return <Navigate to="/profile" replace />;
-  }
+  if (isAuthenticated) return <Navigate to={redirectPath} replace />;
 
   return children;
 };

@@ -4,11 +4,9 @@ import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from "../../context/AuthContext";
 
-
-
 export default function ProfilePage() {
   const { username: paramUsername } = useParams();
-  const { user: currentUser, isAuthenticated } = useAuth();
+  const { user: currentUser, isAuthenticated, updateProfile } = useAuth();
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -47,7 +45,7 @@ export default function ProfilePage() {
       // For own profile, use the authenticated endpoint
       const endpoint = isOwnProfile ? '/api/auth/profile' : `/api/auth/profile/${username}`;
       const response = await axios.get(endpoint, {
-        withCredentials: true // Important for cookie-based auth
+        withCredentials: true
       });
       
       if (response.data.success) {
@@ -91,25 +89,23 @@ export default function ProfilePage() {
     setUploadingImage(true);
     const formData = new FormData();
     
-    // Use the correct field name based on your backend
-    formData.append('profileImage', file);
+    // Use the correct field name based on image type
+    formData.append(type === 'profile' ? 'profileImage' : 'coverImage', file);
     
     try {
-      const response = await axios.put('/api/auth/profile', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
-        withCredentials: true
-      });
-
-      if (response.data.success) {
-        setProfileData(prev => ({ ...prev, ...response.data.data }));
+      const result = await updateProfile(formData);
+      
+      if (result.success) {
+        setProfileData(prev => ({ ...prev, ...result.data }));
         setSuccess('Image uploaded successfully!');
         setTimeout(() => setSuccess(''), 3000);
+      } else {
+        setError(result.message || 'Failed to upload image');
+        setTimeout(() => setError(''), 3000);
       }
     } catch (error) {
       console.error('Upload failed:', error);
-      setError(error.response?.data?.message || 'Failed to upload image');
+      setError('Failed to upload image');
       setTimeout(() => setError(''), 3000);
     } finally {
       setUploadingImage(false);
@@ -128,22 +124,19 @@ export default function ProfilePage() {
         bio: editForm.bio.trim()
       };
 
-      const response = await axios.put('/api/auth/profile', updateData, {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        withCredentials: true
-      });
-
-      if (response.data.success) {
-        setProfileData(prev => ({ ...prev, ...response.data.data }));
+      const result = await updateProfile(updateData);
+      
+      if (result.success) {
+        setProfileData(prev => ({ ...prev, ...result.data }));
         setIsEditing(false);
         setSuccess('Profile updated successfully!');
         setTimeout(() => setSuccess(''), 3000);
+      } else {
+        setError(result.message || 'Failed to update profile');
       }
     } catch (error) {
       console.error('Update failed:', error);
-      setError(error.response?.data?.message || 'Failed to update profile');
+      setError('Failed to update profile');
     } finally {
       setUpdating(false);
     }

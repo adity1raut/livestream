@@ -99,7 +99,7 @@ const RegistrationForm = () => {
     
     try {
       setAvailability(prev => ({ ...prev, [field]: 'checking' }));
-      await axios.post('/auth/check-availability', {
+      await axios.post('/api/auth/check-availability', {
         identifier: formData[field]
       });
       setAvailability(prev => ({ ...prev, [field]: 'available' }));
@@ -113,7 +113,7 @@ const RegistrationForm = () => {
   const sendOTP = async () => {
     try {
       setLoading(true);
-      await axios.post('/auth/send-otp', { email: formData.email });
+      await axios.post('/api/auth/send-otp', { email: formData.email });
       setOtpSent(true);
       setOtpTimer(300); // 5 minutes
       addToast('OTP sent to your email', 'success');
@@ -128,7 +128,7 @@ const RegistrationForm = () => {
   const resendOTP = async () => {
     try {
       setLoading(true);
-      await axios.post('/auth/resend-otp', { email: formData.email });
+      await axios.post('/api/auth/resend-otp', { email: formData.email });
       setOtpTimer(300);
       addToast('New OTP sent to your email', 'success');
     } catch (error) {
@@ -142,7 +142,7 @@ const RegistrationForm = () => {
   const verifyOTP = async () => {
     try {
       setLoading(true);
-      await axios.post('/auth/verify-otp', {
+      await axios.post('/api/auth/verify-otp', {
         email: formData.email,
         otp: formData.otp
       });
@@ -159,7 +159,7 @@ const RegistrationForm = () => {
   const registerUser = async () => {
     try {
       setLoading(true);
-      const response = await axios.post('/auth/register', formData);
+      const response = await axios.post('/api/auth/register', formData);
       addToast('Account created successfully!', 'success');
       // Reset form or redirect
       setTimeout(() => {

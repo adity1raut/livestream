@@ -12,6 +12,10 @@ const Navbar = () => {
       </div>
 
       <div className="flex gap-4 items-center">
+        {loading && (
+          <span className="text-gray-400">Checking authentication...</span>
+        )}
+
         {!loading && !isAuthenticated && (
           <>
             <Link
@@ -38,7 +42,7 @@ const Navbar = () => {
               Profile
             </Link>
             <span className="font-medium">
-              Welcome, {user?.username || user?.name || user?.email || "User"}
+              Welcome, {user?.username || user?.firstName || user?.email || "User"}
             </span>
             <button
               onClick={logout}

@@ -5,7 +5,7 @@ import ProtectedRoute from "./context/ProtectedRoute";
 import ProfilePage from "./components/ProfilePage/ProfilePage";
 import Login from "./components/LoginForm/Login";
 import RegistrationForm from "./components/RegistrationForm/RegistrationForm";
-import Home from "./components/Home";
+import GamingDashboard from "./components/Home";
 import Navbar from "./components/Navbar/Navbar";
 import { AuthProvider } from "./context/AuthContext";
 import ForgetPassword from "./components/ForgetPassword/ForgetPass"
@@ -18,7 +18,7 @@ function App() {
 
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<GamingDashboard />} />
           <Route
             path="/login"
             element={

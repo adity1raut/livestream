@@ -10,7 +10,7 @@ router.use("/api/auth" , SignInrouter)
 router.use("/api/auth" , SignUprouter)
 router.use("/api/auth" , ForgetPassrouter)
 
-
+router.use("/api/user" , Message)
 
 
 export default router ;

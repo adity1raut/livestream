@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import {
-  BookOpen,
+  Gamepad2,
   ChevronDown,
   User,
   LogIn,
@@ -10,12 +10,14 @@ import {
   X,
   Home,
   Settings,
-  HelpCircle,
-  FileText,
-  Users,
   LogOut,
   UserCircle,
-  GraduationCap,
+  Trophy,
+  Sword,
+  Shield,
+  Zap,
+  Crown,
+  Sparkles,
 } from "lucide-react";
 
 const Navbar = () => {
@@ -71,19 +73,25 @@ const Navbar = () => {
     {
       icon: <Home size={16} />,
       name: "Dashboard",
-      description: "Access your personalized dashboard",
+      description: "Your gaming command center",
       path: "/dashboard",
+    },
+    {
+      icon: <Trophy size={16} />,
+      name: "Achievements",
+      description: "View your gaming accomplishments",
+      path: "/achievements",
     },
     {
       icon: <UserCircle size={16} />,
       name: "Profile",
-      description: "Manage your profile settings",
+      description: "Manage your gaming identity",
       path: "/profile",
     },
     {
       icon: <Settings size={16} />,
       name: "Settings",
-      description: "Configure your preferences",
+      description: "Configure your gaming experience",
       path: "/settings",
     },
   ];
@@ -92,41 +100,42 @@ const Navbar = () => {
     <>
       <nav
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-          scrolled ? "bg-white shadow-md py-2" : "bg-white py-4"
+          scrolled 
+            ? "bg-gray-900 shadow-lg py-2 border-b border-purple-900" 
+            : "bg-gradient-to-b from-gray-900 to-black py-4"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             {/* Logo Section */}
             <div className="flex items-center">
-              <Link to="/" className="flex items-center focus:outline-none">
+              <Link to="/" className="flex items-center focus:outline-none group">
                 <div
                   className={`relative overflow-hidden transition-all duration-300 ${
                     scrolled ? "h-10 w-10" : "h-12 w-12"
                   }`}
                 >
-                  <BookOpen
-                    className={`h-full w-full text-blue-600 transition-all duration-300 ${
-                      scrolled ? "h-8 w-8" : "h-10 w-10"
-                    }`}
-                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg transform group-hover:scale-110 transition-transform duration-300">
+                    <Gamepad2 className="h-full w-full p-2 text-white" />
+                  </div>
+                  {!scrolled && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                  )}
                 </div>
                 <div className="ml-3">
                   <span
-                    className={`font-bold transition-all duration-300 ${
-                      scrolled
-                        ? "text-xl text-gray-800"
-                        : "text-2xl text-blue-600"
+                    className={`font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400 transition-all duration-300 ${
+                      scrolled ? "text-xl" : "text-2xl"
                     }`}
                   >
-                    MyApp
+                    GAME PORTAL
                   </span>
                   <div
-                    className={`text-xs text-gray-500 transition-opacity duration-300 ${
+                    className={`text-xs text-gray-400 transition-opacity duration-300 ${
                       scrolled ? "opacity-0 h-0" : "opacity-100"
                     }`}
                   >
-                    Modern Web Application
+                    Level Up Your Gaming Experience
                   </div>
                 </div>
               </Link>
@@ -136,8 +145,8 @@ const Navbar = () => {
             <div className="hidden md:flex md:items-center md:space-x-6">
               {loading && (
                 <div className="flex items-center space-x-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
-                  <span className="text-gray-500 text-sm">Loading...</span>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-500 border-t-transparent"></div>
+                  <span className="text-gray-400 text-sm">Loading...</span>
                 </div>
               )}
 
@@ -145,16 +154,16 @@ const Navbar = () => {
                 <>
                   <Link
                     to="/login"
-                    className="flex items-center text-sm font-medium px-2 py-1 rounded-md transition-colors duration-200 text-gray-600 hover:text-blue-600"
+                    className="flex items-center text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 text-gray-300 hover:text-white hover:bg-gray-800 group"
                   >
-                    <LogIn size={16} className="mr-1" />
+                    <LogIn size={16} className="mr-1 group-hover:scale-110 transition-transform" />
                     Login
                   </Link>
                   <Link
                     to="/signup"
-                    className="flex items-center text-sm font-medium px-2 py-1 rounded-md transition-colors duration-200 text-gray-600 hover:text-blue-600"
+                    className="flex items-center text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 text-gray-300 hover:text-white hover:bg-gray-800 group"
                   >
-                    <User size={16} className="mr-1" />
+                    <User size={16} className="mr-1 group-hover:scale-110 transition-transform" />
                     Sign Up
                   </Link>
                 </>
@@ -165,9 +174,9 @@ const Navbar = () => {
                   {/* Dashboard Link */}
                   <Link
                     to="/dashboard"
-                    className="flex items-center text-sm font-medium px-2 py-1 rounded-md transition-colors duration-200 text-gray-600 hover:text-blue-600"
+                    className="flex items-center text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 text-gray-300 hover:text-white hover:bg-gray-800 group"
                   >
-                    <Home size={16} className="mr-1" />
+                    <Home size={16} className="mr-1 group-hover:scale-110 transition-transform" />
                     Dashboard
                   </Link>
 
@@ -175,13 +184,13 @@ const Navbar = () => {
                   <div className="relative dropdown-container">
                     <button
                       onClick={toggleDropdown}
-                      className={`flex items-center text-sm font-medium px-2 py-1 rounded-md transition-colors duration-200 ${
+                      className={`flex items-center text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 group ${
                         dropdownOpen
-                          ? "text-blue-600"
-                          : "text-gray-600 hover:text-blue-600"
+                          ? "text-white bg-gray-800"
+                          : "text-gray-300 hover:text-white hover:bg-gray-800"
                       }`}
                     >
-                      <UserCircle size={16} className="mr-1" />
+                      <Shield size={16} className="mr-1 group-hover:scale-110 transition-transform" />
                       Menu
                       <ChevronDown
                         size={16}
@@ -192,21 +201,21 @@ const Navbar = () => {
                     </button>
 
                     {dropdownOpen && (
-                      <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg overflow-hidden z-50 border border-gray-100 transform transition-all duration-200 origin-top-right">
+                      <div className="absolute right-0 mt-2 w-72 bg-gray-800 rounded-lg shadow-xl overflow-hidden z-50 border border-purple-700 transform transition-all duration-200 origin-top-right">
                         <div className="p-2">
                           {userMenuItems.map((item, index) => (
                             <Link
                               key={index}
                               to={item.path}
                               onClick={() => setDropdownOpen(false)}
-                              className="flex w-full p-3 hover:bg-blue-50 rounded-lg transition-colors duration-150 text-left"
+                              className="flex w-full p-3 hover:bg-purple-900 rounded-lg transition-all duration-150 text-left group hover:transform hover:scale-105"
                             >
-                              <div className="text-blue-500">{item.icon}</div>
+                              <div className="text-purple-400 group-hover:text-purple-300">{item.icon}</div>
                               <div className="ml-3">
-                                <div className="text-sm font-medium text-gray-900">
+                                <div className="text-sm font-medium text-white">
                                   {item.name}
                                 </div>
-                                <div className="text-xs text-gray-500">
+                                <div className="text-xs text-gray-400">
                                   {item.description}
                                 </div>
                               </div>
@@ -220,9 +229,9 @@ const Navbar = () => {
                   {/* Logout Button */}
                   <button
                     onClick={() => handleNavigation(logout)}
-                    className="flex items-center text-sm font-medium px-2 py-1 rounded-md transition-colors duration-200 text-red-500 hover:text-red-700"
+                    className="flex items-center text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 text-red-400 hover:text-red-300 hover:bg-gray-800 group"
                   >
-                    <LogOut size={16} className="mr-1" />
+                    <LogOut size={16} className="mr-1 group-hover:scale-110 transition-transform" />
                     Logout
                   </button>
                 </>
@@ -233,15 +242,16 @@ const Navbar = () => {
             {!loading && isAuthenticated && (
               <div className="hidden md:flex items-center">
                 {/* User Profile */}
-                <div className="border-l pl-4 border-gray-200">
+                <div className="border-l pl-4 border-gray-700">
                   <Link
                     to="/profile"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center"
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-lg hover:shadow-purple-500/25 transition-all duration-200 flex items-center group"
                   >
-                    <User size={16} className="mr-2" />
-                    <span>
-                      {user?.username || user?.firstName || user?.email || "Profile"}
+                    <Crown size={16} className="mr-2 group-hover:animate-pulse" />
+                    <span className="max-w-xs truncate">
+                      {user?.username || user?.firstName || user?.email || "Player"}
                     </span>
+                    <Sparkles size={14} className="ml-1 text-yellow-300" />
                   </Link>
                 </div>
               </div>
@@ -252,10 +262,10 @@ const Navbar = () => {
               <div className="hidden md:flex items-center">
                 <Link
                   to="/login"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-lg hover:shadow-purple-500/25 transition-all duration-200 flex items-center group"
                 >
-                  <LogIn size={16} className="mr-2" />
-                  <span>Login</span>
+                  <Zap size={16} className="mr-2 group-hover:animate-pulse" />
+                  <span>Play Now</span>
                 </Link>
               </div>
             )}
@@ -264,7 +274,7 @@ const Navbar = () => {
             <div className="md:hidden">
               <button
                 onClick={toggleMobileMenu}
-                className="p-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-purple-900 transition-all duration-200"
               >
                 {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
@@ -275,25 +285,27 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       <div
-        className={`fixed inset-0 bg-gray-800 bg-opacity-50 z-40 md:hidden transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black bg-opacity-70 z-40 md:hidden transition-opacity duration-300 ${
           isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setIsMobileMenuOpen(false)}
       >
         <div
-          className={`fixed inset-y-0 right-0 max-w-xs w-full bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
+          className={`fixed inset-y-0 right-0 max-w-xs w-full bg-gray-900 shadow-xl z-50 transform transition-transform duration-300 ease-in-out border-l border-purple-800 ${
             isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
           }`}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex justify-between items-center p-4 border-b">
+          <div className="flex justify-between items-center p-4 border-b border-purple-800">
             <div className="flex items-center">
-              <BookOpen className="h-6 w-6 text-blue-600" />
-              <span className="ml-2 font-bold text-lg">MyApp</span>
+              <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded flex items-center justify-center">
+                <Gamepad2 className="h-5 w-5 text-white" />
+              </div>
+              <span className="ml-2 font-bold text-lg text-white">GAME PORTAL</span>
             </div>
             <button
               onClick={() => setIsMobileMenuOpen(false)}
-              className="p-2 rounded-md text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors duration-200"
+              className="p-2 rounded-md text-gray-400 hover:text-red-400 hover:bg-red-900 transition-colors duration-200"
             >
               <X size={20} />
             </button>
@@ -302,8 +314,8 @@ const Navbar = () => {
           <div className="py-2 px-4">
             {loading && (
               <div className="flex items-center space-x-2 px-4 py-3">
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
-                <span className="text-gray-500 text-sm">Loading...</span>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-500 border-t-transparent"></div>
+                <span className="text-gray-400 text-sm">Loading...</span>
               </div>
             )}
 
@@ -312,17 +324,17 @@ const Navbar = () => {
                 <Link
                   to="/login"
                   onClick={() => handleNavigation()}
-                  className="flex items-center px-4 py-3 w-full text-left rounded-lg transition-colors duration-200 text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+                  className="flex items-center px-4 py-3 w-full text-left rounded-lg transition-all duration-200 text-gray-300 hover:bg-purple-900 hover:text-white group"
                 >
-                  <LogIn size={18} className="mr-3" />
+                  <LogIn size={18} className="mr-3 group-hover:scale-110" />
                   Login
                 </Link>
                 <Link
                   to="/signup"
                   onClick={() => handleNavigation()}
-                  className="flex items-center px-4 py-3 w-full text-left rounded-lg transition-colors duration-200 text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+                  className="flex items-center px-4 py-3 w-full text-left rounded-lg transition-all duration-200 text-gray-300 hover:bg-purple-900 hover:text-white group"
                 >
-                  <User size={18} className="mr-3" />
+                  <User size={18} className="mr-3 group-hover:scale-110" />
                   Sign Up
                 </Link>
               </>
@@ -331,14 +343,20 @@ const Navbar = () => {
             {!loading && isAuthenticated && (
               <>
                 {/* User Info Section */}
-                <div className="px-4 py-3 border-b border-gray-200 mb-2">
+                <div className="px-4 py-3 border-b border-purple-800 mb-2">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center font-semibold text-white">
-                      {(user?.username || user?.firstName || user?.email || "U")[0].toUpperCase()}
+                    <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center font-semibold text-white">
+                      {(user?.username || user?.firstName || user?.email || "P")[0].toUpperCase()}
                     </div>
-                    <span className="text-gray-900 font-medium">
-                      {user?.username || user?.firstName || user?.email || "User"}
-                    </span>
+                    <div>
+                      <div className="text-white font-medium">
+                        {user?.username || user?.firstName || user?.email || "Player"}
+                      </div>
+                      <div className="text-xs text-purple-400 flex items-center">
+                        <span>Level 25</span>
+                        <Sparkles size={10} className="ml-1 text-yellow-300" />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -348,9 +366,9 @@ const Navbar = () => {
                     key={index}
                     to={item.path}
                     onClick={() => handleNavigation()}
-                    className="flex items-center px-4 py-3 w-full text-left rounded-lg transition-colors duration-200 text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+                    className="flex items-center px-4 py-3 w-full text-left rounded-lg transition-all duration-200 text-gray-300 hover:bg-purple-900 hover:text-white group"
                   >
-                    {item.icon && <span className="mr-3">{item.icon}</span>}
+                    {item.icon && <span className="mr-3 group-hover:scale-110">{item.icon}</span>}
                     {item.name}
                   </Link>
                 ))}
@@ -358,9 +376,9 @@ const Navbar = () => {
                 {/* Logout Button */}
                 <button
                   onClick={() => handleNavigation(logout)}
-                  className="flex items-center px-4 py-3 w-full text-left rounded-lg transition-colors duration-200 text-red-500 hover:bg-red-50 hover:text-red-700"
+                  className="flex items-center px-4 py-3 w-full text-left rounded-lg transition-all duration-200 text-red-400 hover:bg-red-900 hover:text-red-300 group"
                 >
-                  <LogOut size={18} className="mr-3" />
+                  <LogOut size={18} className="mr-3 group-hover:scale-110" />
                   Logout
                 </button>
               </>
@@ -368,14 +386,14 @@ const Navbar = () => {
           </div>
 
           {!loading && !isAuthenticated && (
-            <div className="border-t mt-2 pt-4 px-6">
+            <div className="border-t border-purple-800 mt-2 pt-4 px-6">
               <Link
                 to="/login"
                 onClick={() => handleNavigation()}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center"
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-3 rounded-lg text-sm font-medium shadow-lg transition-all duration-200 flex items-center justify-center group"
               >
-                <LogIn size={18} className="mr-2" />
-                Login 
+                <Zap size={18} className="mr-2 group-hover:animate-pulse" />
+                Play Now
               </Link>
             </div>
           )}

@@ -12,7 +12,8 @@ import {
   UserCheck,
   Shield,
   Send,
-  RefreshCw
+  RefreshCw,
+  Gamepad2
 } from 'lucide-react';
 
 // Toast component
@@ -24,7 +25,7 @@ const Toast = ({ message, type, onClose }) => {
     return () => clearTimeout(timer);
   }, [onClose]);
 
-  const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+  const bgColor = type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-purple-600';
   const icon = type === 'success' ? <Check size={20} /> : type === 'error' ? <X size={20} /> : <Shield size={20} />;
 
   return (
@@ -211,13 +212,13 @@ const RegistrationForm = () => {
       {[1, 2, 3].map((step) => (
         <React.Fragment key={step}>
           <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-            currentStep >= step ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600'
+            currentStep >= step ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-400'
           }`}>
             {step}
           </div>
           {step < 3 && (
             <div className={`w-16 h-1 mx-2 ${
-              currentStep > step ? 'bg-blue-600' : 'bg-gray-300'
+              currentStep > step ? 'bg-purple-600' : 'bg-gray-700'
             }`} />
           )}
         </React.Fragment>
@@ -227,19 +228,25 @@ const RegistrationForm = () => {
 
   const renderStep1 = () => (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Create Account</h2>
+      <div className="text-center">
+        <div className="flex items-center justify-center mb-2">
+          <Gamepad2 className="w-6 h-6 text-purple-400 mr-2" />
+          <h2 className="text-2xl font-bold text-white">Create Account</h2>
+        </div>
+        <p className="text-gray-400">Join the gaming community</p>
+      </div>
       
       {/* Name */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+        <label className="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
         <div className="relative">
-          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
           <input
             type="text"
             name="name"
             value={formData.name}
             onChange={handleInputChange}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
             placeholder="Enter your full name"
             required
           />
@@ -248,21 +255,21 @@ const RegistrationForm = () => {
 
       {/* Username */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
+        <label className="block text-sm font-medium text-gray-300 mb-2">Username</label>
         <div className="relative">
-          <UserCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <UserCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
           <input
             type="text"
             name="username"
             value={formData.username}
             onChange={handleInputChange}
             onBlur={() => checkAvailability('username')}
-            className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-12 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
             placeholder="Choose a username"
             required
           />
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-            {availability.username === 'checking' && <Loader className="animate-spin text-gray-400" size={20} />}
+            {availability.username === 'checking' && <Loader className="animate-spin text-gray-500" size={20} />}
             {availability.username === 'available' && <Check className="text-green-500" size={20} />}
             {availability.username === 'unavailable' && <X className="text-red-500" size={20} />}
           </div>
@@ -271,21 +278,21 @@ const RegistrationForm = () => {
 
       {/* Email */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+        <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
           <input
             type="email"
             name="email"
             value={formData.email}
             onChange={handleInputChange}
             onBlur={() => checkAvailability('email')}
-            className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-12 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
             placeholder="Enter your email"
             required
           />
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-            {availability.email === 'checking' && <Loader className="animate-spin text-gray-400" size={20} />}
+            {availability.email === 'checking' && <Loader className="animate-spin text-gray-500" size={20} />}
             {availability.email === 'available' && <Check className="text-green-500" size={20} />}
             {availability.email === 'unavailable' && <X className="text-red-500" size={20} />}
           </div>
@@ -295,7 +302,7 @@ const RegistrationForm = () => {
       <button
         onClick={nextStep}
         disabled={loading || availability.username !== 'available' || availability.email !== 'available'}
-        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all font-medium tracking-wide"
       >
         Next Step
       </button>
@@ -304,16 +311,21 @@ const RegistrationForm = () => {
 
   const renderStep2 = () => (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Verify Email</h2>
+      <div className="text-center">
+        <div className="flex items-center justify-center mb-2">
+          <Shield className="w-6 h-6 text-purple-400 mr-2" />
+          <h2 className="text-2xl font-bold text-white">Verify Email</h2>
+        </div>
+      </div>
       
       {!otpSent ? (
         <div className="text-center space-y-4">
-          <p className="text-gray-600">We'll send a verification code to:</p>
-          <p className="font-medium text-gray-800">{formData.email}</p>
+          <p className="text-gray-400">We'll send a verification code to:</p>
+          <p className="font-medium text-purple-300">{formData.email}</p>
           <button
             onClick={sendOTP}
             disabled={loading}
-            className="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2 mx-auto"
+            className="bg-purple-600 text-white py-3 px-6 rounded-lg hover:bg-purple-700 disabled:opacity-50 flex items-center justify-center gap-2 mx-auto transition-all"
           >
             {loading ? <Loader className="animate-spin" size={20} /> : <Send size={20} />}
             Send OTP
@@ -321,15 +333,15 @@ const RegistrationForm = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          <p className="text-center text-gray-600">Enter the 6-digit code sent to your email</p>
+          <p className="text-center text-gray-400">Enter the 6-digit code sent to your email</p>
           <div className="relative">
-            <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
             <input
               type="text"
               name="otp"
               value={formData.otp}
               onChange={handleInputChange}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-lg tracking-wider"
+              className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center text-lg tracking-wider text-white"
               placeholder="000000"
               maxLength="6"
             />
@@ -342,7 +354,7 @@ const RegistrationForm = () => {
             <button
               onClick={resendOTP}
               disabled={otpTimer > 0 || loading}
-              className="text-blue-600 hover:text-blue-700 disabled:opacity-50 flex items-center gap-1"
+              className="text-purple-400 hover:text-purple-300 disabled:opacity-50 flex items-center gap-1 transition-colors"
             >
               <RefreshCw size={16} />
               Resend OTP
@@ -352,7 +364,7 @@ const RegistrationForm = () => {
           <button
             onClick={nextStep}
             disabled={loading || formData.otp.length !== 6}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
           >
             {loading ? <Loader className="animate-spin" size={20} /> : <Check size={20} />}
             Verify OTP
@@ -364,26 +376,31 @@ const RegistrationForm = () => {
 
   const renderStep3 = () => (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Set Password</h2>
+      <div className="text-center">
+        <div className="flex items-center justify-center mb-2">
+          <Lock className="w-6 h-6 text-purple-400 mr-2" />
+          <h2 className="text-2xl font-bold text-white">Set Password</h2>
+        </div>
+      </div>
       
       {/* Password */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+        <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
           <input
             type={showPassword ? 'text' : 'password'}
             name="password"
             value={formData.password}
             onChange={handleInputChange}
-            className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-12 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
             placeholder="Create a password"
             required
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
           >
             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
@@ -392,22 +409,22 @@ const RegistrationForm = () => {
 
       {/* Confirm Password */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+        <label className="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
           <input
             type={showConfirmPassword ? 'text' : 'password'}
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleInputChange}
-            className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-12 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
             placeholder="Confirm your password"
             required
           />
           <button
             type="button"
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
           >
             {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
@@ -419,12 +436,12 @@ const RegistrationForm = () => {
           {formData.password === formData.confirmPassword ? (
             <>
               <Check className="text-green-500" size={16} />
-              <span className="text-green-500 text-sm">Passwords match</span>
+              <span className="text-green-400 text-sm">Passwords match</span>
             </>
           ) : (
             <>
               <X className="text-red-500" size={16} />
-              <span className="text-red-500 text-sm">Passwords don't match</span>
+              <span className="text-red-400 text-sm">Passwords don't match</span>
             </>
           )}
         </div>
@@ -433,7 +450,7 @@ const RegistrationForm = () => {
       <button
         onClick={registerUser}
         disabled={loading || formData.password !== formData.confirmPassword || !formData.password}
-        className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all font-medium tracking-wide"
       >
         {loading ? <Loader className="animate-spin" size={20} /> : <UserCheck size={20} />}
         Create Account
@@ -442,8 +459,14 @@ const RegistrationForm = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 flex items-center justify-center p-4">
+      <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-2xl p-8 w-full max-w-md relative overflow-hidden">
+        {/* Subtle gaming pattern in background */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-0 left-0 w-32 h-32 border-4 border-white rounded-full transform -translate-x-16 -translate-y-16"></div>
+          <div className="absolute bottom-0 right-0 w-32 h-32 border-4 border-white rounded-full translate-x-16 translate-y-16"></div>
+        </div>
+        
         {renderStepIndicator()}
         
         {currentStep === 1 && renderStep1()}
@@ -453,7 +476,7 @@ const RegistrationForm = () => {
         {currentStep > 1 && (
           <button
             onClick={() => setCurrentStep(currentStep - 1)}
-            className="mt-4 text-gray-600 hover:text-gray-800 flex items-center gap-1"
+            className="mt-4 text-gray-400 hover:text-gray-200 flex items-center gap-1 transition-colors"
           >
             ← Back
           </button>

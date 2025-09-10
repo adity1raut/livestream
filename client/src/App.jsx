@@ -8,6 +8,7 @@ import RegistrationForm from "./components/RegistrationForm/RegistrationForm";
 import Home from "./components/Home";
 import Navbar from "./components/Navbar/Navbar";
 import { AuthProvider } from "./context/AuthContext";
+import ForgetPassword from "./components/ForgetPassword/ForgetPass"
 
 function App() {
   return (
@@ -31,6 +32,14 @@ function App() {
             element={
               <PublicRoute>
                 <RegistrationForm />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              <PublicRoute>
+                <ForgetPassword />
               </PublicRoute>
             }
           />

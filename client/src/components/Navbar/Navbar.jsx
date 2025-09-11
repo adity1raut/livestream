@@ -12,12 +12,13 @@ import {
   Settings,
   LogOut,
   UserCircle,
-  MessageCircle ,
+  MessageCircle,
   Shield,
   Zap,
   Crown,
   Sparkles,
 } from "lucide-react";
+import NotificationBell from "../Notification/NotificationBell"
 
 const Navbar = () => {
   const { user, isAuthenticated, logout, loading } = useAuth();
@@ -78,7 +79,7 @@ const Navbar = () => {
     {
       icon: <MessageCircle size={16} />,
       name: "Chat",
-      description: "Chatting you Friends",
+      description: "Chatting with Friends",
       path: "/chat",
     },
     {
@@ -141,7 +142,7 @@ const Navbar = () => {
             </div>
 
             {/* Desktop Menu */}
-            <div className="hidden md:flex md:items-center md:space-x-6">
+            <div className="hidden md:flex md:items-center md:space-x-4">
               {loading && (
                 <div className="flex items-center space-x-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-500 border-t-transparent"></div>
@@ -178,6 +179,11 @@ const Navbar = () => {
                     <Home size={16} className="mr-1 group-hover:scale-110 transition-transform" />
                     Dashboard
                   </Link>
+
+                  {/* Notification Bell */}
+                  <div className="relative">
+                    <NotificationBell />
+                  </div>
 
                   {/* User Menu Dropdown */}
                   <div className="relative dropdown-container">
@@ -239,7 +245,7 @@ const Navbar = () => {
 
             {/* Right Actions */}
             {!loading && isAuthenticated && (
-              <div className="hidden md:flex items-center">
+              <div className="hidden md:flex items-center space-x-4">
                 {/* User Profile */}
                 <div className="border-l pl-4 border-gray-700">
                   <Link

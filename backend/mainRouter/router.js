@@ -4,6 +4,7 @@ import SignUprouter from "../route/SingUp.js"
 import ForgetPassrouter from "../route/ForgetPass.js"
 import Message from "../route/Chat.js"
 import Post from "../route/Post.js"
+import Notifications from "../route/Notification.js"
 
 const router = express() ;
 
@@ -13,6 +14,7 @@ router.use("/api/auth" , ForgetPassrouter)
 
 router.use("/api/chat" , Message)
 router.use("/api/post" , Post)
+router.use("/api/notifications" , Notifications)
 
 
 export default router ;

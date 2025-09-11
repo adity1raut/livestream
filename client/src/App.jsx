@@ -10,65 +10,78 @@ import Navbar from "./components/Navbar/Navbar";
 import { AuthProvider } from "./context/AuthContext";
 import ForgetPassword from "./components/ForgetPassword/ForgetPass"
 import ChatApp from "./components/ChatPAge/ChatApp";
+import NotificationPage from "./components/Notification/NotificationsPage"
+import { NotificationProvider } from './context/NotificationContext';
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Navbar />
+      <NotificationProvider >
+        <Router>
+          <Navbar />
 
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<GamingDashboard />} />
-          <Route
-            path="/login"
-            element={
-              <PublicRoute>
-                <Login />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/signup"
-            element={
-              <PublicRoute>
-                <RegistrationForm />
-              </PublicRoute>
-            }
-          />
-        
-          <Route
-            path="/forgot-password"
-            element={
-              <PublicRoute>
-                <ForgetPassword />
-              </PublicRoute>
-            }
-          />
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<GamingDashboard />} />
+            <Route
+              path="/login"
+              element={
+                <PublicRoute>
+                  <Login />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/signup"
+              element={
+                <PublicRoute>
+                  <RegistrationForm />
+                </PublicRoute>
+              }
+            />
 
-          {/* Protected Routes */}
-          <Route
-            path="/chat"
-            element={
-              <ProtectedRoute>
-                <ChatApp />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/forgot-password"
+              element={
+                <PublicRoute>
+                  <ForgetPassword />
+                </PublicRoute>
+              }
+            />
 
-          {/* Fallback Route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
+            {/* Protected Routes */}
+            <Route
+              path="/chat"
+              element={
+                <ProtectedRoute>
+                  <ChatApp />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/notification"
+              element={
+                <ProtectedRoute>
+                  <NotificationPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Fallback Route */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Router>
+      </NotificationProvider>
     </AuthProvider>
   );
 }

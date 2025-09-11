@@ -6,22 +6,37 @@ import User from '../models/User.models.js';
 const connectedUsers = new Map();
 
 const setupSocketHandlers = (io) => {
-  io.use((socket, next) => {
-    const token = socket.request.headers.cookie
-      ?.split(';')
-      ?.find(c => c.trim().startsWith('token='))
-      ?.split('=')[1];
-
-    if (!token) {
-      return next(new Error('Authentication error'));
-    }
-
+  io.use(async (socket, next) => {
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
-      socket.userId = decoded.userId;
+      const token = socket.handshake.auth?.token ||
+        socket.request.headers?.cookie
+          ?.split(';')
+          ?.find(c => c.trim().startsWith('token='))
+          ?.split('=')[1];
+
+      if (!token) {
+        return next(new Error('Authentication error: No token provided'));
+      }
+
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      // Add user info to socket object (matching your HTTP middleware)
+      socket.userId = decoded.id; // Using 'id' instead of 'userId' to match your token structure
+      socket.user = decoded;
+
       next();
     } catch (error) {
-      next(new Error('Authentication error'));
+      console.error('Socket authentication error:', error);
+
+      if (error.name === 'TokenExpiredError') {
+        return next(new Error('Authentication error: Token expired'));
+      }
+
+      if (error.name === 'JsonWebTokenError') {
+        return next(new Error('Authentication error: Invalid token'));
+      }
+
+      return next(new Error('Authentication error: Server error'));
     }
   });
 
@@ -29,11 +44,11 @@ const setupSocketHandlers = (io) => {
     try {
       // Store connected user
       connectedUsers.set(socket.userId, socket.id);
-      
+
       // Update user's online status
-      await User.findByIdAndUpdate(socket.userId, { 
-        isOnline: true, 
-        lastSeen: new Date() 
+      await User.findByIdAndUpdate(socket.userId, {
+        isOnline: true,
+        lastSeen: new Date()
       });
 
       console.log(`User ${socket.userId} connected`);
@@ -55,9 +70,21 @@ const setupSocketHandlers = (io) => {
       });
 
       // Handle sending messages
+      // Handle sending messages
       socket.on('send-message', async (data) => {
         try {
           const { conversationId, content, type = 'text' } = data;
+
+          // Add validation for required fields
+          if (!conversationId) {
+            socket.emit('error', { message: 'Conversation ID is required' });
+            return;
+          }
+
+          if (!content || content.trim() === '') {
+            socket.emit('error', { message: 'Message content is required' });
+            return;
+          }
 
           // Verify user is member of conversation
           const conversation = await Conversation.findOne({
@@ -70,11 +97,11 @@ const setupSocketHandlers = (io) => {
             return;
           }
 
-          // Create message
+          // Create message - Fix the field name here
           const message = new Message({
             sender: socket.userId,
-            conversation: conversationId,
-            content,
+            conversationId: conversationId,  // ← Changed from 'conversation' to 'conversationId'
+            content: content.trim(),
             type
           });
 
@@ -105,6 +132,7 @@ const setupSocketHandlers = (io) => {
           });
 
         } catch (error) {
+          console.error('Error sending message:', error);
           socket.emit('error', { message: 'Failed to send message' });
         }
       });
@@ -128,7 +156,7 @@ const setupSocketHandlers = (io) => {
       socket.on('mark-as-read', async (data) => {
         try {
           const { messageId, conversationId } = data;
-          
+
           await Message.findByIdAndUpdate(messageId, {
             $addToSet: {
               readBy: {
@@ -143,6 +171,7 @@ const setupSocketHandlers = (io) => {
             userId: socket.userId
           });
         } catch (error) {
+          console.error('Error marking message as read:', error);
           socket.emit('error', { message: 'Failed to mark message as read' });
         }
       });
@@ -151,11 +180,11 @@ const setupSocketHandlers = (io) => {
       socket.on('disconnect', async () => {
         try {
           connectedUsers.delete(socket.userId);
-          
+
           // Update user's offline status
-          await User.findByIdAndUpdate(socket.userId, { 
-            isOnline: false, 
-            lastSeen: new Date() 
+          await User.findByIdAndUpdate(socket.userId, {
+            isOnline: false,
+            lastSeen: new Date()
           });
 
           console.log(`User ${socket.userId} disconnected`);
@@ -170,6 +199,5 @@ const setupSocketHandlers = (io) => {
     }
   });
 };
-
 
 export default setupSocketHandlers;

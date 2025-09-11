@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { Gamepad2, Sword, Shield, Crown, Search, Send, ArrowLeft, Users, MessageCircle } from 'lucide-react';
+import io from 'socket.io-client';
 
 const ChatApplication = () => {
   const { user } = useAuth();
-  const [activeView, setActiveView] = useState('conversations'); // 'conversations', 'chat', 'search'
+  const [activeView, setActiveView] = useState('conversations');
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [currentConversation, setCurrentConversation] = useState(null);
@@ -14,12 +15,120 @@ const ChatApplication = () => {
   const [searchType, setSearchType] = useState('username');
   const [messageInput, setMessageInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [socket, setSocket] = useState(null);
+  const [typingUsers, setTypingUsers] = useState({});
   const messagesEndRef = useRef(null);
+
+  // Initialize socket connection
+  useEffect(() => {
+    const newSocket = io('http://localhost:5000', {
+      withCredentials: true,
+      auth: {
+        token: document.cookie
+          .split('; ')
+          .find(row => row.startsWith('token='))
+          ?.split('=')[1]
+      }
+    });
+
+    setSocket(newSocket);
+
+    return () => newSocket.close();
+  }, []);
+
+  // Socket event listeners
+  useEffect(() => {
+    if (!socket) return;
+
+    // Handle new messages
+    socket.on('new-message', (message) => {
+      setMessages(prev => [...prev, message]);
+      
+      // Update conversations list with new last message
+      setConversations(prev => prev.map(conv => 
+        conv._id === message.conversation 
+          ? { ...conv, lastMessage: message }
+          : conv
+      ));
+    });
+
+    // Handle conversation updates
+    socket.on('conversation-updated', (updatedConversation) => {
+      setConversations(prev => prev.map(conv => 
+        conv._id === updatedConversation._id 
+          ? updatedConversation 
+          : conv
+      ));
+    });
+
+    // Handle typing indicators
+    socket.on('user-typing', (data) => {
+      setTypingUsers(prev => ({
+        ...prev,
+        [data.conversationId]: [...(prev[data.conversationId] || []).filter(id => id !== data.userId), data.userId]
+      }));
+    });
+
+    socket.on('user-stop-typing', (data) => {
+      setTypingUsers(prev => ({
+        ...prev,
+        [data.conversationId]: (prev[data.conversationId] || []).filter(id => id !== data.userId)
+      }));
+    });
+
+    // Handle message read events
+    socket.on('message-read', (data) => {
+      setMessages(prev => prev.map(msg => 
+        msg._id === data.messageId 
+          ? { 
+              ...msg, 
+              readBy: [...(msg.readBy || []), { user: data.userId, readAt: new Date() }]
+            } 
+          : msg
+      ));
+    });
+
+    // Handle errors
+    socket.on('error', (error) => {
+      console.error('Socket error:', error);
+    });
+
+    return () => {
+      socket.off('new-message');
+      socket.off('conversation-updated');
+      socket.off('user-typing');
+      socket.off('user-stop-typing');
+      socket.off('message-read');
+      socket.off('error');
+    };
+  }, [socket]);
 
   // Fetch conversations on component mount
   useEffect(() => {
     fetchConversations();
   }, []);
+
+  // Join conversation rooms when socket is ready
+  useEffect(() => {
+    if (socket && conversations.length > 0) {
+      conversations.forEach(conv => {
+        socket.emit('join-conversation', conv._id);
+      });
+    }
+  }, [socket, conversations]);
+
+  // Join current conversation room when it changes
+  useEffect(() => {
+    if (socket && currentConversation) {
+      socket.emit('join-conversation', currentConversation._id);
+    }
+
+    return () => {
+      if (socket && currentConversation) {
+        socket.emit('leave-conversation', currentConversation._id);
+      }
+    };
+  }, [socket, currentConversation]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -112,27 +221,61 @@ const ChatApplication = () => {
 
   // Send a message
   const sendMessage = async () => {
-    if (!messageInput.trim() || !currentConversation) return;
+    if (!messageInput.trim() || !currentConversation || !socket) return;
 
     try {
-      const response = await axios.post('/api/chat/messages', 
-        {
-          conversationId: currentConversation._id,
-          content: messageInput.trim(),
-          type: 'text'
-        },
-        { withCredentials: true }
-      );
+      // Emit message via socket
+      socket.emit('send-message', {
+        conversationId: currentConversation._id,
+        content: messageInput.trim(),
+        type: 'text'
+      });
+
+      setMessageInput('');
       
-      if (response.data.success) {
-        setMessages(prev => [...prev, response.data.message]);
-        setMessageInput('');
-        fetchConversations(); // Refresh to update last message
-      }
+      // Stop typing indicator
+      socket.emit('typing-stop', currentConversation._id);
     } catch (error) {
       console.error('Error sending message:', error);
     }
   };
+
+  // Handle typing indicators
+  const handleTypingStart = () => {
+    if (socket && currentConversation) {
+      socket.emit('typing-start', currentConversation._id);
+    }
+  };
+
+  const handleTypingStop = () => {
+    if (socket && currentConversation) {
+      socket.emit('typing-stop', currentConversation._id);
+    }
+  };
+
+  // Mark messages as read
+  const markMessagesAsRead = () => {
+    if (socket && currentConversation && messages.length > 0) {
+      const unreadMessages = messages.filter(msg => 
+        msg.sender._id !== user._id && 
+        !msg.readBy?.some(read => read.user === user._id)
+      );
+
+      unreadMessages.forEach(msg => {
+        socket.emit('mark-as-read', {
+          messageId: msg._id,
+          conversationId: currentConversation._id
+        });
+      });
+    }
+  };
+
+  // Mark messages as read when opening conversation
+  useEffect(() => {
+    if (currentConversation) {
+      markMessagesAsRead();
+    }
+  }, [currentConversation, messages]);
 
   // Open conversation from list
   const openConversation = (conversation) => {
@@ -166,8 +309,24 @@ const ChatApplication = () => {
     }
   };
 
+  // Handle input change with typing indicators
+  const handleInputChange = (e) => {
+    setMessageInput(e.target.value);
+    
+    if (e.target.value.trim() && socket && currentConversation) {
+      handleTypingStart();
+    } else {
+      handleTypingStop();
+    }
+  };
+
   // Generate random level for gaming theme
   const getRandomLevel = () => Math.floor(Math.random() * 100) + 1;
+
+  // Check if user is typing in current conversation
+  const isUserTyping = currentConversation && 
+                       typingUsers[currentConversation._id] && 
+                       typingUsers[currentConversation._id].length > 0;
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 text-white">
@@ -408,10 +567,29 @@ const ChatApplication = () => {
                       >
                         {formatTime(message.createdAt)}
                       </p>
+                      {isOwnMessage && message.readBy && message.readBy.length > 0 && (
+                        <p className="text-xs text-purple-200 mt-1">
+                          Read {formatTime(message.readBy[0].readAt)}
+                        </p>
+                      )}
                     </div>
                   </div>
                 );
               })}
+              
+              {/* Typing indicator */}
+              {isUserTyping && (
+                <div className="flex justify-start mb-4">
+                  <div className="bg-gray-700 px-4 py-2 rounded-2xl rounded-bl-sm">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div ref={messagesEndRef} />
             </div>
 
@@ -421,8 +599,9 @@ const ChatApplication = () => {
                 <input
                   type="text"
                   value={messageInput}
-                  onChange={(e) => setMessageInput(e.target.value)}
+                  onChange={handleInputChange}
                   onKeyDown={handleKeyPress}
+                  onBlur={handleTypingStop}
                   placeholder="Type a message..."
                   className="flex-1 p-3 bg-gray-700 border border-purple-800 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />

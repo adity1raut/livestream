@@ -26,7 +26,6 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 10) {
@@ -40,7 +39,7 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close dropdown when clicking outside
+  
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownOpen && !event.target.closest(".dropdown-container")) {
@@ -74,7 +73,7 @@ const Navbar = () => {
       icon: <Home size={16} />,
       name: "Dashboard",
       description: "Your gaming command center",
-      path: "/dashboard",
+      path: "/",
     },
     {
       icon: <MessageCircle size={16} />,

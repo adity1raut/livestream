@@ -12,6 +12,7 @@ import ForgetPassword from "./components/ForgetPassword/ForgetPass"
 import ChatApp from "./components/ChatPAge/ChatApp";
 import NotificationPage from "./components/Notification/NotificationsPage"
 import { NotificationProvider } from './context/NotificationContext';
+import Footer from "./components/Footer/Footer";
 
 function App() {
   return (
@@ -80,6 +81,8 @@ function App() {
             {/* Fallback Route */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+
+          <Footer />
         </Router>
       </NotificationProvider>
     </AuthProvider>

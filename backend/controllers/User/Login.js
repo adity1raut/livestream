@@ -56,32 +56,73 @@ export async function getProfile(req, res) {
   }
 }
 
-// Update Profile - Fixed: Function signature should match usage
 export async function updateProfile(req, res) {
   try {
     const userId = req.user.id;
-
     const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-
-    const { firstName, lastName, email } = req.body;
-
-    if (firstName) user.firstName = firstName;
-    if (lastName) user.lastName = lastName;
-    if (email) user.email = email;
-
-    if (req.file) {
-      const uploadResponse = await cloudinary.uploader.upload(req.file.path, {
-        folder: 'profile_pictures',
-        use_filename: true,
+    
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'User not found' 
       });
-      user.profileImage = uploadResponse.secure_url;
+    }
+
+    const { name, bio, email, coverImage } = req.body;
+
+    // Update profile fields
+    if (name) user.profile.name = name;
+    if (bio) user.profile.bio = bio;
+    if (email) user.email = email;
+    
+    // Handle profile image upload from base64 string
+    if (req.body.profileImage) {
+      try {
+        const uploadResponse = await cloudinary.uploader.upload(req.body.profileImage, {
+          folder: 'profile_pictures',
+          public_id: `user_${userId}_profile`,
+          overwrite: true
+        });
+        user.profile.profileImage = uploadResponse.secure_url;
+      } catch (uploadError) {
+        console.error('Cloudinary upload error:', uploadError);
+        return res.status(400).json({
+          success: false,
+          message: 'Failed to upload profile image'
+        });
+      }
+    }
+
+    // Handle cover image upload from base64 string
+    if (req.body.coverImage) {
+      try {
+        const uploadResponse = await cloudinary.uploader.upload(req.body.coverImage, {
+          folder: 'cover_images',
+          public_id: `user_${userId}_cover`,
+          overwrite: true
+        });
+        user.profile.coverImage = uploadResponse.secure_url;
+      } catch (uploadError) {
+        console.error('Cloudinary upload error:', uploadError);
+        return res.status(400).json({
+          success: false,
+          message: 'Failed to upload cover image'
+        });
+      }
     }
 
     await user.save();
-    res.status(200).json({ success: true, message: 'Profile updated', data: user });
+    
+    res.status(200).json({ 
+      success: true, 
+      message: 'Profile updated successfully', 
+      data: user 
+    });
   } catch (error) {
     console.error('Update profile error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
   }
 }

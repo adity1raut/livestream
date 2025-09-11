@@ -61,7 +61,16 @@ function App() {
             />
 
             <Route
-              path="/profile"
+              path="/profile/me"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/profile/:username"
               element={
                 <ProtectedRoute>
                   <ProfilePage />

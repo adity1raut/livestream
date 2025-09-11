@@ -15,8 +15,7 @@ export default function ProfilePage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [editForm, setEditForm] = useState({
-    firstName: '',
-    lastName: '',
+    name: '',
     bio: '',
     email: ''
   });
@@ -54,9 +53,8 @@ export default function ProfilePage() {
         
         // Set edit form with available data
         setEditForm({
-          firstName: userData.firstName || '',
-          lastName: userData.lastName || '',
-          bio: userData.bio || '',
+          name: userData.profile?.name || '',
+          bio: userData.profile?.bio || '',
           email: userData.email || ''
         });
       } else {
@@ -68,6 +66,16 @@ export default function ProfilePage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Convert file to base64
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleImageUpload = async (e, type) => {
@@ -87,25 +95,36 @@ export default function ProfilePage() {
     }
 
     setUploadingImage(true);
-    const formData = new FormData();
-    
-    // Use the correct field name based on image type
-    formData.append(type === 'profile' ? 'profileImage' : 'coverImage', file);
     
     try {
-      const result = await updateProfile(formData);
+      // Convert file to base64
+      const base64 = await fileToBase64(file);
       
-      if (result.success) {
-        setProfileData(prev => ({ ...prev, ...result.data }));
+      // Prepare update data with base64 image
+      const updateData = {
+        [type === 'profile' ? 'profileImage' : 'coverImage']: base64
+      };
+      
+      const response = await axios.put('/api/auth/profile', updateData, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.data.success) {
+        // Update profile data with new image URL
+        const updatedUser = response.data.data;
+        setProfileData(updatedUser);
         setSuccess('Image uploaded successfully!');
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(result.message || 'Failed to upload image');
+        setError(response.data.message || 'Failed to upload image');
         setTimeout(() => setError(''), 3000);
       }
     } catch (error) {
       console.error('Upload failed:', error);
-      setError('Failed to upload image');
+      setError(error.response?.data?.message || 'Failed to upload image');
       setTimeout(() => setError(''), 3000);
     } finally {
       setUploadingImage(false);
@@ -118,25 +137,30 @@ export default function ProfilePage() {
       setError('');
       
       const updateData = {
-        firstName: editForm.firstName.trim(),
-        lastName: editForm.lastName.trim(),
+        name: editForm.name.trim(),
         email: editForm.email.trim(),
         bio: editForm.bio.trim()
       };
 
-      const result = await updateProfile(updateData);
+      const response = await axios.put('/api/auth/profile', updateData, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       
-      if (result.success) {
-        setProfileData(prev => ({ ...prev, ...result.data }));
+      if (response.data.success) {
+        const updatedUser = response.data.data;
+        setProfileData(updatedUser);
         setIsEditing(false);
         setSuccess('Profile updated successfully!');
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(result.message || 'Failed to update profile');
+        setError(response.data.message || 'Failed to update profile');
       }
     } catch (error) {
       console.error('Update failed:', error);
-      setError('Failed to update profile');
+      setError(error.response?.data?.message || 'Failed to update profile');
     } finally {
       setUpdating(false);
     }
@@ -189,10 +213,8 @@ export default function ProfilePage() {
   };
 
   const getDisplayName = () => {
-    const firstName = profileData.firstName || '';
-    const lastName = profileData.lastName || '';
-    const fullName = `${firstName} ${lastName}`.trim();
-    return fullName || profileData.username;
+    const profileName = profileData.profile?.name || '';
+    return profileName || profileData.username;
   };
 
   return (
@@ -217,9 +239,9 @@ export default function ProfilePage() {
 
       {/* Cover Image Section */}
       <div className="relative h-80 bg-gradient-to-r from-purple-600 to-pink-600 overflow-hidden">
-        {profileData.coverImage ? (
+        {profileData.profile?.coverImage ? (
           <img 
-            src={profileData.coverImage} 
+            src={profileData.profile.coverImage} 
             alt="Cover" 
             className="w-full h-full object-cover opacity-90"
           />
@@ -263,9 +285,9 @@ export default function ProfilePage() {
               {/* Profile Image */}
               <div className="relative group">
                 <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-white shadow-xl">
-                  {profileData.profileImage ? (
+                  {profileData.profile?.profileImage ? (
                     <img 
-                      src={profileData.profileImage} 
+                      src={profileData.profile.profileImage} 
                       alt={getDisplayName()}
                       className="w-full h-full object-cover"
                     />
@@ -309,7 +331,7 @@ export default function ProfilePage() {
                     </h1>
                     <p className="text-gray-500 mb-3">@{profileData.username}</p>
                     <p className="text-gray-700 max-w-lg">
-                      {profileData.bio || 'No bio yet'}
+                      {profileData.profile?.bio || 'No bio yet'}
                     </p>
                   </div>
                   {isOwnProfile && (
@@ -327,19 +349,19 @@ export default function ProfilePage() {
                 <div className="flex flex-wrap gap-6 mt-6 justify-center sm:justify-start">
                   <div className="text-center">
                     <p className="text-2xl font-bold text-gray-900">
-                      {profileData.postsCount || 0}
+                      {profileData.posts?.length || 0}
                     </p>
                     <p className="text-gray-500 text-sm">Posts</p>
                   </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold text-gray-900">
-                      {profileData.followersCount || 0}
+                      {profileData.followers?.length || 0}
                     </p>
                     <p className="text-gray-500 text-sm">Followers</p>
                   </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold text-gray-900">
-                      {profileData.followingCount || 0}
+                      {profileData.following?.length || 0}
                     </p>
                     <p className="text-gray-500 text-sm">Following</p>
                   </div>
@@ -380,9 +402,9 @@ export default function ProfilePage() {
                   >
                     <span className="capitalize">{tab}</span>
                     <span className="ml-2 text-sm">
-                      ({tab === 'posts' ? profileData.postsCount || 0 :
-                        tab === 'followers' ? profileData.followersCount || 0 :
-                        profileData.followingCount || 0})
+                      ({tab === 'posts' ? profileData.posts?.length || 0 :
+                        tab === 'followers' ? profileData.followers?.length || 0 :
+                        profileData.following?.length || 0})
                     </span>
                     {activeTab === tab && (
                       <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-600 to-pink-600"></div>
@@ -411,13 +433,13 @@ export default function ProfilePage() {
               {activeTab === 'followers' && (
                 <div className="text-center py-12 text-gray-500">
                   <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p>{profileData.followersCount > 0 ? 'Followers list coming soon' : 'No followers yet'}</p>
+                  <p>{(profileData.followers?.length || 0) > 0 ? 'Followers list coming soon' : 'No followers yet'}</p>
                 </div>
               )}
               {activeTab === 'following' && (
                 <div className="text-center py-12 text-gray-500">
                   <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p>{profileData.followingCount > 0 ? 'Following list coming soon' : 'Not following anyone yet'}</p>
+                  <p>{(profileData.following?.length || 0) > 0 ? 'Following list coming soon' : 'Not following anyone yet'}</p>
                 </div>
               )}
             </div>
@@ -442,26 +464,14 @@ export default function ProfilePage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                 <input
                   type="text"
-                  value={editForm.firstName}
-                  onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
                   disabled={updating}
-                  placeholder="Enter your first name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                <input
-                  type="text"
-                  value={editForm.lastName}
-                  onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-                  disabled={updating}
-                  placeholder="Enter your last name"
+                  placeholder="Enter your full name"
                 />
               </div>
 

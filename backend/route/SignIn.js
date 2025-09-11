@@ -1,7 +1,6 @@
 import express from 'express';
 import generateToken from '../utils/GenerateToken.js';
 import authenticateToken from '../middleware/Auth.js';
-import upload from '../config/multrer.js';
 import { loginUser, logoutUser, getProfile, updateProfile } from '../controllers/User/Login.js';
 
 const router = express.Router(); // Fixed: Use express.Router() instead of express()
@@ -40,7 +39,7 @@ router.post('/logout', (req, res) => {
 router.get("/profile", authenticateToken, (req, res) => getProfile(req, res));
 
 // Fixed: Pass req and res to updateProfile
-router.put('/profile', authenticateToken, upload.single('profileImage'), (req, res) => {
+router.put('/profile', authenticateToken, (req, res) => {
   updateProfile(req, res);
 });
 

@@ -85,7 +85,7 @@ const Navbar = () => {
       icon: <UserCircle size={16} />,
       name: "Profile",
       description: "Manage your gaming identity",
-      path: "/profile",
+      path: "/profile/me",
     },
     {
       icon: <Settings size={16} />,
@@ -172,7 +172,7 @@ const Navbar = () => {
                 <>
                   {/* Dashboard Link */}
                   <Link
-                    to="/dashboard"
+                    to="/"
                     className="flex items-center text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 text-gray-300 hover:text-white hover:bg-gray-800 group"
                   >
                     <Home size={16} className="mr-1 group-hover:scale-110 transition-transform" />
@@ -248,7 +248,7 @@ const Navbar = () => {
                 {/* User Profile */}
                 <div className="border-l pl-4 border-gray-700">
                   <Link
-                    to="/profile"
+                    to="/profile/me"
                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-lg hover:shadow-purple-500/25 transition-all duration-200 flex items-center group"
                   >
                     <Crown size={16} className="mr-2 group-hover:animate-pulse" />

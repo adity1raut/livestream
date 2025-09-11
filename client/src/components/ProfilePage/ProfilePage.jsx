@@ -40,18 +40,14 @@ export default function ProfilePage() {
     try {
       setLoading(true);
       setError('');
-      
-      // For own profile, use the authenticated endpoint
-      const endpoint = isOwnProfile ? '/api/auth/profile' : `/api/auth/profile/${username}`;
-      const response = await axios.get(endpoint, {
-        withCredentials: true
-      });
-      
+
+      const endpoint = isOwnProfile ? '/api/auth/profile/' : `/api/auth/profile/${username}`;
+      const response = await axios.get(endpoint, { withCredentials: true });
+
       if (response.data.success) {
         const userData = response.data.data;
         setProfileData(userData);
-        
-        // Set edit form with available data
+
         setEditForm({
           name: userData.profile?.name || '',
           bio: userData.profile?.bio || '',
@@ -67,6 +63,7 @@ export default function ProfilePage() {
       setLoading(false);
     }
   };
+
 
   // Convert file to base64
   const fileToBase64 = (file) => {
@@ -95,23 +92,23 @@ export default function ProfilePage() {
     }
 
     setUploadingImage(true);
-    
+
     try {
       // Convert file to base64
       const base64 = await fileToBase64(file);
-      
+
       // Prepare update data with base64 image
       const updateData = {
         [type === 'profile' ? 'profileImage' : 'coverImage']: base64
       };
-      
+
       const response = await axios.put('/api/auth/profile', updateData, {
         withCredentials: true,
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (response.data.success) {
         // Update profile data with new image URL
         const updatedUser = response.data.data;
@@ -135,7 +132,7 @@ export default function ProfilePage() {
     try {
       setUpdating(true);
       setError('');
-      
+
       const updateData = {
         name: editForm.name.trim(),
         email: editForm.email.trim(),
@@ -148,7 +145,7 @@ export default function ProfilePage() {
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (response.data.success) {
         const updatedUser = response.data.data;
         setProfileData(updatedUser);
@@ -183,7 +180,7 @@ export default function ProfilePage() {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Error loading profile</h2>
           <p className="text-gray-600">{error}</p>
-          <button 
+          <button
             onClick={fetchProfile}
             className="mt-4 px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
           >
@@ -206,9 +203,9 @@ export default function ProfilePage() {
   }
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long' 
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long'
     });
   };
 
@@ -222,9 +219,8 @@ export default function ProfilePage() {
       {/* Success/Error Messages */}
       {(success || error) && (
         <div className="fixed top-4 right-4 z-50">
-          <div className={`p-4 rounded-lg shadow-lg ${
-            success ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-          }`}>
+          <div className={`p-4 rounded-lg shadow-lg ${success ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+            }`}>
             <div className="flex items-center gap-2">
               {success ? (
                 <Check className="w-5 h-5" />
@@ -240,17 +236,17 @@ export default function ProfilePage() {
       {/* Cover Image Section */}
       <div className="relative h-80 bg-gradient-to-r from-purple-600 to-pink-600 overflow-hidden">
         {profileData.profile?.coverImage ? (
-          <img 
-            src={profileData.profile.coverImage} 
-            alt="Cover" 
+          <img
+            src={profileData.profile.coverImage}
+            alt="Cover"
             className="w-full h-full object-cover opacity-90"
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-r from-purple-600 to-pink-600"></div>
         )}
-        
+
         <div className="absolute inset-0 bg-black bg-opacity-20"></div>
-        
+
         {isOwnProfile && (
           <>
             <button
@@ -286,8 +282,8 @@ export default function ProfilePage() {
               <div className="relative group">
                 <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-white shadow-xl">
                   {profileData.profile?.profileImage ? (
-                    <img 
-                      src={profileData.profile.profileImage} 
+                    <img
+                      src={profileData.profile.profileImage}
                       alt={getDisplayName()}
                       className="w-full h-full object-cover"
                     />
@@ -394,17 +390,16 @@ export default function ProfilePage() {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`flex-1 py-4 px-6 text-center font-medium transition-all relative ${
-                      activeTab === tab
+                    className={`flex-1 py-4 px-6 text-center font-medium transition-all relative ${activeTab === tab
                         ? 'text-purple-600'
                         : 'text-gray-500 hover:text-gray-700'
-                    }`}
+                      }`}
                   >
                     <span className="capitalize">{tab}</span>
                     <span className="ml-2 text-sm">
                       ({tab === 'posts' ? profileData.posts?.length || 0 :
                         tab === 'followers' ? profileData.followers?.length || 0 :
-                        profileData.following?.length || 0})
+                          profileData.following?.length || 0})
                     </span>
                     {activeTab === tab && (
                       <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-600 to-pink-600"></div>

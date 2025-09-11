@@ -5,7 +5,7 @@ import { Bell } from 'lucide-react';
 
 function NotificationBell() {
   const { unreadCount } = useNotifications();
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [showDropdown, setShowDropdown] = React.useState(false);
 
   return (
     <div className="relative">
@@ -30,5 +30,4 @@ function NotificationBell() {
     </div>
   );
 }
-
 export default NotificationBell;

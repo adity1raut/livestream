@@ -4,7 +4,7 @@ import { Check, Trash2, X } from 'lucide-react';
 
 function NotificationItem({ notification }) {
   const { markAsRead, deleteNotification } = useNotifications();
-  const [showActions, setShowActions] = useState(false);
+  const [showActions, setShowActions] = React.useState(false);
 
   const handleMarkAsRead = () => {
     if (!notification.isRead) {
@@ -20,12 +20,12 @@ function NotificationItem({ notification }) {
     const now = new Date();
     const notifDate = new Date(date);
     const diffInSeconds = Math.floor((now - notifDate) / 1000);
-    
+
     if (diffInSeconds < 60) return 'Just now';
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
     if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-    
+
     return notifDate.toLocaleDateString();
   };
 
@@ -80,4 +80,4 @@ function NotificationItem({ notification }) {
   );
 }
 
-export default { NotificationItem};
+export default NotificationItem;

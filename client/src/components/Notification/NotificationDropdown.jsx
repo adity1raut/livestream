@@ -68,8 +68,7 @@ function NotificationDropdown({ onClose }) {
           <button
             onClick={() => {
               onClose();
-              // Navigate to full notifications page
-              window.location.href = '/notifications';
+              window.location.href = '/notification';
             }}
             className="w-full text-center text-purple-400 hover:text-purple-300 font-medium transition-colors text-sm"
           >

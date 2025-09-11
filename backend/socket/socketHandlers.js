@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import Message from '../models/Messege.model.js';
 import Conversation from '../models/Chat.models.js';
 import User from '../models/User.models.js';
+import Notification from '../models/Notification.models.js';
 
 const connectedUsers = new Map();
 
@@ -53,11 +54,24 @@ const setupSocketHandlers = (io) => {
 
       console.log(`User ${socket.userId} connected`);
 
+      // Join user to their personal notification room
+      socket.join(`user_${socket.userId}`);
+
       // Join user's conversation rooms
       const user = await User.findById(socket.userId).populate('conversations');
-      user.conversations.forEach(conv => {
-        socket.join(conv._id.toString());
+      if (user.conversations) {
+        user.conversations.forEach(conv => {
+          socket.join(conv._id.toString());
+        });
+      }
+
+      // Send unread notification count on connection
+      const unreadCount = await Notification.countDocuments({
+        user: socket.userId,
+        isRead: false
       });
+      
+      socket.emit('notification-count', { count: unreadCount });
 
       // Handle joining a conversation room
       socket.on('join-conversation', (conversationId) => {
@@ -69,7 +83,6 @@ const setupSocketHandlers = (io) => {
         socket.leave(conversationId);
       });
 
-      // Handle sending messages
       // Handle sending messages
       socket.on('send-message', async (data) => {
         try {
@@ -90,17 +103,17 @@ const setupSocketHandlers = (io) => {
           const conversation = await Conversation.findOne({
             _id: conversationId,
             members: socket.userId
-          });
+          }).populate('members', 'username profile.firstName profile.lastName profile.name profile.profileImage');
 
           if (!conversation) {
             socket.emit('error', { message: 'Conversation not found' });
             return;
           }
 
-          // Create message - Fix the field name here
+          // Create message
           const message = new Message({
             sender: socket.userId,
-            conversationId: conversationId,  // ← Changed from 'conversation' to 'conversationId'
+            conversationId: conversationId,
             content: content.trim(),
             type
           });
@@ -109,23 +122,75 @@ const setupSocketHandlers = (io) => {
 
           // Update conversation
           conversation.lastMessage = message._id;
-          conversation.messages.push(message._id);
+          if (conversation.messages) {
+            conversation.messages.push(message._id);
+          }
           await conversation.save();
 
           // Populate message
           const populatedMessage = await Message.findById(message._id)
-            .populate('sender', 'username profile.name profile.profileImage');
+            .populate('sender', 'username profile.name profile.profileImage profile.firstName profile.lastName');
 
           // Emit to conversation room
           io.to(conversationId).emit('new-message', populatedMessage);
 
+          // Get sender info for notification
+          const sender = await User.findById(socket.userId).select('username profile');
+          const senderName = sender.profile?.firstName 
+            ? `${sender.profile.firstName} ${sender.profile.lastName || ''}`.trim()
+            : sender.username;
+
+          // Create notifications for other members
+          const otherMembers = conversation.members.filter(member => 
+            member._id.toString() !== socket.userId
+          );
+
+          for (const member of otherMembers) {
+            // Create notification in database
+            const notification = new Notification({
+              user: member._id,
+              type: 'MESSAGE',
+              message: `${senderName} sent you a message: ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
+              link: `/chat/${conversationId}`,
+              isRead: false
+            });
+
+            await notification.save();
+
+            // Send real-time notification to user if they're online
+            const memberSocketId = connectedUsers.get(member._id.toString());
+            if (memberSocketId) {
+              io.to(`user_${member._id}`).emit('new-notification', {
+                id: notification._id,
+                type: notification.type,
+                message: notification.message,
+                link: notification.link,
+                isRead: notification.isRead,
+                createdAt: notification.createdAt,
+                sender: {
+                  id: socket.userId,
+                  name: senderName,
+                  profileImage: sender.profile?.profileImage
+                }
+              });
+
+              // Update notification count
+              const unreadCount = await Notification.countDocuments({
+                user: member._id,
+                isRead: false
+              });
+              
+              io.to(`user_${member._id}`).emit('notification-count', { count: unreadCount });
+            }
+          }
+
           // Emit conversation update to all members
           const updatedConversation = await Conversation.findById(conversationId)
-            .populate('members', 'username profile.name profile.profileImage')
+            .populate('members', 'username profile.name profile.profileImage profile.firstName profile.lastName')
             .populate('lastMessage');
 
           conversation.members.forEach(memberId => {
-            const memberSocketId = connectedUsers.get(memberId.toString());
+            const memberSocketId = connectedUsers.get(memberId._id.toString());
             if (memberSocketId) {
               io.to(memberSocketId).emit('conversation-updated', updatedConversation);
             }
@@ -173,6 +238,79 @@ const setupSocketHandlers = (io) => {
         } catch (error) {
           console.error('Error marking message as read:', error);
           socket.emit('error', { message: 'Failed to mark message as read' });
+        }
+      });
+
+      // Handle notification read status
+      socket.on('mark-notification-read', async (data) => {
+        try {
+          const { notificationId } = data;
+
+          await Notification.findOneAndUpdate(
+            { _id: notificationId, user: socket.userId },
+            { isRead: true }
+          );
+
+          // Update notification count
+          const unreadCount = await Notification.countDocuments({
+            user: socket.userId,
+            isRead: false
+          });
+          
+          socket.emit('notification-count', { count: unreadCount });
+          socket.emit('notification-read', { notificationId });
+
+        } catch (error) {
+          console.error('Error marking notification as read:', error);
+          socket.emit('error', { message: 'Failed to mark notification as read' });
+        }
+      });
+
+      // Handle mark all notifications as read
+      socket.on('mark-all-notifications-read', async () => {
+        try {
+          await Notification.updateMany(
+            { user: socket.userId, isRead: false },
+            { isRead: true }
+          );
+
+          socket.emit('notification-count', { count: 0 });
+          socket.emit('all-notifications-read');
+
+        } catch (error) {
+          console.error('Error marking all notifications as read:', error);
+          socket.emit('error', { message: 'Failed to mark all notifications as read' });
+        }
+      });
+
+      // Handle get notifications
+      socket.on('get-notifications', async (data = {}) => {
+        try {
+          const { page = 1, limit = 20 } = data;
+          
+          const notifications = await Notification.find({ user: socket.userId })
+            .sort({ createdAt: -1 })
+            .limit(limit * 1)
+            .skip((page - 1) * limit);
+
+          const unreadCount = await Notification.countDocuments({
+            user: socket.userId,
+            isRead: false
+          });
+
+          const totalCount = await Notification.countDocuments({ user: socket.userId });
+
+          socket.emit('notifications-list', {
+            notifications,
+            unreadCount,
+            currentPage: page,
+            totalPages: Math.ceil(totalCount / limit),
+            hasMore: page * limit < totalCount
+          });
+
+        } catch (error) {
+          console.error('Error fetching notifications:', error);
+          socket.emit('error', { message: 'Failed to fetch notifications' });
         }
       });
 

@@ -1,7 +1,7 @@
 import Conversation from '../../models/Chat.models.js';
 import Message from '../../models/Messege.model.js';
 import User from '../../models/User.models.js';
-
+import Notification from '../../models/Notification.models.js';
 
 export async function searchUsers (req, res) {
   try {
@@ -183,7 +183,7 @@ export async function sendMessage (req, res)  {
     const conversation = await Conversation.findOne({
       _id: conversationId,
       members: req.user.id
-    });
+    }).populate('members', 'username profile firstName lastName');
 
     if (!conversation) {
       return res.status(404).json({
@@ -209,9 +209,31 @@ export async function sendMessage (req, res)  {
     // Populate sender info
     await message.populate('sender', 'username profile firstName lastName');
 
+    // Create notifications for other members
+    const otherMembers = conversation.members.filter(member => 
+      member._id.toString() !== req.user.id
+    );
+
+    const senderName = req.user.profile?.firstName 
+      ? `${req.user.profile.firstName} ${req.user.profile.lastName || ''}`.trim()
+      : req.user.username;
+
+    const notifications = otherMembers.map(member => ({
+      user: member._id,
+      type: 'MESSAGE',
+      message: `${senderName} sent you a message: ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
+      link: `/chat/${conversationId}`,
+      isRead: false
+    }));
+
+    if (notifications.length > 0) {
+      await Notification.insertMany(notifications);
+    }
+
     res.json({
       success: true,
-      message
+      message,
+      notifications: notifications.length
     });
   } catch (error) {
     console.error('Error sending message:', error);
@@ -221,4 +243,3 @@ export async function sendMessage (req, res)  {
     });
   }
 };
-

@@ -1,222 +1,162 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Send, ArrowLeft, MoreVertical, Phone, Video } from 'lucide-react';
+import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import { Gamepad2, Sword, Shield, Crown, Search, Send, ArrowLeft, Users, MessageCircle } from 'lucide-react';
 
-const ChatApp = () => {
-  const { user, isAuthenticated } = useAuth();
+const ChatApplication = () => {
+  const { user } = useAuth();
+  const [activeView, setActiveView] = useState('conversations'); // 'conversations', 'chat', 'search'
   const [conversations, setConversations] = useState([]);
-  const [selectedConversation, setSelectedConversation] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [currentConversation, setCurrentConversation] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
-  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchType, setSearchType] = useState('username');
+  const [messageInput, setMessageInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Auto-scroll to bottom of messages
+  // Fetch conversations on component mount
+  useEffect(() => {
+    fetchConversations();
+  }, []);
+
+  // Auto-scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  // Fetch conversations on mount
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchConversations();
-    }
-  }, [isAuthenticated]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Fetch all conversations
   const fetchConversations = async () => {
     try {
-      const response = await fetch('/api/chat/conversations', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const response = await axios.get('/api/chat/conversations', {
+        withCredentials: true
       });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setConversations(data.conversations || []);
-      } else {
-        console.error('Failed to fetch conversations');
+      if (response.data.success) {
+        setConversations(response.data.conversations);
       }
     } catch (error) {
       console.error('Error fetching conversations:', error);
     }
   };
 
+  // Search users
+  const searchUsers = async (query) => {
+    if (!query || query.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await axios.get('/api/chat/search', {
+        params: { query, type: searchType },
+        withCredentials: true
+      });
+      if (response.data.success) {
+        setSearchResults(response.data.users);
+      }
+    } catch (error) {
+      console.error('Error searching users:', error);
+    }
+    setLoading(false);
+  };
+
+  // Handle search input change with debouncing
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      if (activeView === 'search') {
+        searchUsers(searchQuery);
+      }
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery, searchType, activeView]);
+
+  // Create or get conversation with a user
+  const startConversation = async (userId) => {
+    try {
+      const response = await axios.post('/api/chat/conversations', 
+        { userId },
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        const conversation = response.data.conversation;
+        setCurrentConversation(conversation);
+        fetchMessages(conversation._id);
+        setActiveView('chat');
+        fetchConversations(); // Refresh conversations list
+      }
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+    }
+  };
+
+  // Fetch messages for a conversation
   const fetchMessages = async (conversationId) => {
     try {
-      const response = await fetch(`/api/chat/conversations/${conversationId}/messages`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const response = await axios.get(`/api/chat/conversations/${conversationId}/messages`, {
+        withCredentials: true
       });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setMessages(data.messages || []);
-      } else {
-        console.error('Failed to fetch messages');
+      if (response.data.success) {
+        setMessages(response.data.messages);
       }
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
   };
 
+  // Send a message
   const sendMessage = async () => {
-    if (!newMessage.trim() || !selectedConversation) return;
-
-    const tempMessage = {
-      _id: Date.now().toString(),
-      sender: user,
-      content: newMessage,
-      createdAt: new Date().toISOString(),
-      type: 'text'
-    };
-
-    // Optimistically add message to UI
-    setMessages(prev => [...prev, tempMessage]);
-    const messageContent = newMessage;
-    setNewMessage('');
+    if (!messageInput.trim() || !currentConversation) return;
 
     try {
-      const response = await fetch('/api/chat/messages', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          conversationId: selectedConversation._id,
-          content: messageContent,
+      const response = await axios.post('/api/chat/messages', 
+        {
+          conversationId: currentConversation._id,
+          content: messageInput.trim(),
           type: 'text'
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const message = data.message;
-        
-        // Replace temp message with real message
-        setMessages(prev => 
-          prev.map(msg => msg._id === tempMessage._id ? message : msg)
-        );
-
-        // Update conversation last message
-        setConversations(prev => prev.map(conv => 
-          conv._id === selectedConversation._id 
-            ? { ...conv, lastMessage: message, updatedAt: new Date().toISOString() }
-            : conv
-        ));
-      } else {
-        // Remove temp message on error
-        setMessages(prev => prev.filter(msg => msg._id !== tempMessage._id));
-        setNewMessage(messageContent);
-        console.error('Failed to send message');
+        },
+        { withCredentials: true }
+      );
+      
+      if (response.data.success) {
+        setMessages(prev => [...prev, response.data.message]);
+        setMessageInput('');
+        fetchConversations(); // Refresh to update last message
       }
     } catch (error) {
-      // Remove temp message on error
-      setMessages(prev => prev.filter(msg => msg._id !== tempMessage._id));
-      setNewMessage(messageContent);
       console.error('Error sending message:', error);
     }
   };
 
-  const searchUsers = async (query) => {
-    if (!query.trim()) {
-      setSearchResults([]);
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/chat/search?query=${encodeURIComponent(query)}`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setSearchResults(data.users || []);
-      } else {
-        console.error('Failed to search users');
-        setSearchResults([]);
-      }
-    } catch (error) {
-      console.error('Error searching users:', error);
-      setSearchResults([]);
-    }
-  };
-
-  const createOrGetConversation = async (userId) => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/chat/conversations', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const conversation = data.conversation;
-        
-        // Add to conversations if new
-        setConversations(prev => {
-          const exists = prev.some(conv => conv._id === conversation._id);
-          return exists ? prev : [conversation, ...prev];
-        });
-
-        setSelectedConversation(conversation);
-        setShowSearch(false);
-        setSearchQuery('');
-        setSearchResults([]);
-        fetchMessages(conversation._id);
-      } else {
-        console.error('Failed to create/get conversation');
-      }
-    } catch (error) {
-      console.error('Error creating conversation:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleConversationClick = (conversation) => {
-    setSelectedConversation(conversation);
+  // Open conversation from list
+  const openConversation = (conversation) => {
+    setCurrentConversation(conversation);
     fetchMessages(conversation._id);
+    setActiveView('chat');
   };
 
+  // Get other user in conversation
+  const getOtherUser = (conversation) => {
+    return conversation.members.find(member => member._id !== user._id);
+  };
+
+  // Format timestamp
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
     const now = new Date();
     const diffInHours = (now - date) / (1000 * 60 * 60);
-
+    
     if (diffInHours < 24) {
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } else if (diffInHours < 168) { // 7 days
-      return date.toLocaleDateString([], { weekday: 'short' });
     } else {
-      return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      return date.toLocaleDateString();
     }
-  };
-
-  const getOtherUser = (conversation) => {
-    return conversation.members?.find(member => member._id !== user?._id);
   };
 
   const handleKeyPress = (e) => {
@@ -226,277 +166,282 @@ const ChatApp = () => {
     }
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center p-8 bg-white rounded-lg shadow-lg">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">Authentication Required</h1>
-          <p className="text-gray-600">Please log in to access the chat application.</p>
-        </div>
-      </div>
-    );
-  }
+  // Generate random level for gaming theme
+  const getRandomLevel = () => Math.floor(Math.random() * 100) + 1;
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
-      {/* Sidebar - Conversations */}
-      <div className={`w-full md:w-1/3 lg:w-1/4 bg-white border-r border-gray-200 flex flex-col ${
-        selectedConversation ? 'hidden md:flex' : 'flex'
-      }`}>
+    <div className="flex h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 text-white">
+      {/* Sidebar */}
+      <div className="w-80 bg-gray-800 border-r border-purple-700 flex flex-col">
         {/* Header */}
-        <div className="p-4 bg-blue-600 text-white flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold">Messages</h1>
-            <button 
-              onClick={() => setShowSearch(!showSearch)}
-              className="p-2 rounded-full hover:bg-blue-700 transition-colors"
-              title="Search users"
+        <div className="p-4 border-b border-purple-700">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <Gamepad2 className="w-6 h-6 mr-2 text-purple-400" />
+              <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
+                Game Chat
+              </h1>
+            </div>
+            <button
+              onClick={() => setActiveView('search')}
+              className="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors text-purple-400"
             >
-              <Search className="h-5 w-5" />
+              <Search className="w-5 h-5" />
+            </button>
+          </div>
+          
+          {/* Navigation Tabs */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setActiveView('conversations')}
+              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center ${
+                activeView === 'conversations' 
+                  ? 'bg-purple-700 text-white' 
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              <MessageCircle className="w-4 h-4 mr-1" />
+              Chats
+            </button>
+            <button
+              onClick={() => setActiveView('search')}
+              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center ${
+                activeView === 'search' 
+                  ? 'bg-purple-700 text-white' 
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              <Users className="w-4 h-4 mr-1" />
+              Find Players
             </button>
           </div>
         </div>
 
-        {/* Search Section */}
-        {showSearch && (
-          <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search users by name or username..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  searchUsers(e.target.value);
-                }}
-                className="w-full p-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <Search className="absolute right-3 top-3.5 h-4 w-4 text-gray-400" />
-            </div>
-            
-            {/* Search Results */}
-            {searchResults.length > 0 && (
-              <div className="mt-2 max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-sm">
-                {searchResults.map((searchUser) => (
-                  <div
-                    key={searchUser._id}
-                    onClick={() => createOrGetConversation(searchUser._id)}
-                    className="flex items-center p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
-                  >
-                    <img
-                      src={searchUser.profile?.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(searchUser.profile?.name || searchUser.username)}&background=random`}
-                      alt={searchUser.profile?.name || searchUser.username}
-                      className="w-10 h-10 rounded-full mr-3 object-cover"
-                    />
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-800">
-                        {searchUser.profile?.name || searchUser.username}
-                      </p>
-                      <p className="text-sm text-gray-500">@{searchUser.username}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {searchQuery && searchResults.length === 0 && (
-              <div className="mt-2 text-center text-gray-500 text-sm">
-                No users found
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Conversations List */}
+        {/* Content Area */}
         <div className="flex-1 overflow-y-auto">
-          {conversations.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-gray-500">
-              <div className="text-center">
-                <p className="mb-2">No conversations yet</p>
-                <p className="text-sm">Search for users to start chatting</p>
-              </div>
-            </div>
-          ) : (
-            conversations.map((conversation) => {
-              const otherUser = getOtherUser(conversation);
-              if (!otherUser) return null;
-              
-              return (
-                <div
-                  key={conversation._id}
-                  onClick={() => handleConversationClick(conversation)}
-                  className={`flex items-center p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
-                    selectedConversation?._id === conversation._id 
-                      ? 'bg-blue-50 border-l-4 border-l-blue-600' 
-                      : ''
-                  }`}
-                >
-                  <div className="relative">
-                    <img
-                      src={otherUser.profile?.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(otherUser.profile?.name || otherUser.username)}&background=random`}
-                      alt={otherUser.profile?.name || otherUser.username}
-                      className="w-12 h-12 rounded-full mr-3 object-cover"
-                    />
-                    <div className="absolute bottom-0 right-3 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-center mb-1">
-                      <p className="font-medium text-gray-800 truncate">
-                        {otherUser.profile?.name || otherUser.username}
-                      </p>
-                      {conversation.lastMessage && (
-                        <p className="text-xs text-gray-500 flex-shrink-0">
-                          {formatTime(conversation.lastMessage.createdAt)}
-                        </p>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-500 truncate">
-                      {conversation.lastMessage?.content || 'Start a conversation'}
-                    </p>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </div>
-
-      {/* Chat Area */}
-      <div className={`flex-1 flex flex-col ${
-        selectedConversation ? 'flex' : 'hidden md:flex'
-      }`}>
-        {selectedConversation ? (
-          <>
-            {/* Chat Header */}
-            <div className="bg-white border-b border-gray-200 p-4 flex items-center flex-shrink-0">
-              <button
-                onClick={() => setSelectedConversation(null)}
-                className="md:hidden p-2 rounded-full hover:bg-gray-100 mr-2 transition-colors"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </button>
-              
-              <div className="relative mr-3">
-                <img
-                  src={getOtherUser(selectedConversation)?.profile?.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(getOtherUser(selectedConversation)?.profile?.name || getOtherUser(selectedConversation)?.username)}&background=random`}
-                  alt={getOtherUser(selectedConversation)?.profile?.name}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-              </div>
-              
-              <div className="flex-1">
-                <p className="font-medium text-gray-800">
-                  {getOtherUser(selectedConversation)?.profile?.name || getOtherUser(selectedConversation)?.username}
-                </p>
-                <p className="text-sm text-green-500">Online</p>
-              </div>
-              
-              <div className="flex space-x-2">
-                <button className="p-2 rounded-full hover:bg-gray-100 transition-colors" title="Voice call">
-                  <Phone className="h-5 w-5 text-gray-600" />
-                </button>
-                <button className="p-2 rounded-full hover:bg-gray-100 transition-colors" title="Video call">
-                  <Video className="h-5 w-5 text-gray-600" />
-                </button>
-                <button className="p-2 rounded-full hover:bg-gray-100 transition-colors" title="More options">
-                  <MoreVertical className="h-5 w-5 text-gray-600" />
-                </button>
-              </div>
-            </div>
-
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-              {messages.length === 0 ? (
-                <div className="flex items-center justify-center h-full text-gray-500">
-                  <div className="text-center">
-                    <p className="text-lg mb-2">No messages yet</p>
-                    <p className="text-sm">Send a message to start the conversation</p>
-                  </div>
+          {activeView === 'conversations' && (
+            <div className="p-2">
+              {conversations.length === 0 ? (
+                <div className="text-center p-6 text-gray-400">
+                  <Shield className="w-12 h-12 mx-auto mb-3 text-purple-500 opacity-50" />
+                  <p className="mb-1">No conversations yet</p>
+                  <p className="text-sm">Start a new chat to begin messaging</p>
                 </div>
               ) : (
-                messages.map((message, index) => {
-                  const isCurrentUser = message.sender._id === user._id;
-                  const showAvatar = !isCurrentUser && (index === 0 || messages[index - 1].sender._id !== message.sender._id);
-                  
+                conversations.map((conversation) => {
+                  const otherUser = getOtherUser(conversation);
                   return (
                     <div
-                      key={message._id}
-                      className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} ${
-                        showAvatar ? 'mt-4' : 'mt-1'
-                      }`}
+                      key={conversation._id}
+                      onClick={() => openConversation(conversation)}
+                      className="flex items-center p-3 rounded-lg cursor-pointer transition-colors hover:bg-gray-700 mb-1"
                     >
-                      {!isCurrentUser && showAvatar && (
-                        <img
-                          src={message.sender.profile?.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(message.sender.profile?.name || message.sender.username)}&background=random`}
-                          alt={message.sender.profile?.name}
-                          className="w-8 h-8 rounded-full mr-2 mt-auto object-cover"
-                        />
-                      )}
-                      
-                      {!isCurrentUser && !showAvatar && (
-                        <div className="w-8 mr-2"></div>
-                      )}
-                      
-                      <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
-                        isCurrentUser
-                          ? 'bg-blue-600 text-white rounded-br-sm'
-                          : 'bg-white text-gray-800 border border-gray-200 rounded-bl-sm'
-                      }`}>
-                        <p className="break-words">{message.content}</p>
-                        <p className={`text-xs mt-1 ${
-                          isCurrentUser ? 'text-blue-100' : 'text-gray-500'
-                        }`}>
-                          {formatTime(message.createdAt)}
-                        </p>
+                      <div className="relative">
+                        <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold mr-3">
+                          {otherUser?.profile?.name
+                            ? otherUser.profile.name.charAt(0).toUpperCase()
+                            : otherUser?.username.charAt(0).toUpperCase()
+                          }
+                        </div>
+                        <div className="absolute bottom-0 right-2 w-3 h-3 bg-green-500 border-2 border-gray-800 rounded-full"></div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="font-medium text-white truncate">
+                            {otherUser?.profile?.name || otherUser?.username}
+                          </span>
+                          {conversation.lastMessage && (
+                            <span className="text-xs text-gray-400 whitespace-nowrap">
+                              {formatTime(conversation.lastMessage.createdAt)}
+                            </span>
+                          )}
+                        </div>
+                        {conversation.lastMessage && (
+                          <p className="text-sm text-gray-400 truncate">
+                            {conversation.lastMessage.content}
+                          </p>
+                        )}
                       </div>
                     </div>
                   );
                 })
               )}
+            </div>
+          )}
+
+          {activeView === 'search' && (
+            <div className="p-4">
+              {/* Search Input */}
+              <div className="mb-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={`Search by ${searchType}...`}
+                    className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-purple-800 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+                <div className="flex gap-2 mt-2">
+                  <button
+                    onClick={() => setSearchType('username')}
+                    className={`flex-1 py-1 px-2 rounded text-xs ${
+                      searchType === 'username' 
+                        ? 'bg-purple-600 text-white' 
+                        : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                    } transition-colors`}
+                  >
+                    Username
+                  </button>
+                  <button
+                    onClick={() => setSearchType('name')}
+                    className={`flex-1 py-1 px-2 rounded text-xs ${
+                      searchType === 'name' 
+                        ? 'bg-purple-600 text-white' 
+                        : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                    } transition-colors`}
+                  >
+                    Name
+                  </button>
+                </div>
+              </div>
+
+              {/* Search Results */}
+              {loading ? (
+                <div className="text-center p-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500 mx-auto"></div>
+                </div>
+              ) : searchResults.length > 0 ? (
+                searchResults.map((user) => (
+                  <div
+                    key={user._id}
+                    onClick={() => startConversation(user._id)}
+                    className="flex items-center p-3 rounded-lg cursor-pointer transition-colors hover:bg-gray-700 mb-2"
+                  >
+                    <div className="relative">
+                      <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold mr-3">
+                        {user.profile?.name
+                          ? user.profile.name.charAt(0).toUpperCase()
+                          : user.username.charAt(0).toUpperCase()
+                        }
+                      </div>
+                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-gray-800 rounded-full"></div>
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium text-white">
+                        {user.profile?.name || user.username}
+                      </div>
+                      <div className="text-sm text-gray-400">@{user.username}</div>
+                    </div>
+                    <div className="flex items-center text-xs text-yellow-400">
+                      <Crown className="w-3 h-3 mr-1" />
+                      <span>Lvl {getRandomLevel()}</span>
+                    </div>
+                  </div>
+                ))
+              ) : searchQuery.length >= 2 ? (
+                <div className="text-center p-6 text-gray-400">
+                  <Sword className="w-12 h-12 mx-auto mb-3 text-purple-500 opacity-50" />
+                  <p>No players found</p>
+                </div>
+              ) : null}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col">
+        {activeView === 'chat' && currentConversation ? (
+          <>
+            {/* Chat Header */}
+            <div className="bg-gray-800 border-b border-purple-700 p-4 flex items-center">
+              <button
+                onClick={() => setActiveView('conversations')}
+                className="p-2 rounded-lg mr-3 text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div className="relative">
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold mr-3">
+                  {getOtherUser(currentConversation)?.profile?.name
+                    ? getOtherUser(currentConversation).profile.name.charAt(0).toUpperCase()
+                    : getOtherUser(currentConversation)?.username.charAt(0).toUpperCase()
+                  }
+                </div>
+                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-gray-800 rounded-full"></div>
+              </div>
+              <div>
+                <h2 className="font-bold text-white">
+                  {getOtherUser(currentConversation)?.profile?.name || 
+                   getOtherUser(currentConversation)?.username}
+                </h2>
+                <p className="text-sm text-green-400 flex items-center">
+                  <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                  Online • In Game
+                </p>
+              </div>
+            </div>
+
+            {/* Messages Area */}
+            <div className="flex-1 overflow-y-auto p-4 bg-gray-900">
+              {messages.map((message) => {
+                const isOwnMessage = message.sender._id === user._id;
+                return (
+                  <div
+                    key={message._id}
+                    className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-4`}
+                  >
+                    <div
+                      className={`max-w-xs px-4 py-2 rounded-2xl ${
+                        isOwnMessage
+                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-br-sm'
+                          : 'bg-gray-700 text-gray-200 border border-purple-900 rounded-bl-sm'
+                      }`}
+                    >
+                      <p className="break-words">{message.content}</p>
+                      <p
+                        className={`text-xs mt-1 ${
+                          isOwnMessage ? 'text-purple-200' : 'text-gray-500'
+                        }`}
+                      >
+                        {formatTime(message.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
               <div ref={messagesEndRef} />
             </div>
 
             {/* Message Input */}
-            <div className="bg-white border-t border-gray-200 p-4 flex-shrink-0">
-              <div className="flex items-end space-x-2">
-                <div className="flex-1">
-                  <textarea
-                    placeholder="Type a message..."
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    rows="1"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                    style={{
-                      minHeight: '44px',
-                      maxHeight: '120px',
-                    }}
-                  />
-                </div>
+            <div className="bg-gray-800 border-t border-purple-700 p-4">
+              <div className="flex items-center gap-3">
+                <input
+                  type="text"
+                  value={messageInput}
+                  onChange={(e) => setMessageInput(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                  placeholder="Type a message..."
+                  className="flex-1 p-3 bg-gray-700 border border-purple-800 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
                 <button
                   onClick={sendMessage}
-                  disabled={!newMessage.trim() || sendingMessage}
-                  className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex-shrink-0"
+                  disabled={!messageInput.trim()}
+                  className="p-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 disabled:bg-gray-700 disabled:cursor-not-allowed transition-colors"
                 >
-                  {sendingMessage ? (
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  ) : (
-                    <Send className="h-5 w-5" />
-                  )}
+                  <Send className="w-5 h-5" />
                 </button>
               </div>
             </div>
           </>
         ) : (
-          <div className="hidden md:flex flex-1 items-center justify-center bg-gray-50">
-            <div className="text-center text-gray-500">
-              <div className="w-32 h-32 mx-auto mb-6 bg-gray-200 rounded-full flex items-center justify-center">
-                <Search className="h-16 w-16 text-gray-400" />
-              </div>
-              <h2 className="text-2xl font-semibold mb-2 text-gray-700">Welcome to Chat</h2>
-              <p className="text-lg">Select a conversation to start messaging</p>
-              <p className="text-sm mt-2">or search for users to begin a new conversation</p>
+          <div className="flex-1 flex items-center justify-center text-gray-400 bg-gray-900">
+            <div className="text-center">
+              <Gamepad2 className="w-16 h-16 mx-auto mb-4 text-purple-500 opacity-50" />
+              <h2 className="text-xl font-bold text-white mb-2">Welcome to Game Chat</h2>
+              <p>Select a conversation or search for players to start chatting</p>
             </div>
           </div>
         )}
@@ -505,4 +450,4 @@ const ChatApp = () => {
   );
 };
 
-export default ChatApp;
+export default ChatApplication;

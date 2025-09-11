@@ -2,118 +2,223 @@ import Conversation from '../../models/Chat.models.js';
 import Message from '../../models/Messege.model.js';
 import User from '../../models/User.models.js';
 
-export async function getConversations (req, res) {
-  try {
-    const conversations = await Conversation.find({
-      members: req.userId
-    })
-      .populate('members', 'username profile.name profile.profileImage')
-      .populate('lastMessage')
-      .sort({ updatedAt: -1 });
 
-    res.json({ conversations });
+export async function searchUsers (req, res) {
+  try {
+    const { query, type = 'username' } = req.query;
+    
+    if (!query || query.trim().length < 2) {
+      return res.status(400).json({
+        success: false,
+        message: 'Search query must be at least 2 characters long'
+      });
+    }
+
+    let searchQuery;
+    if (type === 'username') {
+      // Search by username
+      searchQuery = {
+        username: { $regex: query, $options: 'i' },
+        _id: { $ne: req.user.id } // Exclude current user
+      };
+    } else {
+      // Search by name
+      searchQuery = {
+        $or: [
+          { 'profile.firstName': { $regex: query, $options: 'i' } },
+          { 'profile.lastName': { $regex: query, $options: 'i' } },
+          { 
+            $expr: { 
+              $regexMatch: { 
+                input: { $concat: ['$profile.firstName', ' ', '$profile.lastName'] }, 
+                regex: query, 
+                options: 'i' 
+              } 
+            } 
+          }
+        ],
+        _id: { $ne: req.user.id } // Exclude current user
+      };
+    }
+
+    const users = await User.find(searchQuery)
+      .select('username profile firstName lastName')
+      .limit(10);
+
+    res.json({
+      success: true,
+      users: users.map(user => ({
+        _id: user._id,
+        username: user.username,
+        profile: {
+          name: user.profile?.firstName || user.profile?.lastName 
+            ? `${user.profile.firstName || ''} ${user.profile.lastName || ''}`.trim()
+            : null,
+          profileImage: user.profile?.profileImage
+        }
+      }))
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error('Search error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during search'
+    });
   }
 };
 
+// Get all conversations for the authenticated user
+export async function getConversations (req, res) {
+  try {
+    const conversations = await Conversation.find({
+      members: req.user.id
+    })
+    .populate('members', 'username profile firstName lastName')
+    .populate('lastMessage')
+    .sort({ updatedAt: -1 });
+
+    res.json({
+      success: true,
+      conversations
+    });
+  } catch (error) {
+    console.error('Error fetching conversations:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+};
+
+// Get messages for a specific conversation
+export async function getMessages  (req, res) {
+  try {
+    const { conversationId } = req.params;
+    
+    // Verify user is a member of this conversation
+    const conversation = await Conversation.findOne({
+      _id: conversationId,
+      members: req.user.id
+    });
+
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Conversation not found'
+      });
+    }
+
+    const messages = await Message.find({ conversationId })
+      .populate('sender', 'username profile firstName lastName')
+      .sort({ createdAt: 1 });
+
+    res.json({
+      success: true,
+      messages
+    });
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+};
+
+// Create a new conversation or get existing one
 export async function createOrGetConversation (req, res) {
   try {
     const { userId } = req.body;
 
-    if (userId === req.userId) {
-      return res.status(400).json({ message: 'Cannot create conversation with yourself' });
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'User ID is required'
+      });
     }
 
+    // Check if conversation already exists
     let conversation = await Conversation.findOne({
-      members: { $all: [req.userId, userId], $size: 2 }
-    })
-      .populate('members', 'username profile.name profile.profileImage')
-      .populate('lastMessage');
-
-    if (conversation) {
-      return res.json({ conversation });
-    }
-
-    conversation = new Conversation({
-      members: [req.userId, userId]
-    });
-
-    await conversation.save();
-
-    await User.updateMany(
-      { _id: { $in: [req.userId, userId] } },
-      { $push: { conversations: conversation._id } }
-    );
-
-    conversation = await Conversation.findById(conversation._id)
-      .populate('members', 'username profile.name profile.profileImage');
-
-    res.status(201).json({ conversation });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
-
-export async function getMessages (req, res) {
-  try {
-    const { conversationId } = req.params;
-    const { page = 1, limit = 50 } = req.query;
-
-    const conversation = await Conversation.findOne({
-      _id: conversationId,
-      members: req.userId
-    });
+      members: { $all: [req.user.id, userId] }
+    }).populate('members', 'username profile firstName lastName');
 
     if (!conversation) {
-      return res.status(404).json({ message: 'Conversation not found' });
+      // Create new conversation
+      conversation = new Conversation({
+        members: [req.user.id, userId]
+      });
+      await conversation.save();
+      
+      // Populate the members field
+      conversation = await Conversation.findById(conversation._id)
+        .populate('members', 'username profile firstName lastName');
     }
 
-    const messages = await Message.find({ conversation: conversationId })
-      .populate('sender', 'username profile.name profile.profileImage')
-      .sort({ createdAt: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
-
-    res.json({ messages: messages.reverse() });
+    res.json({
+      success: true,
+      conversation
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error('Error creating conversation:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
   }
 };
 
-export async function  sendMessage (req, res) {
+// Send a message
+export async function sendMessage (req, res)  {
   try {
     const { conversationId, content, type = 'text' } = req.body;
 
+    if (!conversationId || !content) {
+      return res.status(400).json({
+        success: false,
+        message: 'Conversation ID and content are required'
+      });
+    }
+
+    // Verify user is a member of this conversation
     const conversation = await Conversation.findOne({
       _id: conversationId,
-      members: req.userId
+      members: req.user.id
     });
 
     if (!conversation) {
-      return res.status(404).json({ message: 'Conversation not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Conversation not found'
+      });
     }
 
+    // Create new message
     const message = new Message({
-      sender: req.userId,
-      conversation: conversationId,
+      conversationId,
+      sender: req.user.id,
       content,
       type
     });
-
     await message.save();
 
+    // Update conversation's last message and timestamp
     conversation.lastMessage = message._id;
-    conversation.messages.push(message._id);
+    conversation.updatedAt = new Date();
     await conversation.save();
 
-    const populatedMessage = await Message.findById(message._id)
-      .populate('sender', 'username profile.name profile.profileImage');
+    // Populate sender info
+    await message.populate('sender', 'username profile firstName lastName');
 
-    res.status(201).json({ message: populatedMessage });
+    res.json({
+      success: true,
+      message
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error('Error sending message:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
   }
 };
-
 

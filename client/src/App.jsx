@@ -1,4 +1,4 @@
-import React from "react";
+import React from "react"
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import PublicRoute from "./context/PublicRoute";
 import ProtectedRoute from "./context/ProtectedRoute";
@@ -14,6 +14,7 @@ import NotificationPage from "./components/Notification/NotificationsPage"
 import { NotificationProvider } from './context/NotificationContext';
 import Footer from "./components/Footer/Footer";
 import Feed from "./components/Post/PostFeed";
+import MyPosts from "./components/Post/MyPosts";
 
 function App() {
   return (
@@ -87,7 +88,15 @@ function App() {
                 </ProtectedRoute>
               }
             />
-             <Route
+            <Route
+              path="/myposts"
+              element={
+                <ProtectedRoute>
+                  <MyPosts />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/post"
               element={
                 <ProtectedRoute>

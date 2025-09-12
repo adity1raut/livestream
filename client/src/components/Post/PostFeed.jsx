@@ -3,6 +3,7 @@ import CreatePost from './CreatePost';
 import Post from './PostCard';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
+import {MessageCircle} from "lucide-react"
 
 const Feed = () => {
   const [posts, setPosts] = useState([]);
@@ -71,8 +72,11 @@ const Feed = () => {
     );
   }
 
+  // Filter out current user's posts
+  const filteredPosts = posts.filter(post => post.author !== user?._id && post.author?._id !== user?._id);
+
   return (
-    <div className="max-w-2xl mx-auto pt-20 p-4">
+    <div className="max-w-2xl mx-auto pt-40 p-4">
       {/* Feed Header */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Feed</h2>
@@ -89,7 +93,7 @@ const Feed = () => {
       
       {/* Posts List */}
       <div className="space-y-4">
-        {posts.map((post) => (
+        {filteredPosts.map((post) => (
           <Post 
             key={post._id} 
             post={post} 
@@ -99,7 +103,7 @@ const Feed = () => {
       </div>
 
       {/* Load More Button */}
-      {hasMore && posts.length > 0 && (
+      {hasMore && filteredPosts.length > 0 && (
         <div className="text-center mt-6">
           <button
             onClick={loadMore}
@@ -119,7 +123,7 @@ const Feed = () => {
       )}
 
       {/* Empty State */}
-      {posts.length === 0 && !loading && (
+      {filteredPosts.length === 0 && !loading && (
         <div className="text-center py-12">
           <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
             <MessageCircle className="w-12 h-12 text-gray-400" />

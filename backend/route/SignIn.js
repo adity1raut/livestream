@@ -136,4 +136,18 @@ router.get("/profile/:username/posts", authenticateToken, async (req, res) => {
 });
 
 
+router.get("/profile/me/posts", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const posts = await Post.find({ author: userId }).sort({ createdAt: -1 }).populate({
+      path: 'author',
+      select: 'username profile',
+    });
+    return res.json({ success: true, data: posts });
+  } catch (error) {
+    console.error("Fetch my posts error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 export default router;

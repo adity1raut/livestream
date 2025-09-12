@@ -9,7 +9,7 @@ import GamingDashboard from "./components/Home";
 import Navbar from "./components/Navbar/Navbar";
 import { AuthProvider } from "./context/AuthContext";
 import ForgetPassword from "./components/ForgetPassword/ForgetPass"
-import ChatApp from "./components/ChatPAge/ChatApp";
+import ChatApp from "./components/ChatPAge/chat/ChatApplication";
 import NotificationPage from "./components/Notification/NotificationsPage"
 import { NotificationProvider } from './context/NotificationContext';
 import Footer from "./components/Footer/Footer";

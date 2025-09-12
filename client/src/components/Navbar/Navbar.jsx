@@ -13,10 +13,12 @@ import {
   LogOut,
   UserCircle,
   MessageCircle,
+  Aperture,
   Shield,
   Zap,
   Crown,
   Sparkles,
+  Store,
 } from "lucide-react";
 import NotificationBell from "../Notification/NotificationBell"
 
@@ -39,7 +41,7 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownOpen && !event.target.closest(".dropdown-container")) {
@@ -82,27 +84,32 @@ const Navbar = () => {
       path: "/chat",
     },
     {
+      icon: <Aperture size={16} />,
+      name: "Post",
+      description: "Chatting with Friends",
+      path: "/post",
+    },
+    {
+      icon: <Store size={16} />,
+      name: "Store",
+      description: "Chatting with Friends",
+      path: "/store",
+    },
+    {
       icon: <UserCircle size={16} />,
       name: "Profile",
       description: "Manage your gaming identity",
       path: "/profile/me",
-    },
-    {
-      icon: <Settings size={16} />,
-      name: "Settings",
-      description: "Configure your gaming experience",
-      path: "/settings",
     },
   ];
 
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-          scrolled 
-            ? "bg-gray-900 shadow-lg py-2 border-b border-purple-900" 
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled
+            ? "bg-gray-900 shadow-lg py-2 border-b border-purple-900"
             : "bg-gradient-to-b from-gray-900 to-black py-4"
-        }`}
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
@@ -110,9 +117,8 @@ const Navbar = () => {
             <div className="flex items-center">
               <Link to="/" className="flex items-center focus:outline-none group">
                 <div
-                  className={`relative overflow-hidden transition-all duration-300 ${
-                    scrolled ? "h-10 w-10" : "h-12 w-12"
-                  }`}
+                  className={`relative overflow-hidden transition-all duration-300 ${scrolled ? "h-10 w-10" : "h-12 w-12"
+                    }`}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg transform group-hover:scale-110 transition-transform duration-300">
                     <Gamepad2 className="h-full w-full p-2 text-white" />
@@ -123,16 +129,14 @@ const Navbar = () => {
                 </div>
                 <div className="ml-3">
                   <span
-                    className={`font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400 transition-all duration-300 ${
-                      scrolled ? "text-xl" : "text-2xl"
-                    }`}
+                    className={`font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400 transition-all duration-300 ${scrolled ? "text-xl" : "text-2xl"
+                      }`}
                   >
                     GAME PORTAL
                   </span>
                   <div
-                    className={`text-xs text-gray-400 transition-opacity duration-300 ${
-                      scrolled ? "opacity-0 h-0" : "opacity-100"
-                    }`}
+                    className={`text-xs text-gray-400 transition-opacity duration-300 ${scrolled ? "opacity-0 h-0" : "opacity-100"
+                      }`}
                   >
                     Level Up Your Gaming Experience
                   </div>
@@ -188,19 +192,17 @@ const Navbar = () => {
                   <div className="relative dropdown-container">
                     <button
                       onClick={toggleDropdown}
-                      className={`flex items-center text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 group ${
-                        dropdownOpen
+                      className={`flex items-center text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 group ${dropdownOpen
                           ? "text-white bg-gray-800"
                           : "text-gray-300 hover:text-white hover:bg-gray-800"
-                      }`}
+                        }`}
                     >
                       <Shield size={16} className="mr-1 group-hover:scale-110 transition-transform" />
                       Menu
                       <ChevronDown
                         size={16}
-                        className={`ml-1 transition-transform duration-200 ${
-                          dropdownOpen ? "transform rotate-180" : ""
-                        }`}
+                        className={`ml-1 transition-transform duration-200 ${dropdownOpen ? "transform rotate-180" : ""
+                          }`}
                       />
                     </button>
 
@@ -289,15 +291,13 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       <div
-        className={`fixed inset-0 bg-black bg-opacity-70 z-40 md:hidden transition-opacity duration-300 ${
-          isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 bg-black bg-opacity-70 z-40 md:hidden transition-opacity duration-300 ${isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
         onClick={() => setIsMobileMenuOpen(false)}
       >
         <div
-          className={`fixed inset-y-0 right-0 max-w-xs w-full bg-gray-900 shadow-xl z-50 transform transition-transform duration-300 ease-in-out border-l border-purple-800 ${
-            isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
-          }`}
+          className={`fixed inset-y-0 right-0 max-w-xs w-full bg-gray-900 shadow-xl z-50 transform transition-transform duration-300 ease-in-out border-l border-purple-800 ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
+            }`}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex justify-between items-center p-4 border-b border-purple-800">

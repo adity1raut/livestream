@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Camera, Edit2, Mail, Calendar, User } from 'lucide-react';
+import { Camera, Edit2, Mail, Calendar, User, Loader2 } from 'lucide-react';
 import axios from 'axios';
 
 const ProfileHeader = ({
@@ -10,7 +10,8 @@ const ProfileHeader = ({
   setSuccess,
   setError,
   setProfileData,
-  setIsEditing
+  setIsEditing,
+  currentUserId
 }) => {
   const profileImageRef = useRef(null);
   const coverImageRef = useRef(null);
@@ -81,6 +82,37 @@ const ProfileHeader = ({
     return profileName || profileData.username;
   };
 
+  // Follow button state
+  const [followLoading, setFollowLoading] = React.useState(false);
+  // Ensure followers is always an array
+  const followersArr = Array.isArray(profileData.followers) ? profileData.followers : [];
+  const [isFollowing, setIsFollowing] = React.useState(
+    followersArr.some(f => f === currentUserId)
+  );
+  const [followersCount, setFollowersCount] = React.useState(followersArr.length);
+
+  React.useEffect(() => {
+    const arr = Array.isArray(profileData.followers) ? profileData.followers : [];
+    setFollowersCount(arr.length);
+    setIsFollowing(arr.includes(currentUserId));
+  }, [profileData, currentUserId]);
+
+  const handleFollow = async () => {
+    setFollowLoading(true);
+    try {
+      const res = await axios.post(`/api/auth/profile/${profileData.username}/follow`, {}, { withCredentials: true });
+      if (res.data.success) {
+        setIsFollowing(res.data.followed);
+        setFollowersCount(res.data.followersCount);
+        setProfileData((prev) => ({ ...prev, followers: res.data.followersCount }));
+      }
+    } catch (err) {
+      setError('Failed to follow/unfollow');
+    } finally {
+      setFollowLoading(false);
+    }
+  };
+
   return (
     <>
       {/* Cover Image Section */}
@@ -143,7 +175,7 @@ const ProfileHeader = ({
                     </div>
                   )}
                 </div>
-                {isOwnProfile && (
+                {isOwnProfile ? (
                   <>
                     <button
                       onClick={() => profileImageRef.current?.click()}
@@ -165,6 +197,14 @@ const ProfileHeader = ({
                       disabled={uploadingImage}
                     />
                   </>
+                ) : (
+                  <button
+                    onClick={handleFollow}
+                    className={`absolute bottom-0 right-0 bg-pink-600 p-2.5 rounded-full shadow-lg text-white font-semibold hover:bg-pink-700 transition-all transform hover:scale-105 ${followLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    disabled={followLoading}
+                  >
+                    {followLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : isFollowing ? 'Unfollow' : 'Follow'}
+                  </button>
                 )}
               </div>
 
@@ -201,7 +241,7 @@ const ProfileHeader = ({
                   </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold text-gray-900">
-                      {profileData.followers?.length || 0}
+                      {followersCount}
                     </p>
                     <p className="text-gray-500 text-sm">Followers</p>
                   </div>

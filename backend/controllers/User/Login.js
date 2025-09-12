@@ -7,7 +7,6 @@ import cloudinary from '../../config/cloudinary.js';
 dotenv.config();
 const router = express.Router();
 
-//Login
 export async function loginUser(identifier, password) {
   try {
     if (!identifier || !password) throw new Error('Username/Email and password required');
@@ -126,3 +125,17 @@ export async function updateProfile(req, res) {
     });
   }
 }
+
+
+export async function getProfileByUsername(req, res) {
+  try {
+    const user = await User.findOne({ username: req.params.username }).select("-password").lean();
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    return res.json({ success: true, data: user });
+  } catch (error) {
+    console.error("Profile by username error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};

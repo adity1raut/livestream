@@ -44,6 +44,7 @@ export default function ProfilePage() {
 
       if (response.data.success) {
         const userData = response.data.data;
+        if (!Array.isArray(userData.followers)) userData.followers = [];
         setProfileData(userData);
       } else {
         setError(response.data.message || 'Failed to load profile');
@@ -88,6 +89,7 @@ export default function ProfilePage() {
         setError={setError}
         setProfileData={setProfileData}
         setIsEditing={setIsEditing}
+        currentUserId={currentUser?._id}
       />
       
       <ProfileTabs 

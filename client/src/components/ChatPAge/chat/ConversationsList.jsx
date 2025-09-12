@@ -28,12 +28,20 @@ const ConversationsList = ({
               className="flex items-center p-4 rounded-xl cursor-pointer transition-all duration-300 hover:bg-gray-700/50 mb-3 hover:scale-102 hover:shadow-lg group"
             >
               <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold mr-4 shadow-lg group-hover:shadow-purple-500/50">
-                  {otherUser?.profile?.name
-                    ? otherUser.profile.name.charAt(0).toUpperCase()
-                    : otherUser?.username.charAt(0).toUpperCase()
-                  }
-                </div>
+                {otherUser?.profile?.profileImage ? (
+                  <img
+                    src={otherUser.profile.profileImage}
+                    alt={otherUser?.profile?.name || otherUser?.username}
+                    className="w-12 h-12 rounded-full object-cover mr-4 shadow-lg border-2 border-purple-600 group-hover:shadow-purple-500/50"
+                  />
+                ) : (
+                  <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold mr-4 shadow-lg group-hover:shadow-purple-500/50">
+                    {otherUser?.profile?.name
+                      ? otherUser.profile.name.charAt(0).toUpperCase()
+                      : otherUser?.username.charAt(0).toUpperCase()
+                    }
+                  </div>
+                )}
                 <div className="absolute bottom-0 right-2 w-4 h-4 bg-green-500 border-2 border-gray-800 rounded-full shadow-lg"></div>
               </div>
               <div className="flex-1 min-w-0">

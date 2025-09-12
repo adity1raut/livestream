@@ -11,12 +11,20 @@ const ChatHeader = ({ currentConversation, setActiveView, getOtherUser }) => {
         <ArrowLeft className="w-5 h-5" />
       </button>
       <div className="relative">
-        <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold mr-4 shadow-lg">
-          {getOtherUser(currentConversation)?.profile?.name
-            ? getOtherUser(currentConversation).profile.name.charAt(0).toUpperCase()
-            : getOtherUser(currentConversation)?.username.charAt(0).toUpperCase()
-          }
-        </div>
+        {getOtherUser(currentConversation)?.profile?.profileImage ? (
+          <img
+            src={getOtherUser(currentConversation).profile.profileImage}
+            alt={getOtherUser(currentConversation)?.profile?.name || getOtherUser(currentConversation)?.username}
+            className="w-12 h-12 rounded-full object-cover mr-4 shadow-lg border-2 border-purple-600"
+          />
+        ) : (
+          <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold mr-4 shadow-lg">
+            {getOtherUser(currentConversation)?.profile?.name
+              ? getOtherUser(currentConversation).profile.name.charAt(0).toUpperCase()
+              : getOtherUser(currentConversation)?.username.charAt(0).toUpperCase()
+            }
+          </div>
+        )}
         <div className="absolute bottom-0 right-2 w-4 h-4 bg-green-500 border-2 border-gray-800 rounded-full shadow-lg"></div>
       </div>
       <div>
@@ -26,7 +34,7 @@ const ChatHeader = ({ currentConversation, setActiveView, getOtherUser }) => {
         </h2>
         <p className="text-sm text-green-400 flex items-center">
           <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
-          Online • In Game
+          Online
         </p>
       </div>
     </div>

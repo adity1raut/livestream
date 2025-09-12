@@ -13,6 +13,7 @@ import ChatApp from "./components/ChatPAge/ChatApp";
 import NotificationPage from "./components/Notification/NotificationsPage"
 import { NotificationProvider } from './context/NotificationContext';
 import Footer from "./components/Footer/Footer";
+import Feed from "./components/Post/PostFeed";
 
 function App() {
   return (
@@ -83,6 +84,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <NotificationPage />
+                </ProtectedRoute>
+              }
+            />
+             <Route
+              path="/post"
+              element={
+                <ProtectedRoute>
+                  <Feed />
                 </ProtectedRoute>
               }
             />

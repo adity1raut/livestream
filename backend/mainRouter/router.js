@@ -13,7 +13,7 @@ router.use("/api/auth" , SignUprouter)
 router.use("/api/auth" , ForgetPassrouter)
 
 router.use("/api/chat" , Message)
-router.use("/api/post" , Post)
+router.use("/api/posts" , Post)
 router.use("/api/notifications" , Notifications)
 
 

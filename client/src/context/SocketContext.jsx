@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
+import axios from 'axios';
 
 const SocketContext = createContext();
 
@@ -17,51 +18,95 @@ export const SocketProvider = ({ children }) => {
   const [onlineUsers, setOnlineUsers] = useState(new Map());
   const [notifications, setNotifications] = useState([]);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [isConnected, setIsConnected] = useState(false);
   const { user, isAuthenticated } = useAuth();
 
+  // Fetch existing notifications
   useEffect(() => {
+    const fetchNotifications = async () => {
+      if (isAuthenticated && user) {
+        try {
+          const res = await axios.get('/api/notifications', {
+            withCredentials: true
+          });
+          if (res.data.success) {
+            setNotifications(res.data.notifications);
+            setNotificationCount(res.data.unreadCount || 0);
+          }
+        } catch (error) {
+          console.error('Error fetching notifications:', error);
+        }
+      }
+    };
+
+    fetchNotifications();
+  }, [isAuthenticated, user]);
+
+  // Socket connection management
+  useEffect(() => {
+    let newSocket;
+    
     if (isAuthenticated && user) {
-      // Get token from cookies
-      const token = document.cookie
-        .split(';')
-        .find(c => c.trim().startsWith('token='))
-        ?.split('=')[1];
+      try {
+        // Get token from cookies
+        const token = document.cookie
+          .split(';')
+          .find(c => c.trim().startsWith('token='))
+          ?.split('=')[1];
 
-      const newSocket = io('http://localhost:5000', {
-        auth: { token },
-        withCredentials: true
-      });
+        newSocket = io('http://localhost:5000', {
+          auth: { token },
+          withCredentials: true
+        });
 
-      newSocket.on('connect', () => {
-        console.log('Connected to server');
-        setSocket(newSocket);
-        
-        // Join feed for real-time updates
-        newSocket.emit('join-feed');
-      });
+        newSocket.on('connect', () => {
+          console.log('Connected to server');
+          setIsConnected(true);
+          setSocket(newSocket);
+          
+          // Join user room for notifications
+          newSocket.emit('join-user-room', user._id);
+          
+          // Join feed for real-time updates
+          newSocket.emit('join-feed');
+        });
 
-      newSocket.on('disconnect', () => {
-        console.log('Disconnected from server');
-        setSocket(null);
-      });
+        newSocket.on('disconnect', () => {
+          console.log('Disconnected from server');
+          setIsConnected(false);
+          setSocket(null);
+        });
 
-      // Handle notifications
-      newSocket.on('new-notification', (notification) => {
-        setNotifications(prev => [notification, ...prev]);
-      });
+        newSocket.on('online-users', (users) => {
+          const usersMap = new Map(users.map(user => [user._id, user]));
+          setOnlineUsers(usersMap);
+        });
 
-      newSocket.on('notification-count', ({ count }) => {
-        setNotificationCount(count);
-      });
+        // Handle notifications
+        newSocket.on('new-notification', (notification) => {
+          setNotifications(prev => [notification, ...prev]);
+          setNotificationCount(prev => prev + 1);
+        });
 
-      newSocket.on('connect_error', (error) => {
-        console.error('Socket connection error:', error);
-      });
+        newSocket.on('notification-count', ({ count }) => {
+          setNotificationCount(count);
+        });
 
-      return () => {
-        newSocket.close();
-      };
+        newSocket.on('connect_error', (error) => {
+          console.error('Socket connection error:', error);
+          setIsConnected(false);
+        });
+
+      } catch (error) {
+        console.error('Error initializing socket:', error);
+      }
     }
+
+    return () => {
+      if (newSocket) {
+        newSocket.close();
+      }
+    };
   }, [isAuthenticated, user]);
 
   const joinPost = (postId) => {
@@ -94,15 +139,53 @@ export const SocketProvider = ({ children }) => {
     }
   };
 
-  const markNotificationAsRead = (notificationId) => {
+  const markNotificationAsRead = async (notificationId) => {
     if (socket) {
       socket.emit('mark-notification-read', { notificationId });
+    }
+    
+    // Update local state immediately for better UX
+    setNotifications(prev => 
+      prev.map(notif => 
+        notif._id === notificationId ? { ...notif, read: true } : notif
+      )
+    );
+    
+    setNotificationCount(prev => Math.max(0, prev - 1));
+    
+    // Also update on server via API
+    try {
+      await axios.patch(`/api/notifications/${notificationId}/read`, {}, {
+        withCredentials: true
+      });
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  const markAllNotificationsAsRead = async () => {
+    setNotifications(prev => 
+      prev.map(notif => ({ ...notif, read: true }))
+    );
+    setNotificationCount(0);
+    
+    try {
+      await axios.patch('/api/notifications/read-all', {}, {
+        withCredentials: true
+      });
+      
+      if (socket) {
+        socket.emit('mark-all-notifications-read');
+      }
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
     }
   };
 
   return (
     <SocketContext.Provider value={{
       socket,
+      isConnected,
       onlineUsers,
       notifications,
       notificationCount,
@@ -111,7 +194,10 @@ export const SocketProvider = ({ children }) => {
       togglePostLike,
       addComment,
       deleteComment,
-      markNotificationAsRead
+      markNotificationAsRead,
+      markAllNotificationsAsRead,
+      setNotifications,
+      setNotificationCount
     }}>
       {children}
     </SocketContext.Provider>

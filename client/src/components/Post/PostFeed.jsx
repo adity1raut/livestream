@@ -1,169 +1,135 @@
 import React, { useState, useEffect } from 'react';
-import { useSocket } from '../../context/SocketContext';
-import PostCard from './PostCard';
 import CreatePost from './CreatePost';
+import Post from './PostCard';
+import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 
-const PostFeed = () => {
+const Feed = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  
-  const { socket } = useSocket();
+  const { user } = useAuth();
 
-  useEffect(() => {
-    fetchFeed();
-  }, []);
-
-  useEffect(() => {
-    if (socket) {
-      // Listen for real-time post events
-      const handleNewPost = (data) => {
-        if (data.type === 'new_post') {
-          setPosts(prev => [data.post, ...prev]);
-        }
-      };
-
-      const handlePostUpdated = (data) => {
-        if (data.type === 'post_updated') {
-          setPosts(prev => prev.map(post => 
-            post._id === data.post._id ? data.post : post
-          ));
-        }
-      };
-
-      const handlePostDeleted = (data) => {
-        if (data.type === 'post_deleted') {
-          setPosts(prev => prev.filter(post => post._id !== data.postId));
-        }
-      };
-
-      socket.on('new-post', handleNewPost);
-      socket.on('post-updated', handlePostUpdated);
-      socket.on('post-deleted', handlePostDeleted);
-
-      return () => {
-        socket.off('new-post', handleNewPost);
-        socket.off('post-updated', handlePostUpdated);
-        socket.off('post-deleted', handlePostDeleted);
-      };
-    }
-  }, [socket]);
-
-  const fetchFeed = async (pageNum = 1) => {
+  const fetchPosts = async (pageNum = 1, append = false) => {
     try {
-      const response = await axios.get(`/api/posts/feed?page=${pageNum}&limit=10`, {
+      if (pageNum > 1) setLoadingMore(true);
+      
+      const res = await axios.get(`/api/posts/feed?page=${pageNum}&limit=10`, {
         withCredentials: true
       });
       
-      if (response.data.success) {
-        if (pageNum === 1) {
-          setPosts(response.data.posts);
+      if (res.data.success) {
+        if (append) {
+          setPosts(prev => [...prev, ...res.data.posts]);
         } else {
-          setPosts(prev => [...prev, ...response.data.posts]);
+          setPosts(res.data.posts);
         }
-        setHasMore(response.data.pagination.hasMore);
+        setHasMore(res.data.hasMore);
+        setPage(pageNum);
       }
     } catch (error) {
-      console.error('Error fetching feed:', error);
+      console.error('Error fetching posts:', error);
     } finally {
       setLoading(false);
       setLoadingMore(false);
     }
   };
 
-  const loadMore = async () => {
-    if (!hasMore || loadingMore) return;
-    
-    setLoadingMore(true);
-    const nextPage = page + 1;
-    setPage(nextPage);
-    await fetchFeed(nextPage);
-  };
+  useEffect(() => {
+    if (user) {
+      fetchPosts();
+    }
+  }, [user]);
 
-  const handlePostCreated = (newPost) => {
+  const handleNewPost = (newPost) => {
     setPosts(prev => [newPost, ...prev]);
   };
 
-  const handlePostUpdate = (updatedPost) => {
-    setPosts(prev => prev.map(post => 
-      post._id === updatedPost._id ? updatedPost : post
-    ));
+  const handleDeletePost = (postId) => {
+    setPosts(prev => prev.filter(post => post._id !== postId));
   };
 
-  const handlePostDelete = (postId) => {
-    setPosts(prev => prev.filter(post => post._id !== postId));
+  const loadMore = () => {
+    if (!loadingMore && hasMore) {
+      fetchPosts(page + 1, true);
+    }
+  };
+
+  const refreshFeed = () => {
+    setLoading(true);
+    setPage(1);
+    fetchPosts(1, false);
   };
 
   if (loading) {
     return (
-      <div className="max-w-2xl mx-auto p-6">
-        <div className="space-y-4">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-lg shadow-md p-6 animate-pulse">
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
-                <div className="space-y-2">
-                  <div className="h-4 bg-gray-300 rounded w-24"></div>
-                  <div className="h-3 bg-gray-300 rounded w-16"></div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="h-4 bg-gray-300 rounded"></div>
-                <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-              </div>
-            </div>
-          ))}
-        </div>
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6 pt-52">
-      <CreatePost onPostCreated={handlePostCreated} />
+    <div className="max-w-2xl mx-auto p-4">
+      {/* Feed Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">Feed</h2>
+        <button
+          onClick={refreshFeed}
+          className="px-4 py-2 text-blue-500 hover:text-blue-600 font-medium"
+        >
+          Refresh
+        </button>
+      </div>
+
+      {/* Create Post */}
+      <CreatePost onPostCreated={handleNewPost} />
       
-      <div className="space-y-6">
+      {/* Posts List */}
+      <div className="space-y-4">
         {posts.map((post) => (
-          <PostCard 
+          <Post 
             key={post._id} 
-            post={post}
-            onPostUpdate={handlePostUpdate}
-            onPostDelete={handlePostDelete}
+            post={post} 
+            onDelete={handleDeletePost}
           />
         ))}
       </div>
 
-      {hasMore && (
-        <div className="text-center mt-8">
+      {/* Load More Button */}
+      {hasMore && posts.length > 0 && (
+        <div className="text-center mt-6">
           <button
             onClick={loadMore}
             disabled={loadingMore}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
-            {loadingMore ? 'Loading...' : 'Load More'}
+            {loadingMore ? (
+              <div className="flex items-center space-x-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>Loading...</span>
+              </div>
+            ) : (
+              'Load More'
+            )}
           </button>
         </div>
       )}
 
-      {!hasMore && posts.length > 0 && (
-        <div className="text-center mt-8 text-gray-500">
-          You've reached the end of your feed
-        </div>
-      )}
-
+      {/* Empty State */}
       {posts.length === 0 && !loading && (
-        <div className="text-center mt-8">
-          <div className="bg-white rounded-lg shadow-md p-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No posts yet</h3>
-            <p className="text-gray-600">Follow some users or create your first post to get started!</p>
+        <div className="text-center py-12">
+          <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+            <MessageCircle className="w-12 h-12 text-gray-400" />
           </div>
+          <h3 className="text-xl font-semibold text-gray-600 mb-2">No posts yet</h3>
+          <p className="text-gray-500">Be the first to share something with your friends!</p>
         </div>
       )}
     </div>
   );
 };
 
-export default PostFeed;
+export default Feed;

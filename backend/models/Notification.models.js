@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const NotificationSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  fromUser: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, 
   type: {
     type: String,
     enum: ["FOLLOW", "LIKE", "COMMENT", "MESSAGE", "ORDER_UPDATE", "STREAM_START", "GENERAL"],

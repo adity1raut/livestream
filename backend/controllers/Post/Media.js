@@ -1,14 +1,7 @@
 import Post from '../../models/Post.models.js';
 import User from '../../models/User.models.js';
 import cloudinary from '../../config/cloudinary.js';
-import NotificationService from './NotificationServic.js';
-
-
-let notificationService;
-
-export const initializeNotificationService = (io) => {
-  notificationService = new NotificationService(io);
-};
+import { getNotificationService } from '../../socket/socketHandlers.js';
 
 // Helper function to upload to cloudinary
 const uploadToCloudinary = (buffer, resourceType, folder) => {
@@ -139,7 +132,7 @@ export async function getFeed (req, res) {
 // Get single post
 export async function SinglePost (req, res) {
   try {
-    const post = await Post.findById(req.params.id)
+    const post = await Post.findById(req.params.postId)
       .populate('author', 'username profile.name profile.profileImage')
       .populate('comments.user', 'username profile.name profile.profileImage')
       .populate('likes', 'username profile.name profile.profileImage');
@@ -163,11 +156,12 @@ export async function SinglePost (req, res) {
       message: 'Server error while fetching post'
     });
   }
-};
+}
 
+// Like post
 export async function likePost (req, res) {
   try {
-    const postId = req.params.id;
+    const postId = req.params.postId;
     const userId = req.user.id;
 
     const post = await Post.findById(postId).populate('author', 'username');
@@ -197,7 +191,8 @@ export async function likePost (req, res) {
       post.likes.push(userId);
       await post.save();
 
-      // Send notification to post owner
+      // Send notification using NotificationService
+      const notificationService = getNotificationService();
       if (notificationService) {
         const liker = await User.findById(userId);
         await notificationService.sendLikeNotification(
@@ -223,12 +218,12 @@ export async function likePost (req, res) {
       message: 'Server error while processing like'
     });
   }
-};
+}
 
-// Comment on a post
+// Comment on post
 export async function addComment (req, res) {
   try {
-    const postId = req.params.id;
+    const postId = req.params.postId;
     const userId = req.user.id;
     const { text } = req.body;
 
@@ -262,7 +257,8 @@ export async function addComment (req, res) {
     
     const addedComment = post.comments[post.comments.length - 1];
 
-    // Send notification to post owner
+    // Send notification using NotificationService
+    const notificationService = getNotificationService();
     if (notificationService) {
       const commenter = await User.findById(userId);
       await notificationService.sendCommentNotification(
@@ -287,12 +283,12 @@ export async function addComment (req, res) {
       message: 'Server error while adding comment'
     });
   }
-};
+}
 
-// Delete a post
+// Delete post
 export async function DeletePost (req, res) {
   try {
-    const postId = req.params.id;
+    const postId = req.params.postId;
     const userId = req.user.id;
 
     const post = await Post.findById(postId);
@@ -343,7 +339,7 @@ export async function DeletePost (req, res) {
       message: 'Server error while deleting post'
     });
   }
-};
+}
 
 // Get user's posts
 export async function getUserpost (req, res) {
@@ -384,4 +380,3 @@ export async function getUserpost (req, res) {
     });
   }
 };
-

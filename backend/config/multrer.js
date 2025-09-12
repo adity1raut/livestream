@@ -1,16 +1,33 @@
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import multer from 'multer';
-import cloudinary from './cloudinary.js'; // Adjust the import path as necessary
+import path from 'path';
 
-const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: 'videos', 
-        resource_type: 'video',
-        format: async (req, file) => 'mp4', 
-    },
+
+const storage = multer.memoryStorage();
+
+// File filter function
+const fileFilter = (req, file, cb) => {
+  // Check file types
+  const allowedImageTypes = /jpeg|jpg|png|gif|webp/;
+  const allowedVideoTypes = /mp4|mov|avi|mkv|webm/;
+  
+  const extname = allowedImageTypes.test(path.extname(file.originalname).toLowerCase()) ||
+                  allowedVideoTypes.test(path.extname(file.originalname).toLowerCase());
+  
+  const mimetype = file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/');
+  
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb(new Error('Only image and video files are allowed!'), false);
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 100 * 1024 * 1024,
+  },
+  fileFilter: fileFilter,
 });
-
-const upload = multer({ storage: storage });
 
 export default upload;

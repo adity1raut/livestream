@@ -3,10 +3,15 @@ import Message from '../models/Messege.model.js';
 import Conversation from '../models/Chat.models.js';
 import User from '../models/User.models.js';
 import Notification from '../models/Notification.models.js';
+import NotificationService from '../services/NotificationServic.js';
 
 const connectedUsers = new Map();
+let notificationService;
 
 const setupSocketHandlers = (io) => {
+  // Initialize notification service
+  notificationService = new NotificationService(io);
+
   io.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth?.token ||
@@ -72,6 +77,17 @@ const setupSocketHandlers = (io) => {
       });
       
       socket.emit('notification-count', { count: unreadCount });
+
+      // Send recent notifications on connection
+      const recentNotifications = await Notification.find({ 
+        user: socket.userId,
+        isRead: false 
+      })
+      .populate('fromUser', 'username profile.name profile.profileImage')
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+      socket.emit('recent-notifications', recentNotifications);
 
       // Handle joining a conversation room
       socket.on('join-conversation', (conversationId) => {
@@ -140,47 +156,30 @@ const setupSocketHandlers = (io) => {
             ? `${sender.profile.firstName} ${sender.profile.lastName || ''}`.trim()
             : sender.username;
 
-          // Create notifications for other members
+          // Create notifications for other members using NotificationService
           const otherMembers = conversation.members.filter(member => 
             member._id.toString() !== socket.userId
           );
 
           for (const member of otherMembers) {
-            // Create notification in database
-            const notification = new Notification({
-              user: member._id,
-              type: 'MESSAGE',
-              message: `${senderName} sent you a message: ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
-              link: `/chat/${conversationId}`,
-              isRead: false
-            });
+            try {
+              await notificationService.createNotification(
+                member._id,
+                'MESSAGE',
+                `${senderName} sent you a message: ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
+                `/chat/${conversationId}`,
+                socket.userId
+              );
 
-            await notification.save();
-
-            // Send real-time notification to user if they're online
-            const memberSocketId = connectedUsers.get(member._id.toString());
-            if (memberSocketId) {
-              io.to(`user_${member._id}`).emit('new-notification', {
-                id: notification._id,
-                type: notification.type,
-                message: notification.message,
-                link: notification.link,
-                isRead: notification.isRead,
-                createdAt: notification.createdAt,
-                sender: {
-                  id: socket.userId,
-                  name: senderName,
-                  profileImage: sender.profile?.profileImage
-                }
-              });
-
-              // Update notification count
-              const unreadCount = await Notification.countDocuments({
+              // Update notification count for the member
+              const memberUnreadCount = await Notification.countDocuments({
                 user: member._id,
                 isRead: false
               });
               
-              io.to(`user_${member._id}`).emit('notification-count', { count: unreadCount });
+              io.to(`user_${member._id}`).emit('notification-count', { count: memberUnreadCount });
+            } catch (notificationError) {
+              console.error('Error creating message notification:', notificationError);
             }
           }
 
@@ -199,6 +198,81 @@ const setupSocketHandlers = (io) => {
         } catch (error) {
           console.error('Error sending message:', error);
           socket.emit('error', { message: 'Failed to send message' });
+        }
+      });
+
+      // Handle like notification (for real-time updates from frontend)
+      socket.on('post-liked', async (data) => {
+        try {
+          const { postId, postOwnerId, likerUsername } = data;
+          
+          if (postOwnerId !== socket.userId) {
+            await notificationService.sendLikeNotification(
+              postOwnerId,
+              socket.userId,
+              likerUsername,
+              postId
+            );
+
+            // Update notification count
+            const unreadCount = await Notification.countDocuments({
+              user: postOwnerId,
+              isRead: false
+            });
+            
+            io.to(`user_${postOwnerId}`).emit('notification-count', { count: unreadCount });
+          }
+        } catch (error) {
+          console.error('Error handling like notification:', error);
+        }
+      });
+
+      // Handle comment notification (for real-time updates from frontend)
+      socket.on('post-commented', async (data) => {
+        try {
+          const { postId, postOwnerId, commenterUsername } = data;
+          
+          if (postOwnerId !== socket.userId) {
+            await notificationService.sendCommentNotification(
+              postOwnerId,
+              socket.userId,
+              commenterUsername,
+              postId
+            );
+
+            // Update notification count
+            const unreadCount = await Notification.countDocuments({
+              user: postOwnerId,
+              isRead: false
+            });
+            
+            io.to(`user_${postOwnerId}`).emit('notification-count', { count: unreadCount });
+          }
+        } catch (error) {
+          console.error('Error handling comment notification:', error);
+        }
+      });
+
+      // Handle follow notification (for real-time updates from frontend)
+      socket.on('user-followed', async (data) => {
+        try {
+          const { followedUserId, followerUsername } = data;
+          
+          await notificationService.sendFollowNotification(
+            followedUserId,
+            socket.userId,
+            followerUsername
+          );
+
+          // Update notification count
+          const unreadCount = await Notification.countDocuments({
+            user: followedUserId,
+            isRead: false
+          });
+          
+          io.to(`user_${followedUserId}`).emit('notification-count', { count: unreadCount });
+        } catch (error) {
+          console.error('Error handling follow notification:', error);
         }
       });
 
@@ -283,12 +357,18 @@ const setupSocketHandlers = (io) => {
         }
       });
 
-      // Handle get notifications
+      // Handle get notifications with pagination
       socket.on('get-notifications', async (data = {}) => {
         try {
-          const { page = 1, limit = 20 } = data;
+          const { page = 1, limit = 20, type = null } = data;
           
-          const notifications = await Notification.find({ user: socket.userId })
+          const query = { user: socket.userId };
+          if (type) {
+            query.type = type;
+          }
+
+          const notifications = await Notification.find(query)
+            .populate('fromUser', 'username profile.name profile.profileImage')
             .sort({ createdAt: -1 })
             .limit(limit * 1)
             .skip((page - 1) * limit);
@@ -298,7 +378,7 @@ const setupSocketHandlers = (io) => {
             isRead: false
           });
 
-          const totalCount = await Notification.countDocuments({ user: socket.userId });
+          const totalCount = await Notification.countDocuments(query);
 
           socket.emit('notifications-list', {
             notifications,
@@ -311,6 +391,45 @@ const setupSocketHandlers = (io) => {
         } catch (error) {
           console.error('Error fetching notifications:', error);
           socket.emit('error', { message: 'Failed to fetch notifications' });
+        }
+      });
+
+      // Handle delete notification
+      socket.on('delete-notification', async (data) => {
+        try {
+          const { notificationId } = data;
+
+          await Notification.findOneAndDelete({
+            _id: notificationId,
+            user: socket.userId
+          });
+
+          // Update notification count
+          const unreadCount = await Notification.countDocuments({
+            user: socket.userId,
+            isRead: false
+          });
+          
+          socket.emit('notification-count', { count: unreadCount });
+          socket.emit('notification-deleted', { notificationId });
+
+        } catch (error) {
+          console.error('Error deleting notification:', error);
+          socket.emit('error', { message: 'Failed to delete notification' });
+        }
+      });
+
+      // Handle clear all notifications
+      socket.on('clear-all-notifications', async () => {
+        try {
+          await Notification.deleteMany({ user: socket.userId });
+
+          socket.emit('notification-count', { count: 0 });
+          socket.emit('all-notifications-cleared');
+
+        } catch (error) {
+          console.error('Error clearing all notifications:', error);
+          socket.emit('error', { message: 'Failed to clear all notifications' });
         }
       });
 
@@ -337,5 +456,7 @@ const setupSocketHandlers = (io) => {
     }
   });
 };
+
+export const getNotificationService = () => notificationService;
 
 export default setupSocketHandlers;

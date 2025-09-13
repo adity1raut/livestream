@@ -93,7 +93,7 @@ const Navbar = () => {
       icon: <Store size={16} />,
       name: "Store",
       description: "Chatting with Friends",
-      path: "/store",
+      path: "/stores",
     },
     {
       icon: <UserCircle size={16} />,

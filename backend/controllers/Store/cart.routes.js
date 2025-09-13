@@ -1,14 +1,10 @@
-import express from "express";
-import authenticateToken from "../../middleware/Auth.js";
-import verifyStoreOwnership from "../../middleware/verifyStore.js";
 import Cart from "../../models/Card.models.js";
 import Product from "../../models/Product.models.js";
 import Store from "../../models/Store.models.js";
 
-const router = express.Router();
 
 // POST /api/stores/:storeId/cart/add - Add item to cart
-router.post("/:storeId/cart/add", authenticateToken, verifyStoreOwnership, async (req, res) => {
+export async function addToCart(req, res) {
   try {
     const { productId, quantity = 1 } = req.body;
     const { storeId } = req.params;
@@ -66,10 +62,10 @@ router.post("/:storeId/cart/add", authenticateToken, verifyStoreOwnership, async
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 // GET /api/stores/cart - Get user's cart
-router.get("/cart", authenticateToken, async (req, res) => {
+export async function getCart(req, res) {
   try {
     const cart = await Cart.findOne({ user: req.user._id })
       .populate({
@@ -90,10 +86,10 @@ router.get("/cart", authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 // PUT /api/stores/cart/update - Update cart item quantity
-router.put("/cart/update", authenticateToken, async (req, res) => {
+export async function updateCartItem(req, res) {
   try {
     const { productId, quantity } = req.body;
 
@@ -135,10 +131,10 @@ router.put("/cart/update", authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 // DELETE /api/stores/cart/remove/:productId - Remove item from cart
-router.delete("/cart/remove/:productId", authenticateToken, async (req, res) => {
+export async function removeFromCart(req, res) {
   try {
     const { productId } = req.params;
 
@@ -164,10 +160,10 @@ router.delete("/cart/remove/:productId", authenticateToken, async (req, res) => 
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 // DELETE /api/stores/cart/clear - Clear entire cart
-router.delete("/cart/clear", authenticateToken, async (req, res) => {
+export async function clearCart(req, res) {
   try {
     const cart = await Cart.findOne({ user: req.user._id });
     if (!cart) {
@@ -182,6 +178,4 @@ router.delete("/cart/clear", authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
-
-export default router;
+};

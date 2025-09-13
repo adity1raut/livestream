@@ -1,11 +1,7 @@
-import express from "express";
 import Product from "../../models/Product.models.js";
-import Store from "../../models/Store.models.js";
-
-const router = express.Router();
 
 // GET /api/stores/search/products - Search products across all stores
-router.get("/search/products", async (req, res) => {
+export async function searchProducts(req, res) {
   try {
     const { 
       q, 
@@ -66,10 +62,10 @@ router.get("/search/products", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 // GET /api/stores/trending/products - Get trending products
-router.get("/trending/products", async (req, res) => {
+export async function getTrendingProducts(req, res) {
   try {
     const { limit = 20 } = req.query;
 
@@ -106,6 +102,5 @@ router.get("/trending/products", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
-export default router;

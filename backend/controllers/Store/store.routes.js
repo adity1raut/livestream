@@ -1,16 +1,10 @@
-import express from "express";
-import authenticateToken from "../../middleware/Auth.js";
-import verifyStoreOwnership from "../../middleware/verifyStore.js";
 import cloudinary from "../../config/cloudinary.js";
-import { upload } from "../../config/multrer.js";
 import Product from "../../models/Product.models.js";
 import Store from "../../models/Store.models.js";
 import User from "../../models/User.models.js";
 
-const router = express.Router();
-
 // GET /api/stores - Get all stores (public)
-router.get("/", async (req, res) => {
+export async function getAllStores (req, res) {
   try {
     const { page = 1, limit = 10, search } = req.query;
     const query = search 
@@ -35,10 +29,10 @@ router.get("/", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 // GET /api/stores/:id - Get specific store (public)
-router.get("/:id", async (req, res) => {
+export async function getStoreById (req, res) {
   try {
     const store = await Store.findById(req.params.id)
       .populate("owner", "username profile.name profile.profileImage")
@@ -58,10 +52,10 @@ router.get("/:id", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 // POST /api/stores - Create new store
-router.post("/", authenticateToken, upload.single("logo"), async (req, res) => {
+export async function createStore (req, res) {
   try {
     const { name, description } = req.body;
 
@@ -99,10 +93,10 @@ router.post("/", authenticateToken, upload.single("logo"), async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 // PUT /api/stores/:id - Update store
-router.put("/:id", authenticateToken, verifyStoreOwnership, upload.single("logo"), async (req, res) => {
+export async function updateStore (req, res) {
   try {
     const { name, description } = req.body;
 
@@ -135,10 +129,10 @@ router.put("/:id", authenticateToken, verifyStoreOwnership, upload.single("logo"
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 // DELETE /api/stores/:id - Delete store
-router.delete("/:id", authenticateToken, verifyStoreOwnership, async (req, res) => {
+export async function deleteStore (req, res) {
   try {
 
         // Delete all products associated with this store
@@ -159,10 +153,10 @@ router.delete("/:id", authenticateToken, verifyStoreOwnership, async (req, res) 
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 // GET /api/stores/user/:userId - Get user's store
-router.get("/user/:userId", async (req, res) => {
+export async function getUserStore (req, res) {
   try {
     const store = await Store.findOne({ owner: req.params.userId })
       .populate("owner", "username profile.name")
@@ -176,10 +170,10 @@ router.get("/user/:userId", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 // GET /api/stores/:id/products - Get all products of a store
-router.get("/:id/products", async (req, res) => {
+export async function getStoreProducts (req, res) {
   try {
     const { page = 1, limit = 12, sort = "createdAt", order = "desc" } = req.query;
     
@@ -209,10 +203,10 @@ router.get("/:id/products", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 // GET /api/stores/my/store - Get current user's store
-router.get("/my/store", authenticateToken, async (req, res) => {
+export async function getCurrentUserStore (req, res) {
   try {
     const store = await Store.findOne({ owner: req.user._id })
       .populate("owner", "username profile.name")
@@ -226,6 +220,4 @@ router.get("/my/store", authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
-
-export default router;
+};

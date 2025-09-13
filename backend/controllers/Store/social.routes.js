@@ -1,12 +1,8 @@
-import express from "express";
-import authenticateToken from "../../middleware/Auth.js";
 import Store from "../../models/Store.models.js";
 import User from "../../models/User.models.js";
 
-const router = express.Router();
-
 // POST /api/stores/:storeId/follow - Follow/Unfollow a store
-router.post("/:storeId/follow", authenticateToken, async (req, res) => {
+export async function followStore (req, res) {
   try {
     const { storeId } = req.params;
 
@@ -46,10 +42,10 @@ router.post("/:storeId/follow", authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 // GET /api/stores/:storeId/follow-status - Check if user is following a store
-router.get("/:storeId/follow-status", authenticateToken, async (req, res) => {
+export async  function getFollowStatus(req, res) {
   try {
     const { storeId } = req.params;
 
@@ -65,10 +61,10 @@ router.get("/:storeId/follow-status", authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 // GET /api/stores/following/stores - Get stores that user is following
-router.get("/following/stores", authenticateToken, async (req, res) => {
+export async function getFollowingStores(req, res) {
   try {
     const { page = 1, limit = 10 } = req.query;
 
@@ -93,6 +89,5 @@ router.get("/following/stores", authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
-export default router;

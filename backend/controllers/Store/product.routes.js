@@ -9,7 +9,7 @@ import Store from "../../models/Store.models.js";
 const router = express.Router();
 
 // POST /api/stores/:storeId/products - Add product to store (Store Owner)
-router.post("/:storeId/products", authenticateToken, upload.array("images", 5), verifyStoreOwnership, async (req, res) => {
+export async function addProduct(req, res) {
   try {
     const { storeId } = req.params;
     const { name, description, price, stock } = req.body;
@@ -49,10 +49,10 @@ router.post("/:storeId/products", authenticateToken, upload.array("images", 5), 
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 // PUT /api/stores/:storeId/products/:productId - Update product (Store Owner)
-router.put("/:storeId/products/:productId", authenticateToken, upload.array("images", 5), verifyStoreOwnership, async (req, res) => {
+export async function updateProduct(req, res) {
   try {
     const { productId } = req.params;
     const { name, description, price, stock, removeImages } = req.body;
@@ -102,10 +102,10 @@ router.put("/:storeId/products/:productId", authenticateToken, upload.array("ima
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 // DELETE /api/stores/:storeId/products/:productId - Delete product (Store Owner)
-router.delete("/:storeId/products/:productId", authenticateToken, verifyStoreOwnership, async (req, res) => {
+export async function deleteProduct(req, res) {
   try {
     const { productId } = req.params;
 
@@ -133,10 +133,10 @@ router.delete("/:storeId/products/:productId", authenticateToken, verifyStoreOwn
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 // GET /api/stores/products/:productId - Get specific product (public)
-router.get("/products/:productId", async (req, res) => {
+export async function getProductById(req, res) {
   try {
     const product = await Product.findById(req.params.productId)
       .populate("store", "name logo owner")
@@ -150,10 +150,10 @@ router.get("/products/:productId", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 // POST /api/stores/products/:productId/rating - Add rating to product
-router.post("/products/:productId/rating", authenticateToken, async (req, res) => {
+export async function addProductRating(req, res) {
   try {
     const { productId } = req.params;
     const { rating, review } = req.body;
@@ -192,6 +192,6 @@ router.post("/products/:productId/rating", authenticateToken, async (req, res) =
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 export default router;

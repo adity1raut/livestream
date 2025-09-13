@@ -1,10 +1,8 @@
-import express from "express";
-import authenticateToken from "../../middleware/Auth.js";
 import Product from "../../models/Product.models.js";
 import User from "../../models/User.models.js";
 
-const router = express.Router();
-router.post("/wishlist/add/:productId", authenticateToken, async (req, res) => {
+
+ export async function addToWishlist (req, res) {
   try {
     const { productId } = req.params;
 
@@ -36,10 +34,10 @@ router.post("/wishlist/add/:productId", authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
-// GET /api/stores/wishlist - Get user's wishlist
-router.get("/wishlist", authenticateToken, async (req, res) => {
+
+export async function getUserWishlist(req, res) {
   try {
     const { page = 1, limit = 12 } = req.query;
 
@@ -66,6 +64,4 @@ router.get("/wishlist", authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
-
-export default router;
+};

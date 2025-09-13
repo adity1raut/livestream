@@ -1,12 +1,8 @@
-import express from "express";
 import mongoose from "mongoose";
-import authenticateToken from "../../middleware/Auth.js";
-import verifyStoreOwnership from "../../middleware/verifyStore.js";
 import Product from "../../models/Product.models.js";
 
-const router = express.Router();
 
-router.get("/:storeId/analytics", authenticateToken, verifyStoreOwnership, async (req, res) => {
+export async function getStoreAnalytics(req, res) {
   try {
     const { storeId } = req.params;
 
@@ -91,6 +87,4 @@ router.get("/:storeId/analytics", authenticateToken, verifyStoreOwnership, async
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
-
-export default router;
+};

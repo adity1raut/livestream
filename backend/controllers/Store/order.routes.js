@@ -1,5 +1,3 @@
-import express from "express";
-import authenticateToken from "../../middleware/Auth.js";
 import { razorpay } from "../../config/rozapay.js";
 import crypto from "crypto";
 import Cart from "../../models/Card.models.js";
@@ -7,10 +5,9 @@ import Product from "../../models/Product.models.js";
 import User from "../../models/User.models.js";
 import Store from "../../models/Store.models.js";
 
-const router = express.Router();
 
 // POST /api/stores/order/create - Create Razorpay order
-router.post("/order/create", authenticateToken, async (req, res) => {
+export async function createOrder(req, res) {
   try {
     const { addressId } = req.body;
 
@@ -77,10 +74,10 @@ router.post("/order/create", authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 // POST /api/stores/order/verify - Verify Razorpay payment
-router.post("/order/verify", authenticateToken, async (req, res) => {
+export async function verifyPayment(req, res) {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, addressId } = req.body;
 
@@ -145,6 +142,4 @@ router.post("/order/verify", authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
-
-export default router;
+};

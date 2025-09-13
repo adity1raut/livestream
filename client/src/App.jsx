@@ -7,7 +7,6 @@ import Login from "./components/LoginForm/Login";
 import RegistrationForm from "./components/RegistrationForm/RegistrationForm";
 import GamingDashboard from "./components/Home";
 import Navbar from "./components/Navbar/Navbar";
-import { AuthProvider } from "./context/AuthContext";
 import ForgetPassword from "./components/ForgetPassword/ForgetPass"
 import ChatApp from "./components/ChatPAge/chat/ChatApplication";
 import NotificationPage from "./components/Notification/NotificationsPage"
@@ -15,10 +14,19 @@ import { NotificationProvider } from './context/NotificationContext';
 import Footer from "./components/Footer/Footer";
 import Feed from "./components/Post/PostFeed";
 import MyPosts from "./components/Post/MyPosts";
+import MyStore from "./Store/components/MyStore";
+import AllStores from "./Store/components/AllStores";
+import AddProduct from "./Store/product/AddProduct";
+import EditProduct from "./Store/product/EditProduct";
+import ProductDetail from "./Store/product/ProductDetail";
+import PublicProducts from "./Store/product/PublicProduct";
+import Cart from "./Store/Card/Cart";
+import { ProductSearch } from "./Store/search/ProductSearch";
+import { Wishlist } from "./Store/search/Wishlist";
+import Checkout from "./Store/order/Checkout";
 
 function App() {
   return (
-    <AuthProvider>
       <NotificationProvider >
         <Router>
           <Navbar />
@@ -105,14 +113,94 @@ function App() {
               }
             />
 
-            {/* Fallback Route */}
+            <Route
+              path="/my-store"
+              element={
+                <ProtectedRoute>
+                  <MyStore />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/stores"
+              element={
+                <ProtectedRoute>
+                  <AllStores />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Product Routes */}
+            <Route
+              path="/products"
+              element={
+                <PublicProducts />
+              }
+            />
+            <Route
+              path="/products/:productId"
+              element={
+                <ProductDetail />
+              }
+            />
+            <Route
+              path="/add-product"
+              element={
+                <ProtectedRoute>
+                  <AddProduct />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/edit-product/:productId"
+              element={
+                <ProtectedRoute>
+                  <EditProduct />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Cart Routes */}
+            <Route
+              path="/cart"
+              element={
+                <ProtectedRoute>
+                  <Cart />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Checkout Route */}
+            <Route
+              path="/checkout"
+              element={
+                <ProtectedRoute>
+                  <Checkout />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/search"
+              element={
+                <ProductSearch />
+              }
+            />
+
+            <Route
+              path="/wishlist"
+              element={
+                <ProtectedRoute>
+                  <Wishlist />
+                </ProtectedRoute>
+              }
+            />
+
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
 
           <Footer />
         </Router>
       </NotificationProvider>
-    </AuthProvider>
   );
 }
 

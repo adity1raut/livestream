@@ -62,6 +62,7 @@ function FollowingList({ username }) {
   const [following, setFollowing] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState("");
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     async function fetchFollowing() {
@@ -104,7 +105,11 @@ function FollowingList({ username }) {
   return (
     <div className="py-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
       {following.map(f => (
-        <div key={f._id} className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 flex items-center gap-4 shadow">
+        <div
+          key={f._id}
+          className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 flex items-center gap-4 shadow cursor-pointer hover:bg-purple-100"
+          onClick={() => navigate(`/profile/${f.username}`)}
+        >
           <img src={f.profile?.profileImage || '/default-avatar.png'} alt={f.username} className="w-12 h-12 rounded-full object-cover border-2 border-purple-200" />
           <div>
             <div className="font-semibold text-gray-800">{f.profile?.name || f.username}</div>
@@ -119,11 +124,13 @@ function FollowingList({ username }) {
 import React from 'react';
 import axios from 'axios';
 import { Grid, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 function FollowersList({ username }) {
   const [followers, setFollowers] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState("");
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     async function fetchFollowers() {
@@ -166,7 +173,11 @@ function FollowersList({ username }) {
   return (
     <div className="py-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
       {followers.map(f => (
-        <div key={f._id} className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 flex items-center gap-4 shadow">
+        <div
+          key={f._id}
+          className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 flex items-center gap-4 shadow cursor-pointer hover:bg-purple-100"
+          onClick={() => navigate(`/profile/${f.username}`)}
+        >
           <img src={f.profile?.profileImage || '/default-avatar.png'} alt={f.username} className="w-12 h-12 rounded-full object-cover border-2 border-purple-200" />
           <div>
             <div className="font-semibold text-gray-800">{f.profile?.name || f.username}</div>

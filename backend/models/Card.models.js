@@ -24,7 +24,6 @@ const CartSchema = new mongoose.Schema({
   }
 });
 
-// ✅ Prevent OverwriteModelError
 const Cart = mongoose.models.Cart || mongoose.model("Cart", CartSchema);
 
 export default Cart;

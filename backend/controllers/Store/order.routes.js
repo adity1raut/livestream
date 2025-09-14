@@ -1,6 +1,6 @@
 import { razorpay } from "../../config/rozapay.js";
 import crypto from "crypto";
-import Cart from "../../models/Card.models.js";
+import Cart from "../../models/Cart.models.js";
 import Product from "../../models/Product.models.js";
 import User from "../../models/User.models.js";
 import Store from "../../models/Store.models.js";

@@ -11,7 +11,6 @@ import { addToCart, getCart, removeFromCart, updateCartItem , clearCart } from "
 import { getStoreAnalytics } from "../controllers/Store/analytics.routes.js";
 import upload from "../config/multrer.js";
 
-
 const router = express.Router();
 
 // Store routes
@@ -24,38 +23,38 @@ router.get("/user/:userId", getUserStore);
 router.get("/:id/products", getStoreProducts);
 router.get("/my/store", authenticateToken, getCurrentUserStore);
 
+// Product routes
 router.post("/:storeId/products", authenticateToken, upload.array("images", 5), verifyStoreOwnership, addProduct)
 router.put("/:storeId/products/:productId", authenticateToken, upload.array("images", 5), verifyStoreOwnership, updateProduct)
 router.delete("/:storeId/products/:productId", authenticateToken, verifyStoreOwnership, deleteProduct )
 router.get("/products/:productId" ,getProductById )
 router.post("/products/:productId/rating", authenticateToken, addProductRating )
 
-
-router.post("/:storeId/cart/add", authenticateToken, addToCart)
+// Cart routes - Fixed: addToCart needs storeId parameter
 router.get("/cart", authenticateToken, getCart)
 router.put("/cart/update", authenticateToken, updateCartItem )
 router.delete("/cart/remove/:productId", authenticateToken, removeFromCart )
 router.delete("/cart/clear", authenticateToken, clearCart )
+router.post("/:storeId/cart/add", authenticateToken, addToCart)
 
-
+// Wishlist routes
 router.post("/wishlist/add/:productId", authenticateToken , addToWishlist)
 router.get("/wishlist", authenticateToken , getUserWishlist)
 
-
+// Order routes
 router.post("/order/create", authenticateToken,createOrder )
 router.post("/order/verify", authenticateToken, verifyPayment )
 
-
+// Analytics routes
 router.get("/:storeId/analytics", authenticateToken, verifyStoreOwnership, getStoreAnalytics );
 
-
+// Social routes
 router.post("/:storeId/follow", authenticateToken , followStore )
 router.get("/:storeId/follow-status", authenticateToken,getFollowStatus )
 router.get("/following/stores", authenticateToken, getFollowingStores )
 
-
+// Search routes
 router.get("/search/products",  searchProducts )
 router.get("/trending/products", getTrendingProducts )
-
 
 export default router;

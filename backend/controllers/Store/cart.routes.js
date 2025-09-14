@@ -1,4 +1,4 @@
-import Cart from "../../models/Card.models.js";
+import Cart from "../../models/Cart.models.js"; 
 import Product from "../../models/Product.models.js";
 import Store from "../../models/Store.models.js";
 
@@ -6,7 +6,6 @@ import Store from "../../models/Store.models.js";
 // POST /api/stores/:storeId/cart/add - Add item to cart
 export async function addToCart(req, res) {
   try {
-    console.log("addToCart called with:", req.body, req.params);
     const { productId, quantity = 1 } = req.body;
     const { storeId } = req.params;
 
@@ -59,71 +58,73 @@ export async function addToCart(req, res) {
         populate: { path: "store", select: "name logo" }
       });
 
-    res.status(200).json(populatedCart);
+    // Calculate total amount
+    const totalAmount = populatedCart.items.reduce((total, item) => {
+      if (item.product && typeof item.product.price === 'number' && typeof item.quantity === 'number') {
+        return total + (item.product.price * item.quantity);
+      }
+      return total;
+    }, 0);
+
+    res.status(200).json({ ...populatedCart.toObject(), totalAmount });
   } catch (error) {
-    console.error("Error in addToCart:", error);
     res.status(500).json({ error: error.message });
   }
-};
+}
 
 // GET /api/stores/cart - Get user's cart
 export async function getCart(req, res) {
   try {
-    console.log("getCart called for user:", req.user?._id);
-    
-    // Check if user exists
     if (!req.user || !req.user._id) {
-      console.error("No user found in request");
+      console.log("User not authenticated");
       return res.status(401).json({ error: "User not authenticated" });
     }
 
-    const cart = await Cart.findOne({ user: req.user._id })
+    let cart = await Cart.findOne({ user: req.user._id })
       .populate({
         path: "items.product",
         populate: { path: "store", select: "name logo owner" }
       });
 
-    console.log("Cart found:", cart ? "Yes" : "No");
-
     if (!cart) {
+      console.log("Cart not found for user:", req.user._id);
       return res.status(200).json({ items: [], totalAmount: 0 });
     }
 
-    console.log("Cart items count:", cart.items.length);
+    // Filter out items with null/undefined products (deleted products)
+    cart.items = cart.items.filter(item => item.product != null);
 
-    // Calculate total amount with error handling for each item
+    // Save cart if items were filtered out
+    if (cart.items.length !== cart.items.length) {
+      await cart.save();
+    }
+
+    // Calculate total amount safely
     const totalAmount = cart.items.reduce((total, item) => {
-      try {
-        // Check if product exists and has price
-        if (!item.product) {
-          console.error("Item has no product:", item);
-          return total;
-        }
-        if (typeof item.product.price !== 'number') {
-          console.error("Product price is not a number:", item.product);
-          return total;
-        }
-        if (typeof item.quantity !== 'number') {
-          console.error("Item quantity is not a number:", item);
-          return total;
-        }
-        
+      if (item.product && 
+          typeof item.product.price === 'number' && 
+          !isNaN(item.product.price) && 
+          typeof item.quantity === 'number' && 
+          !isNaN(item.quantity)) {
         return total + (item.product.price * item.quantity);
-      } catch (itemError) {
-        console.error("Error calculating item total:", itemError, item);
-        return total;
       }
+      return total;
     }, 0);
 
-    console.log("Total amount calculated:", totalAmount);
+    const response = { 
+      ...cart.toObject(), 
+      totalAmount: Number(totalAmount.toFixed(2))
+    };
 
-    res.status(200).json({ ...cart.toObject(), totalAmount });
+    res.status(200).json(response);
   } catch (error) {
-    console.error("Error in getCart:", error);
-    console.error("Error stack:", error.stack);
-    res.status(500).json({ error: error.message });
+    console.error('Error in getCart:', error);
+    res.status(500).json({ 
+      error: error.message,
+      type: error.name
+    });
   }
-};
+}
 
 // PUT /api/stores/cart/update - Update cart item quantity
 export async function updateCartItem(req, res) {
@@ -149,6 +150,9 @@ export async function updateCartItem(req, res) {
     } else {
       // Verify stock
       const product = await Product.findById(productId);
+      if (!product) {
+        return res.status(404).json({ error: "Product not found" });
+      }
       if (quantity > product.stock) {
         return res.status(400).json({ error: "Quantity exceeds available stock" });
       }
@@ -164,11 +168,19 @@ export async function updateCartItem(req, res) {
         populate: { path: "store", select: "name logo" }
       });
 
-    res.status(200).json(populatedCart);
+    // Calculate total amount
+    const totalAmount = populatedCart.items.reduce((total, item) => {
+      if (item.product && typeof item.product.price === 'number' && typeof item.quantity === 'number') {
+        return total + (item.product.price * item.quantity);
+      }
+      return total;
+    }, 0);
+
+    res.status(200).json({ ...populatedCart.toObject(), totalAmount });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}
 
 // DELETE /api/stores/cart/remove/:productId - Remove item from cart
 export async function removeFromCart(req, res) {
@@ -193,11 +205,19 @@ export async function removeFromCart(req, res) {
         populate: { path: "store", select: "name logo" }
       });
 
-    res.status(200).json(populatedCart);
+    // Calculate total amount
+    const totalAmount = populatedCart.items.reduce((total, item) => {
+      if (item.product && typeof item.product.price === 'number' && typeof item.quantity === 'number') {
+        return total + (item.product.price * item.quantity);
+      }
+      return total;
+    }, 0);
+
+    res.status(200).json({ ...populatedCart.toObject(), totalAmount });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}
 
 // DELETE /api/stores/cart/clear - Clear entire cart
 export async function clearCart(req, res) {
@@ -211,8 +231,8 @@ export async function clearCart(req, res) {
     cart.updatedAt = new Date();
     await cart.save();
 
-    res.status(200).json({ message: "Cart cleared successfully" });
+    res.status(200).json({ message: "Cart cleared successfully", items: [], totalAmount: 0 });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}

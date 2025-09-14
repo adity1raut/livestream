@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Store, User, Calendar, Package, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
+import { useNavigate } from 'react-router-dom';
 
 function StoreDetail({ store, onBack }) {
   const { getStoreProducts } = useStore();
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,6 +43,10 @@ function StoreDetail({ store, onBack }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleProductClick = (productId) => {
+    navigate(`/products/${productId}`);
   };
 
   const handlePrevPage = () => {
@@ -167,7 +173,11 @@ function StoreDetail({ store, onBack }) {
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
               {products.map((product) => (
-                <div key={product._id} className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition-shadow">
+                <div 
+                  key={product._id} 
+                  className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition-all duration-200 cursor-pointer transform hover:-translate-y-1"
+                  onClick={() => handleProductClick(product._id)}
+                >
                   {product.images && product.images[0] ? (
                     <img
                       src={product.images[0]}
@@ -200,6 +210,11 @@ function StoreDetail({ store, onBack }) {
                       Stock: {product.stock > 0 ? `${product.stock} available` : 'Out of stock'}
                     </div>
                   )}
+
+                  {/* Click indicator */}
+                  <div className="mt-3 text-center">
+                    <span className="text-xs text-blue-600 font-medium">Click to view details</span>
+                  </div>
                 </div>
               ))}
             </div>

@@ -237,14 +237,14 @@ export function ProductProvider({ children }) {
     }
   };
 
-  const addToCart = async (productId, quantity = 1) => {
+  const addToCart = async (productId, quantity = 1, storeId) => {
     if (!isAuthenticated) {
       throw new Error('Please login to add items to cart');
     }
     setCartLoading(true);
     try {
       const response = await axios.post(
-        '/api/stores/cart/add',
+        `/api/stores/${storeId}/cart/add`, // Use storeId in URL
         { productId, quantity },
         { withCredentials: true }
       );
@@ -252,6 +252,7 @@ export function ProductProvider({ children }) {
       updateCartIcon(response.data.items);
       return { success: true, data: response.data };
     } catch (error) {
+      console.error('Error adding to cart:', error);
       return { 
         success: false, 
         message: error.response?.data?.error || 'Failed to add to cart'

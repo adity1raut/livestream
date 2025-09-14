@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useStore } from '../../context/StoreContext';
 import { useProduct } from '../../context/ProductContext';
 import { Upload, X, ArrowLeft, Trash2 } from 'lucide-react';
+import axios from 'axios';
 
-export default function EditProduct({ productId }) {
+export default function EditProduct() {
+    const { productId } = useParams(); // Get productId from URL params
     const { user, isAuthenticated } = useAuth();
     const { userStore } = useStore();
     const { updateProduct, getProductById } = useProduct();
@@ -25,20 +28,28 @@ export default function EditProduct({ productId }) {
     const [success, setSuccess] = useState('');
 
     useEffect(() => {
-        if (userStore && productId) {
+        if (productId) {
             fetchProduct();
         }
-    }, [userStore, productId]);
+    }, [productId]);
 
     const fetchProduct = async () => {
+        setInitialLoading(true);
+        setError('');
         try {
             const product = await getProductById(productId);
             if (product) {
+                // Verify that the product belongs to the user's store
+                if (userStore && product.store._id !== userStore._id) {
+                    setError('You are not authorized to edit this product');
+                    return;
+                }
+                
                 setFormData({
-                    name: product.name,
+                    name: product.name || '',
                     description: product.description || '',
-                    price: product.price.toString(),
-                    stock: product.stock.toString()
+                    price: product.price?.toString() || '',
+                    stock: product.stock?.toString() || ''
                 });
                 setExistingImages(product.images || []);
                 setError('');
@@ -46,6 +57,7 @@ export default function EditProduct({ productId }) {
                 setError('Product not found');
             }
         } catch (error) {
+            console.error('Error fetching product:', error);
             setError('Error fetching product details');
         } finally {
             setInitialLoading(false);

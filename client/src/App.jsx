@@ -139,9 +139,7 @@ function App() {
             />
             <Route
               path="/products/:productId"
-              element={
-                <ProductDetail />
-              }
+              element={<ProductDetail />}
             />
             <Route
               path="/add-product"

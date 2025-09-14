@@ -6,6 +6,7 @@ import Store from "../../models/Store.models.js";
 // POST /api/stores/:storeId/cart/add - Add item to cart
 export async function addToCart(req, res) {
   try {
+    console.log("addToCart called with:", req.body, req.params);
     const { productId, quantity = 1 } = req.body;
     const { storeId } = req.params;
 
@@ -60,6 +61,7 @@ export async function addToCart(req, res) {
 
     res.status(200).json(populatedCart);
   } catch (error) {
+    console.error("Error in addToCart:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -67,23 +69,58 @@ export async function addToCart(req, res) {
 // GET /api/stores/cart - Get user's cart
 export async function getCart(req, res) {
   try {
+    console.log("getCart called for user:", req.user?._id);
+    
+    // Check if user exists
+    if (!req.user || !req.user._id) {
+      console.error("No user found in request");
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
     const cart = await Cart.findOne({ user: req.user._id })
       .populate({
         path: "items.product",
         populate: { path: "store", select: "name logo owner" }
       });
 
+    console.log("Cart found:", cart ? "Yes" : "No");
+
     if (!cart) {
       return res.status(200).json({ items: [], totalAmount: 0 });
     }
 
-    // Calculate total amount
+    console.log("Cart items count:", cart.items.length);
+
+    // Calculate total amount with error handling for each item
     const totalAmount = cart.items.reduce((total, item) => {
-      return total + (item.product.price * item.quantity);
+      try {
+        // Check if product exists and has price
+        if (!item.product) {
+          console.error("Item has no product:", item);
+          return total;
+        }
+        if (typeof item.product.price !== 'number') {
+          console.error("Product price is not a number:", item.product);
+          return total;
+        }
+        if (typeof item.quantity !== 'number') {
+          console.error("Item quantity is not a number:", item);
+          return total;
+        }
+        
+        return total + (item.product.price * item.quantity);
+      } catch (itemError) {
+        console.error("Error calculating item total:", itemError, item);
+        return total;
+      }
     }, 0);
+
+    console.log("Total amount calculated:", totalAmount);
 
     res.status(200).json({ ...cart.toObject(), totalAmount });
   } catch (error) {
+    console.error("Error in getCart:", error);
+    console.error("Error stack:", error.stack);
     res.status(500).json({ error: error.message });
   }
 };

@@ -31,7 +31,7 @@ router.get("/products/:productId" ,getProductById )
 router.post("/products/:productId/rating", authenticateToken, addProductRating )
 
 
-router.post("/:storeId/cart/add", authenticateToken, verifyStoreOwnership, addToCart)
+router.post("/:storeId/cart/add", authenticateToken, addToCart)
 router.get("/cart", authenticateToken, getCart)
 router.put("/cart/update", authenticateToken, updateCartItem )
 router.delete("/cart/remove/:productId", authenticateToken, removeFromCart )

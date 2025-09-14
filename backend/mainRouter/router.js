@@ -6,6 +6,7 @@ import Message from "../route/Chat.js"
 import Post from "../route/Post.js"
 import Notifications from "../route/Notification.js"
 import Store from "../route/Store.js"
+import Live from "../route/Stream.js"
 
 const router = express() ;
 
@@ -17,7 +18,6 @@ router.use("/api/chat" , Message)
 router.use("/api/posts" , Post)
 router.use("/api/notifications" , Notifications)
 router.use("/api/stores" , Store)
-
-
+router.use("/api/live" , Live)
 
 export default router ;

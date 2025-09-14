@@ -1,13 +1,11 @@
 import Product from "../../models/Product.models.js";
 
-// GET /api/stores/search/products - Search products across all stores
 export async function searchProducts(req, res) {
   try {
     const { 
       q, 
       minPrice, 
       maxPrice, 
-      category, 
       store, 
       page = 1, 
       limit = 12, 
@@ -57,7 +55,7 @@ export async function searchProducts(req, res) {
       totalPages: Math.ceil(total / limit),
       currentPage: page,
       total,
-      filters: { q, minPrice, maxPrice, category, store }
+      filters: { q, minPrice, maxPrice, store }
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

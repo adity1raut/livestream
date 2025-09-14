@@ -67,11 +67,19 @@ export async function createStore (req, res) {
 
     let logoUrl = "";
     if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "store-logos",
-        resource_type: "auto"
-      });
-      logoUrl = result.secure_url;
+      try {
+        // Convert buffer to base64
+        const b64 = Buffer.from(req.file.buffer).toString("base64");
+        let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+        
+        const result = await cloudinary.uploader.upload(dataURI, {
+          folder: "store-logos",
+          resource_type: "auto"
+        });
+        logoUrl = result.secure_url;
+      } catch (cloudinaryError) {
+        return res.status(500).json({ error: "Failed to upload logo" });
+      }
     }
 
     const store = new Store({
@@ -104,19 +112,37 @@ export async function updateStore (req, res) {
     if (name) updateData.name = name;
     if (description !== undefined) updateData.description = description;
 
+    // First get the store to check for existing logo
+    const store = await Store.findById(req.params.id);
+    if (!store) {
+      return res.status(404).json({ error: "Store not found" });
+    }
+
     // Handle logo upload
     if (req.file) {
       // Delete old logo from Cloudinary if exists
       if (store.logo) {
-        const publicId = store.logo.split("/").pop().split(".")[0];
-        await cloudinary.uploader.destroy(`store-logos/${publicId}`);
+        try {
+          const publicId = store.logo.split("/").pop().split(".")[0];
+          await cloudinary.uploader.destroy(`store-logos/${publicId}`);
+        } catch (cloudinaryError) {
+          // Silently handle error
+        }
       }
       
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "store-logos",
-        resource_type: "auto"
-      });
-      updateData.logo = result.secure_url;
+      try {
+        // Convert buffer to base64
+        const b64 = Buffer.from(req.file.buffer).toString("base64");
+        let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+        
+        const result = await cloudinary.uploader.upload(dataURI, {
+          folder: "store-logos",
+          resource_type: "auto"
+        });
+        updateData.logo = result.secure_url;
+      } catch (cloudinaryError) {
+        return res.status(500).json({ error: "Failed to upload new logo" });
+      }
     }
 
     const updatedStore = await Store.findByIdAndUpdate(
@@ -134,14 +160,17 @@ export async function updateStore (req, res) {
 // DELETE /api/stores/:id - Delete store
 export async function deleteStore (req, res) {
   try {
-
-        // Delete all products associated with this store
+    // Delete all products associated with this store
     await Product.deleteMany({ store: req.store._id });
 
     // Delete logo from Cloudinary if exists
     if (req.store.logo) {
-      const publicId = req.store.logo.split("/").pop().split(".")[0];
-      await cloudinary.uploader.destroy(`store-logos/${publicId}`);
+      try {
+        const publicId = req.store.logo.split("/").pop().split(".")[0];
+        await cloudinary.uploader.destroy(`store-logos/${publicId}`);
+      } catch (cloudinaryError) {
+        // Silently handle error
+      }
     }
 
     // Remove store reference from user

@@ -1,12 +1,17 @@
-import express from "express";
-import authenticateToken from "../../middleware/Auth.js";
-import verifyStoreOwnership from "../../middleware/verifyStore.js";
-import upload from "../../config/multrer.js";
 import cloudinary from "../../config/cloudinary.js";
 import Product from "../../models/Product.models.js";
-import Store from "../../models/Store.models.js";
+import { Readable } from 'stream';
 
-const router = express.Router();
+// Helper function to upload buffer to cloudinary
+const uploadToCloudinary = (buffer, options) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (error) reject(error);
+      else resolve(result);
+    });
+    Readable.from(buffer).pipe(stream);
+  });
+};
 
 // POST /api/stores/:storeId/products - Add product to store (Store Owner)
 export async function addProduct(req, res) {
@@ -18,7 +23,7 @@ export async function addProduct(req, res) {
     let imageUrls = [];
     if (req.files && req.files.length > 0) {
       const uploadPromises = req.files.map(file => 
-        cloudinary.uploader.upload(file.path, {
+        uploadToCloudinary(file.buffer, {
           folder: "product-images",
           resource_type: "auto"
         })
@@ -80,7 +85,7 @@ export async function updateProduct(req, res) {
     // Handle new image uploads
     if (req.files && req.files.length > 0) {
       const uploadPromises = req.files.map(file => 
-        cloudinary.uploader.upload(file.path, {
+        uploadToCloudinary(file.buffer, {
           folder: "product-images",
           resource_type: "auto"
         })
@@ -193,5 +198,3 @@ export async function addProductRating(req, res) {
     res.status(500).json({ error: error.message });
   }
 };
-
-export default router;

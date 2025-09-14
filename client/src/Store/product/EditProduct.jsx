@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useStore } from '../../context/StoreContext';
-import axios from 'axios';
+import { useProduct } from '../../context/ProductContext';
 import { Upload, X, ArrowLeft, Trash2 } from 'lucide-react';
 
 export default function EditProduct({ productId }) {
     const { user, isAuthenticated } = useAuth();
     const { userStore } = useStore();
+    const { updateProduct, getProductById } = useProduct();
+    
     const [formData, setFormData] = useState({
         name: '',
         description: '',
@@ -30,16 +32,19 @@ export default function EditProduct({ productId }) {
 
     const fetchProduct = async () => {
         try {
-            const res = await axios.get(`/api/stores/products/${productId}`);
-            const product = res.data;
-
-            setFormData({
-                name: product.name,
-                description: product.description || '',
-                price: product.price.toString(),
-                stock: product.stock.toString()
-            });
-            setExistingImages(product.images || []);
+            const product = await getProductById(productId);
+            if (product) {
+                setFormData({
+                    name: product.name,
+                    description: product.description || '',
+                    price: product.price.toString(),
+                    stock: product.stock.toString()
+                });
+                setExistingImages(product.images || []);
+                setError('');
+            } else {
+                setError('Product not found');
+            }
         } catch (error) {
             setError('Error fetching product details');
         } finally {
@@ -115,22 +120,19 @@ export default function EditProduct({ productId }) {
                 formDataToSend.append('images', image);
             });
 
-            const res = await axios.put(
-                `/api/stores/${userStore._id}/products/${productId}`,
-                formDataToSend,
-                {
-                    withCredentials: true,
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                }
-            );
-
-            setSuccess('Product updated successfully!');
-            setTimeout(() => {
-                window.location.href = '/products';
-            }, 2000);
+            const result = await updateProduct(userStore._id, productId, formDataToSend);
+            
+            if (result.success) {
+                setSuccess('Product updated successfully!');
+                setTimeout(() => {
+                    window.location.href = '/my-store';
+                }, 2000);
+            } else {
+                setError(result.message || 'Error updating product');
+            }
 
         } catch (error) {
-            setError(error.response?.data?.error || 'Error updating product');
+            setError('Error updating product');
         } finally {
             setLoading(false);
         }
@@ -160,7 +162,7 @@ export default function EditProduct({ productId }) {
         <div className="max-w-4xl mx-auto p-6">
             <div className="flex items-center gap-4 mb-6">
                 <button
-                    onClick={() => window.location.href = '/products'}
+                    onClick={() => window.location.href = '/my-store'}
                     className="p-2 text-gray-600 hover:text-gray-900"
                 >
                     <ArrowLeft size={24} />
@@ -193,6 +195,7 @@ export default function EditProduct({ productId }) {
                             onChange={handleInputChange}
                             required
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Enter product name"
                         />
                     </div>
 
@@ -209,6 +212,7 @@ export default function EditProduct({ productId }) {
                             min="0"
                             step="0.01"
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="0.00"
                         />
                     </div>
 
@@ -224,6 +228,7 @@ export default function EditProduct({ productId }) {
                             required
                             min="0"
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Enter stock quantity"
                         />
                     </div>
 
@@ -237,6 +242,7 @@ export default function EditProduct({ productId }) {
                             onChange={handleInputChange}
                             rows="4"
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Enter product description"
                         />
                     </div>
 
@@ -251,16 +257,18 @@ export default function EditProduct({ productId }) {
                                         <img
                                             src={imageUrl}
                                             alt={`Current ${index + 1}`}
-                                            className={`w-full h-24 object-cover rounded-lg ${removeImages.includes(imageUrl) ? 'opacity-50' : ''
-                                                }`}
+                                            className={`w-full h-24 object-cover rounded-lg ${
+                                                removeImages.includes(imageUrl) ? 'opacity-50' : ''
+                                            }`}
                                         />
                                         <button
                                             type="button"
                                             onClick={() => toggleRemoveExistingImage(imageUrl)}
-                                            className={`absolute -top-2 -right-2 rounded-full p-1 ${removeImages.includes(imageUrl)
+                                            className={`absolute -top-2 -right-2 rounded-full p-1 ${
+                                                removeImages.includes(imageUrl)
                                                     ? 'bg-green-500 hover:bg-green-600'
                                                     : 'bg-red-500 hover:bg-red-600'
-                                                } text-white`}
+                                            } text-white`}
                                         >
                                             {removeImages.includes(imageUrl) ? (
                                                 <span className="text-xs">✓</span>
@@ -276,7 +284,7 @@ export default function EditProduct({ productId }) {
                         )}
 
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Add New Images
+                            Add New Images (Max 5 total)
                         </label>
                         <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
                             <input
@@ -326,11 +334,11 @@ export default function EditProduct({ productId }) {
                         )}
                     </div>
                 </div>
+
                 <div className="flex justify-end gap-4 mt-6">
                     <button
-
                         type="button"
-                        onClick={() => window.location.href = '/products'}
+                        onClick={() => window.location.href = '/my-store'}
                         className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
                     >
                         Cancel
@@ -338,7 +346,7 @@ export default function EditProduct({ productId }) {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+                        className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         {loading ? 'Updating...' : 'Update Product'}
                     </button>

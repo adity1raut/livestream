@@ -3,27 +3,44 @@ import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
 import StoreCard from './StoreCard';
 import StoreDetail from './StoreDetail';
+import { useNavigate } from 'react-router-dom';
 
 function AllStores() {
-  const { stores, loading, getAllStores } = useStore();
+  const { 
+    stores, 
+    loading, 
+    error, 
+    getAllStores, 
+    clearError 
+  } = useStore();
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedStore, setSelectedStore] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchStores();
   }, [currentPage, search]);
 
+  // Clear context errors when component mounts
+  useEffect(() => {
+    clearError();
+  }, []);
+
   const fetchStores = async () => {
-    const result = await getAllStores({
-      page: currentPage,
-      limit: 12,
-      search: search || undefined
-    });
-    if (result) {
-      setTotalPages(result.totalPages || 1);
+    try {
+      const result = await getAllStores({
+        page: currentPage,
+        limit: 12,
+        search: search || undefined
+      });
+      if (result) {
+        setTotalPages(result.totalPages || 1);
+      }
+    } catch (error) {
+      console.error('Error fetching stores:', error);
     }
   };
 
@@ -64,21 +81,36 @@ function AllStores() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-40">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">All Stores</h1>
-        
-        {/* Search */}
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search stores..."
-            value={search}
-            onChange={handleSearch}
-            className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4 sm:mb-0">All Stores</h1>
+          {/* Search */}
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search stores..."
+              value={search}
+              onChange={handleSearch}
+              className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
         </div>
+        {/* My Store Button */}
+        <button
+          onClick={() => navigate('/my-store')}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+        >
+          Go to My Store
+        </button>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 p-4 rounded-lg bg-red-50 text-red-800">
+          {error}
+        </div>
+      )}
 
       {/* Loading State */}
       {loading ? (
@@ -113,7 +145,7 @@ function AllStores() {
             <div className="flex items-center justify-center space-x-4">
               <button
                 onClick={handlePrevPage}
-                disabled={currentPage === 1}
+                disabled={currentPage === 1 || loading}
                 className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -126,7 +158,7 @@ function AllStores() {
               
               <button
                 onClick={handleNextPage}
-                disabled={currentPage === totalPages}
+                disabled={currentPage === totalPages || loading}
                 className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <span>Next</span>

@@ -18,8 +18,12 @@ const authenticateToken = (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // Add user info to request object
-    req.user = decoded;
+    // Ensure _id property exists for consistency
+    // Your JWT contains 'id' but your code expects '_id'
+    req.user = {
+      ...decoded,
+      _id: decoded.id || decoded._id // Use id from token or fallback to _id
+    };
     
     next();
   } catch (error) {

@@ -30,6 +30,7 @@ export function StoreProvider({ children }) {
       return res.data;
     } catch (error) {
       console.error('Error fetching stores:', error);
+      setError(error.response?.data?.error || 'Error fetching stores');
       return null;
     } finally {
       setLoading(false);
@@ -42,43 +43,100 @@ export function StoreProvider({ children }) {
       return res.data;
     } catch (error) {
       console.error('Error fetching store:', error);
+      setError(error.response?.data?.error || 'Error fetching store');
       return null;
     }
   };
 
-  const createStore = async (formData) => {
+  // Convert image file to base64
+  const convertImageToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  const createStore = async (storeData) => {
     try {
-      const res = await axios.post('/api/stores', formData, {
+      setLoading(true);
+      console.log('Creating store with data:', storeData);
+
+      // Prepare data for API
+      const apiData = {
+        name: storeData.name,
+        description: storeData.description || ''
+      };
+
+      // Convert logo to base64 if provided
+      if (storeData.logo && storeData.logo instanceof File) {
+        apiData.logoBase64 = await convertImageToBase64(storeData.logo);
+      }
+
+      const res = await axios.post('/api/stores', apiData, {
         withCredentials: true,
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 'Content-Type': 'application/json' }
       });
+
       setUserStore(res.data);
       return { success: true, data: res.data };
     } catch (error) {
-      return { success: false, message: error.response?.data?.error || error.message };
+      console.error('Create store error:', error);
+      const message = error.response?.data?.error || error.message || 'Failed to create store';
+      setError(message);
+      return { success: false, message };
+    } finally {
+      setLoading(false);
     }
   };
 
-  const updateStore = async (id, formData) => {
+  const updateStore = async (id, storeData) => {
     try {
-      const res = await axios.put(`/api/stores/${id}`, formData, {
+      setLoading(true);
+      console.log('Updating store with data:', storeData);
+
+      // Prepare data for API
+      const apiData = {
+        name: storeData.name,
+        description: storeData.description
+      };
+
+      // Convert logo to base64 if provided
+      if (storeData.logo && storeData.logo instanceof File) {
+        apiData.logoBase64 = await convertImageToBase64(storeData.logo);
+      }
+
+      const res = await axios.put(`/api/stores/${id}`, apiData, {
         withCredentials: true,
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 'Content-Type': 'application/json' }
       });
+
       setUserStore(res.data);
       return { success: true, data: res.data };
     } catch (error) {
-      return { success: false, message: error.response?.data?.error || error.message };
+      console.error('Update store error:', error);
+      const message = error.response?.data?.error || error.message || 'Failed to update store';
+      setError(message);
+      return { success: false, message };
+    } finally {
+      setLoading(false);
     }
   };
 
   const deleteStore = async (id) => {
     try {
+      setLoading(true);
       await axios.delete(`/api/stores/${id}`, { withCredentials: true });
       setUserStore(null);
       return { success: true };
     } catch (error) {
-      return { success: false, message: error.response?.data?.error || error.message };
+      console.error('Delete store error:', error);
+      const message = error.response?.data?.error || error.message || 'Failed to delete store';
+      setError(message);
+      return { success: false, message };
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -89,8 +147,22 @@ export function StoreProvider({ children }) {
       return res.data;
     } catch (error) {
       console.error('Error fetching user store:', error);
+      if (error.response?.status !== 404) {
+        setError(error.response?.data?.error || 'Error fetching user store');
+      }
       setUserStore(null);
       return null;
+    }
+  };
+
+  const getUserStore = async (userId) => {
+    try {
+      const res = await axios.get(`/api/stores/user/${userId}`);
+      return { success: true, data: res.data };
+    } catch (error) {
+      console.error('Error fetching user store:', error);
+      setError(error.response?.data?.error || 'Error fetching user store');
+      return { success: false, message: error.response?.data?.error };
     }
   };
 
@@ -99,6 +171,7 @@ export function StoreProvider({ children }) {
       const res = await axios.get(`/api/stores/${id}/products`, { params });
       return { success: true, data: res.data };
     } catch (error) {
+      console.error('Error fetching store products:', error);
       setError(error.response?.data?.error || 'Error fetching store products');
       return { success: false, message: error.response?.data?.error };
     }
@@ -116,6 +189,7 @@ export function StoreProvider({ children }) {
       });
       return { success: true, data: res.data };
     } catch (error) {
+      console.error('Error fetching analytics:', error);
       setError(error.response?.data?.error || 'Failed to fetch analytics');
       return { success: false, message: error.response?.data?.error };
     } finally {
@@ -139,6 +213,7 @@ export function StoreProvider({ children }) {
       }
       return { success: true, data: res.data };
     } catch (error) {
+      console.error('Error following store:', error);
       setError(error.response?.data?.error || 'Failed to follow/unfollow store');
       return { success: false, message: error.response?.data?.error };
     }
@@ -152,6 +227,7 @@ export function StoreProvider({ children }) {
       });
       return { success: true, data: res.data };
     } catch (error) {
+      console.error('Error getting follow status:', error);
       setError(error.response?.data?.error || 'Failed to get follow status');
       return { success: false, message: error.response?.data?.error };
     }
@@ -166,7 +242,31 @@ export function StoreProvider({ children }) {
       setFollowedStores(res.data.map(store => store._id));
       return { success: true, data: res.data };
     } catch (error) {
+      console.error('Error fetching following stores:', error);
       setError(error.response?.data?.error || 'Failed to fetch following stores');
+      return { success: false, message: error.response?.data?.error };
+    }
+  };
+
+  // Search Functions
+  const searchProducts = async (params = {}) => {
+    try {
+      const res = await axios.get('/api/stores/search/products', { params });
+      return { success: true, data: res.data };
+    } catch (error) {
+      console.error('Error searching products:', error);
+      setError(error.response?.data?.error || 'Error searching products');
+      return { success: false, message: error.response?.data?.error };
+    }
+  };
+
+  const getTrendingProducts = async (params = {}) => {
+    try {
+      const res = await axios.get('/api/stores/trending/products', { params });
+      return { success: true, data: res.data };
+    } catch (error) {
+      console.error('Error fetching trending products:', error);
+      setError(error.response?.data?.error || 'Error fetching trending products');
       return { success: false, message: error.response?.data?.error };
     }
   };
@@ -190,6 +290,7 @@ export function StoreProvider({ children }) {
       updateStore,
       deleteStore,
       getCurrentUserStore,
+      getUserStore,
       getStoreProducts,
 
       // Store Analytics
@@ -199,6 +300,10 @@ export function StoreProvider({ children }) {
       followStore,
       getFollowStatus,
       getFollowingStores,
+
+      // Search Functions
+      searchProducts,
+      getTrendingProducts,
 
       // Error Management
       clearError,

@@ -1,7 +1,7 @@
 import express from "express";
 import authenticateToken from "../middleware/Auth.js";
 import verifyStoreOwnership from "../middleware/verifyStore.js";
-import { getAllStores , createStore , getStoreById , updateStore , getUserStore , getCurrentUserStore , deleteStore} from "../controllers/Store/store.routes.js";
+import { getAllStores , createStore , getStoreById , updateStore , getUserStore , getCurrentUserStore , deleteStore, getStoreProducts} from "../controllers/Store/store.routes.js";
 import { addToWishlist, getUserWishlist } from "../controllers/Store/wishlist.routes.js";
 import { followStore, getFollowingStores, getFollowStatus } from "../controllers/Store/social.routes.js";
 import { getTrendingProducts, searchProducts } from "../controllers/Store/search.routes.js";
@@ -14,18 +14,18 @@ import upload from "../config/multrer.js";
 
 const router = express.Router();
 
+// Store routes
 router.get("/",  getAllStores);
 router.get("/:id" , getStoreById);
 router.post("/", authenticateToken, upload.single("logo"), createStore);
-router.put("/:id", authenticateToken, verifyStoreOwnership, upload.single("logo"), updateStore);
+router.put("/:id", authenticateToken, upload.single("logo"), updateStore); 
 router.delete("/:id", authenticateToken, verifyStoreOwnership, deleteStore);
 router.get("/user/:userId", getUserStore);
-router.get("/:id/products", getUserStore);
+router.get("/:id/products", getStoreProducts);
 router.get("/my/store", authenticateToken, getCurrentUserStore);
 
 router.post("/:storeId/products", authenticateToken, upload.array("images", 5), verifyStoreOwnership, addProduct)
 router.put("/:storeId/products/:productId", authenticateToken, upload.array("images", 5), verifyStoreOwnership, updateProduct)
-router.delete("/:storeId/products/:productId", authenticateToken, verifyStoreOwnership, updateProduct )
 router.delete("/:storeId/products/:productId", authenticateToken, verifyStoreOwnership, deleteProduct )
 router.get("/products/:productId" ,getProductById )
 router.post("/products/:productId/rating", authenticateToken, addProductRating )

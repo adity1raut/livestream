@@ -1,12 +1,22 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X, Upload, Store } from 'lucide-react';
 
 function StoreForm({ isOpen, onClose, onSubmit, store = null, loading = false }) {
-  const [name, setName] = useState(store?.name || '');
-  const [description, setDescription] = useState(store?.description || '');
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [logoFile, setLogoFile] = useState(null);
-  const [logoPreview, setLogoPreview] = useState(store?.logo || null);
+  const [logoPreview, setLogoPreview] = useState(null);
   const fileInputRef = useRef(null);
+
+  // Reset form when store changes or modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      setName(store?.name || '');
+      setDescription(store?.description || '');
+      setLogoFile(null);
+      setLogoPreview(store?.logo || null);
+    }
+  }, [isOpen, store]);
 
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
@@ -22,20 +32,22 @@ function StoreForm({ isOpen, onClose, onSubmit, store = null, loading = false })
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('description', description);
-    if (logoFile) {
-      formData.append('logo', logoFile);
-    }
-    onSubmit(formData);
+    
+    // Create the data object that StoreContext expects
+    const storeData = {
+      name: name.trim(),
+      description: description.trim(),
+      logo: logoFile // Pass the File object directly
+    };
+
+    onSubmit(storeData);
   };
 
   const resetForm = () => {
-    setName(store?.name || '');
-    setDescription(store?.description || '');
+    setName('');
+    setDescription('');
     setLogoFile(null);
-    setLogoPreview(store?.logo || null);
+    setLogoPreview(null);
   };
 
   const handleClose = () => {
@@ -132,7 +144,8 @@ function StoreForm({ isOpen, onClose, onSubmit, store = null, loading = false })
             <button
               type="button"
               onClick={handleClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              disabled={loading}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
               Cancel
             </button>

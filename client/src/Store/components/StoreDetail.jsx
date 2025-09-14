@@ -10,6 +10,7 @@ function StoreDetail({ store, onBack }) {
   const [totalPages, setTotalPages] = useState(1);
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState('desc');
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchProducts();
@@ -17,6 +18,7 @@ function StoreDetail({ store, onBack }) {
 
   const fetchProducts = async () => {
     setLoading(true);
+    setError(null);
     try {
       const result = await getStoreProducts(store._id, {
         page: currentPage,
@@ -24,12 +26,18 @@ function StoreDetail({ store, onBack }) {
         sort: sortBy,
         order: sortOrder
       });
-      if (result) {
-        setProducts(result.products || []);
-        setTotalPages(result.totalPages || 1);
+      
+      if (result?.success) {
+        setProducts(result.data.products || []);
+        setTotalPages(result.data.totalPages || 1);
+      } else {
+        setError(result?.message || 'Failed to fetch products');
+        setProducts([]);
       }
     } catch (error) {
       console.error('Error fetching products:', error);
+      setError('Failed to fetch products');
+      setProducts([]);
     } finally {
       setLoading(false);
     }
@@ -67,7 +75,7 @@ function StoreDetail({ store, onBack }) {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20">
       {/* Back Button */}
       <button
         onClick={onBack}
@@ -105,7 +113,7 @@ function StoreDetail({ store, onBack }) {
               </div>
               <div className="flex items-center space-x-1">
                 <Package className="h-4 w-4" />
-                <span>{store.products?.length || 0} products</span>
+                <span>{products.length} products</span>
               </div>
             </div>
             {store.description && (
@@ -142,6 +150,13 @@ function StoreDetail({ store, onBack }) {
           </div>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 rounded-lg bg-red-50 text-red-800">
+            {error}
+          </div>
+        )}
+
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[...Array(8)].map((_, i) => (
@@ -165,7 +180,7 @@ function StoreDetail({ store, onBack }) {
                     </div>
                   )}
                   
-                  <h3 className="font-semibold text-gray-900 mb-2">{product.name}</h3>
+                  <h3 className="font-semibold text-gray-900 mb-2 truncate">{product.name}</h3>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-lg font-bold text-blue-600">${product.price}</span>
                     {product.ratings && product.ratings.length > 0 && (
@@ -194,7 +209,7 @@ function StoreDetail({ store, onBack }) {
               <div className="flex items-center justify-center space-x-4">
                 <button
                   onClick={handlePrevPage}
-                  disabled={currentPage === 1}
+                  disabled={currentPage === 1 || loading}
                   className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -207,7 +222,7 @@ function StoreDetail({ store, onBack }) {
                 
                 <button
                   onClick={handleNextPage}
-                  disabled={currentPage === totalPages}
+                  disabled={currentPage === totalPages || loading}
                   className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <span>Next</span>

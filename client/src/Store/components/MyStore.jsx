@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Store as StoreIcon, Package, Eye } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useStore } from '../../context/StoreContext';
 import { useAuth } from '../../context/AuthContext';
 import { useProduct } from '../../context/ProductContext';
@@ -9,20 +9,30 @@ import StoreCard from './StoreCard';
 
 function MyStore() {
   const navigate = useNavigate();
-  const { userStore, getCurrentUserStore, createStore, updateStore, deleteStore } = useStore();
+  const { 
+    userStore, 
+    loading, 
+    error, 
+    getCurrentUserStore, 
+    createStore, 
+    updateStore, 
+    deleteStore,
+    getStoreProducts,
+    clearError 
+  } = useStore();
   const { isAuthenticated } = useAuth();
-  const { deleteProduct, getStoreProducts } = useProduct();
+  const { deleteProduct } = useProduct();
   const [showForm, setShowForm] = useState(false);
   const [editingStore, setEditingStore] = useState(null);
   const [storeProducts, setStoreProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [localLoading, setLocalLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
     if (isAuthenticated) {
       getCurrentUserStore();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, getCurrentUserStore]);
 
   useEffect(() => {
     if (userStore?._id) {
@@ -30,19 +40,26 @@ function MyStore() {
     }
   }, [userStore?._id]);
 
+  // Clear context errors when component mounts
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
+
   const fetchStoreProducts = async () => {
     if (!userStore?._id) return;
     
-    setLoading(true);
+    setLocalLoading(true);
     try {
       const result = await getStoreProducts(userStore._id);
-      if (result?.products) {
-        setStoreProducts(result.products);
+      if (result?.success) {
+        setStoreProducts(result.data.products || []);
+      } else {
+        showMessage('error', result?.message || 'Failed to fetch store products');
       }
     } catch (error) {
       showMessage('error', 'Failed to fetch store products');
     } finally {
-      setLoading(false);
+      setLocalLoading(false);
     }
   };
 
@@ -51,40 +68,38 @@ function MyStore() {
     setTimeout(() => setMessage({ type: '', text: '' }), 5000);
   };
 
-  const handleCreateStore = async (formData) => {
-    setLoading(true);
+  const handleCreateStore = async (storeData) => {
     try {
-      const result = await createStore(formData);
-      if (result.success) {
+      const result = await createStore(storeData);
+      if (result?.success) {
         setShowForm(false);
         showMessage('success', 'Store created successfully!');
+        // Refresh user store data
+        getCurrentUserStore();
       } else {
-        showMessage('error', result.message);
+        showMessage('error', result?.message || 'Failed to create store');
       }
     } catch (error) {
       showMessage('error', 'Failed to create store');
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleUpdateStore = async (formData) => {
+  const handleUpdateStore = async (storeData) => {
     if (!editingStore) return;
     
-    setLoading(true);
     try {
-      const result = await updateStore(editingStore._id, formData);
-      if (result.success) {
+      const result = await updateStore(editingStore._id, storeData);
+      if (result?.success) {
         setShowForm(false);
         setEditingStore(null);
         showMessage('success', 'Store updated successfully!');
+        // Refresh user store data
+        getCurrentUserStore();
       } else {
-        showMessage('error', result.message);
+        showMessage('error', result?.message || 'Failed to update store');
       }
     } catch (error) {
       showMessage('error', 'Failed to update store');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -98,18 +113,17 @@ function MyStore() {
       return;
     }
 
-    setLoading(true);
     try {
       const result = await deleteStore(store._id);
-      if (result.success) {
+      if (result?.success) {
         showMessage('success', 'Store deleted successfully!');
+        // Clear products since store is deleted
+        setStoreProducts([]);
       } else {
-        showMessage('error', result.message);
+        showMessage('error', result?.message || 'Failed to delete store');
       }
     } catch (error) {
       showMessage('error', 'Failed to delete store');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -123,20 +137,23 @@ function MyStore() {
       return;
     }
 
-    setLoading(true);
+    setLocalLoading(true);
     try {
       const result = await deleteProduct(userStore._id, productId);
-      if (result.success) {
+      if (result?.success) {
         showMessage('success', 'Product deleted successfully!');
-        // Refresh store products
-        getCurrentUserStore();
+        // Refresh store products and user store data
+        await Promise.all([
+          fetchStoreProducts(),
+          getCurrentUserStore()
+        ]);
       } else {
-        showMessage('error', result.message);
+        showMessage('error', result?.message || 'Failed to delete product');
       }
     } catch (error) {
       showMessage('error', 'Failed to delete product');
     } finally {
-      setLoading(false);
+      setLocalLoading(false);
     }
   };
 
@@ -161,25 +178,37 @@ function MyStore() {
           <p className="text-gray-500 mt-1">Manage your store and products</p>
         </div>
         
-        {!userStore && (
+        <div className="flex items-center space-x-3">
+          {/* All Stores Button */}
           <button
-            onClick={() => setShowForm(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+            onClick={() => navigate('/stores')}
+            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center space-x-2"
           >
-            <Plus className="h-4 w-4" />
-            <span>Create Store</span>
+            <StoreIcon className="h-4 w-4" />
+            <span>All Stores</span>
           </button>
-        )}
+          
+          {!userStore && (
+            <button
+              onClick={() => setShowForm(true)}
+              disabled={loading}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 disabled:opacity-50"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Create Store</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Messages */}
-      {message.text && (
+      {(message.text || error) && (
         <div className={`mb-6 p-4 rounded-lg ${
           message.type === 'success' 
             ? 'bg-green-50 text-green-800' 
             : 'bg-red-50 text-red-800'
         }`}>
-          {message.text}
+          {message.text || error}
         </div>
       )}
 
@@ -193,7 +222,6 @@ function MyStore() {
               showActions={true}
               onEdit={handleEditStore}
               onDelete={handleDeleteStore}
-              onClick={() => {}} // No-op for my store view
             />
           </div>
 
@@ -201,7 +229,7 @@ function MyStore() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-xl border border-gray-200">
               <div className="text-2xl font-bold text-blue-600 mb-1">
-                {userStore.products?.length || 0}
+                {storeProducts.length}
               </div>
               <div className="text-sm text-gray-500">Total Products</div>
             </div>
@@ -230,7 +258,7 @@ function MyStore() {
               </button>
             </div>
             
-            {loading ? (
+            {(loading || localLoading) ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="border border-gray-200 rounded-lg p-4 animate-pulse">
@@ -283,7 +311,8 @@ function MyStore() {
                       </button>
                       <button 
                         onClick={() => handleDeleteProduct(product._id)}
-                        className="flex-1 px-3 py-1 text-sm bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors flex items-center justify-center gap-1"
+                        disabled={localLoading}
+                        className="flex-1 px-3 py-1 text-sm bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors flex items-center justify-center gap-1 disabled:opacity-50"
                       >
                         <Trash2 size={14} />
                         Delete
@@ -307,7 +336,8 @@ function MyStore() {
           <p className="text-gray-500 mb-6">Create your first store to start selling!</p>
           <button
             onClick={() => setShowForm(true)}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 mx-auto"
+            disabled={loading}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 mx-auto disabled:opacity-50"
           >
             <Plus className="h-5 w-5" />
             <span>Create Your Store</span>

@@ -218,20 +218,86 @@ export function ProductProvider({ children }) {
     }
   };
 
+  // Helper function to update cart icon
+  const updateCartIcon = (items) => {
+    if (!Array.isArray(items)) return;
+    
+    const totalItems = items.reduce((sum, item) => {
+      const quantity = Number(item.quantity) || 0;
+      return sum + quantity;
+    }, 0);
+    
+    // Update global cart count if function exists
+    if (typeof window !== 'undefined' && window.updateCartCount) {
+      window.updateCartCount(totalItems);
+    }
+    
+    // Also update document title or favicon if needed
+    if (typeof document !== 'undefined') {
+      const title = document.title.replace(/\(\d+\)/, '');
+      document.title = totalItems > 0 ? `(${totalItems}) ${title}` : title;
+    }
+  };
+
   // Cart Management
   const fetchCart = async () => {
-    if (!isAuthenticated) return;
+    // Early return if user is not authenticated
+    if (!isAuthenticated) {
+      const emptyCart = { items: [], totalAmount: 0 };
+      setCart(emptyCart);
+      updateCartIcon([]);
+      return emptyCart;
+    }
+    
     setCartLoading(true);
     try {
       const response = await axios.get('/api/stores/cart', {
-        withCredentials: true
+        withCredentials: true,
+        timeout: 10000 // Add timeout for better UX
       });
-      setCart(response.data);
-      updateCartIcon(response.data.items);
-      return response.data;
+      
+      // Backend already handles filtering null products and calculating totalAmount
+      const cartData = response.data || { items: [], totalAmount: 0 };
+      
+      // Ensure totalAmount is properly formatted
+      const formattedCart = {
+        ...cartData,
+        totalAmount: Number(cartData.totalAmount || 0),
+        items: cartData.items || []
+      };
+      
+      setCart(formattedCart);
+      updateCartIcon(formattedCart.items);
+      
+      console.log('Cart fetched successfully:', {
+        itemCount: formattedCart.items.length,
+        totalAmount: formattedCart.totalAmount
+      });
+      
+      return formattedCart;
     } catch (error) {
       console.error('Error fetching cart:', error);
-      return null;
+      
+      // Handle different error scenarios
+      if (error.response?.status === 401) {
+        console.log('User not authenticated, clearing cart');
+        const emptyCart = { items: [], totalAmount: 0 };
+        setCart(emptyCart);
+        updateCartIcon([]);
+        return emptyCart;
+      }
+      
+      if (error.response?.status === 500) {
+        console.error('Server error while fetching cart:', error.response.data);
+        // Keep existing cart state on server error to avoid data loss
+        return cart;
+      }
+      
+      // For other errors, return empty cart but log for debugging
+      const emptyCart = { items: [], totalAmount: 0 };
+      setCart(emptyCart);
+      updateCartIcon([]);
+      return emptyCart;
     } finally {
       setCartLoading(false);
     }
@@ -239,23 +305,37 @@ export function ProductProvider({ children }) {
 
   const addToCart = async (productId, quantity = 1, storeId) => {
     if (!isAuthenticated) {
-      throw new Error('Please login to add items to cart');
+      return { 
+        success: false, 
+        message: 'Please login to add items to cart' 
+      };
     }
+    
+    if (!storeId) {
+      return { 
+        success: false, 
+        message: 'Store ID is required' 
+      };
+    }
+    
     setCartLoading(true);
     try {
       const response = await axios.post(
-        `/api/stores/${storeId}/cart/add`, // Use storeId in URL
+        `/api/stores/${storeId}/cart/add`,
         { productId, quantity },
         { withCredentials: true }
       );
-      setCart(response.data);
-      updateCartIcon(response.data.items);
-      return { success: true, data: response.data };
+      
+      const cartData = response.data || { items: [], totalAmount: 0 };
+      setCart(cartData);
+      updateCartIcon(cartData.items);
+      return { success: true, data: cartData, message: 'Item added to cart successfully' };
     } catch (error) {
+      const errorMessage = error.response?.data?.error || 'Failed to add to cart';
       console.error('Error adding to cart:', error);
       return { 
         success: false, 
-        message: error.response?.data?.error || 'Failed to add to cart'
+        message: errorMessage
       };
     } finally {
       setCartLoading(false);
@@ -263,7 +343,20 @@ export function ProductProvider({ children }) {
   };
 
   const updateCartItem = async (productId, quantity) => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {
+      return { 
+        success: false, 
+        message: 'Please login to update cart' 
+      };
+    }
+    
+    if (!productId) {
+      return { 
+        success: false, 
+        message: 'Product ID is required' 
+      };
+    }
+    
     setCartLoading(true);
     try {
       const response = await axios.put(
@@ -271,13 +364,17 @@ export function ProductProvider({ children }) {
         { productId, quantity },
         { withCredentials: true }
       );
-      setCart(response.data);
-      updateCartIcon(response.data.items);
-      return { success: true, data: response.data };
+      
+      const cartData = response.data || { items: [], totalAmount: 0 };
+      setCart(cartData);
+      updateCartIcon(cartData.items);
+      return { success: true, data: cartData, message: 'Cart updated successfully' };
     } catch (error) {
+      const errorMessage = error.response?.data?.error || 'Failed to update cart';
+      console.error('Error updating cart:', error);
       return { 
         success: false, 
-        message: error.response?.data?.error || 'Failed to update cart'
+        message: errorMessage
       };
     } finally {
       setCartLoading(false);
@@ -285,19 +382,36 @@ export function ProductProvider({ children }) {
   };
 
   const removeFromCart = async (productId) => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {
+      return { 
+        success: false, 
+        message: 'Please login to remove items from cart' 
+      };
+    }
+    
+    if (!productId) {
+      return { 
+        success: false, 
+        message: 'Product ID is required' 
+      };
+    }
+    
     setCartLoading(true);
     try {
       const response = await axios.delete(`/api/stores/cart/remove/${productId}`, {
         withCredentials: true
       });
-      setCart(response.data);
-      updateCartIcon(response.data.items);
-      return { success: true, data: response.data };
+      
+      const cartData = response.data || { items: [], totalAmount: 0 };
+      setCart(cartData);
+      updateCartIcon(cartData.items);
+      return { success: true, data: cartData, message: 'Item removed from cart successfully' };
     } catch (error) {
+      const errorMessage = error.response?.data?.error || 'Failed to remove from cart';
+      console.error('Error removing from cart:', error);
       return { 
         success: false, 
-        message: error.response?.data?.error || 'Failed to remove from cart'
+        message: errorMessage
       };
     } finally {
       setCartLoading(false);
@@ -305,31 +419,74 @@ export function ProductProvider({ children }) {
   };
 
   const clearCart = async () => {
-    if (!isAuthenticated) return;
-    setCartLoading(true);
-    try {
-      await axios.delete('/api/stores/cart/clear', {
-        withCredentials: true
-      });
-      setCart({ items: [], totalAmount: 0 });
-      updateCartIcon([]);
-      return { success: true };
-    } catch (error) {
+    if (!isAuthenticated) {
       return { 
         success: false, 
-        message: error.response?.data?.error || 'Failed to clear cart'
+        message: 'Please login to clear cart' 
+      };
+    }
+    
+    setCartLoading(true);
+    try {
+      const response = await axios.delete('/api/stores/cart/clear', {
+        withCredentials: true
+      });
+      
+      const emptyCart = { items: [], totalAmount: 0 };
+      setCart(emptyCart);
+      updateCartIcon([]);
+      return { success: true, message: 'Cart cleared successfully' };
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || 'Failed to clear cart';
+      console.error('Error clearing cart:', error);
+      return { 
+        success: false, 
+        message: errorMessage
       };
     } finally {
       setCartLoading(false);
     }
   };
 
-  // Helper function to update cart icon
-  const updateCartIcon = (items) => {
-    const totalItems = items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-    if (window.updateCartCount) {
-      window.updateCartCount(totalItems);
+  // Helper functions (consolidated and improved)
+  const getCartItemCount = () => {
+    if (!cart.items || !Array.isArray(cart.items)) return 0;
+    return cart.items.reduce((total, item) => {
+      const quantity = Number(item.quantity) || 0;
+      return total + quantity;
+    }, 0);
+  };
+
+  const isInCart = (productId) => {
+    if (!cart.items || !Array.isArray(cart.items) || !productId) return false;
+    return cart.items.some(item => 
+      item.product && 
+      (item.product._id === productId || item.product === productId)
+    );
+  };
+
+  const getCartItemQuantity = (productId) => {
+    if (!cart.items || !Array.isArray(cart.items) || !productId) return 0;
+    const item = cart.items.find(item => 
+      item.product && 
+      (item.product._id === productId || item.product === productId)
+    );
+    return Number(item?.quantity) || 0;
+  };
+
+  // Cart validation function
+  const validateCartData = (cartData) => {
+    if (!cartData || typeof cartData !== 'object') {
+      return { items: [], totalAmount: 0 };
     }
+    
+    return {
+      items: Array.isArray(cartData.items) ? cartData.items : [],
+      totalAmount: Number(cartData.totalAmount) || 0,
+      user: cartData.user,
+      _id: cartData._id,
+      updatedAt: cartData.updatedAt
+    };
   };
 
   // Effect to fetch cart when authenticated
@@ -338,6 +495,7 @@ export function ProductProvider({ children }) {
       fetchCart();
     } else {
       setCart({ items: [], totalAmount: 0 });
+      updateCartIcon([]);
     }
   }, [isAuthenticated]);
 
@@ -375,6 +533,10 @@ export function ProductProvider({ children }) {
       updateCartItem,
       removeFromCart,
       clearCart,
+      getCartItemCount,
+      isInCart,
+      getCartItemQuantity,
+      validateCartData,
 
       // Order Management
       createOrder,

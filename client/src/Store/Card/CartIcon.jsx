@@ -1,33 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
+import { useProduct } from '../../context/ProductContext';
 import { ShoppingCart } from 'lucide-react';
-import axios from 'axios';
 
 export default function CartIcon() {
   const { isAuthenticated } = useAuth();
+  const { cart } = useProduct();
   const [cartItemCount, setCartItemCount] = useState(0);
 
+  // Calculate cart count from context
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchCartCount();
+    if (isAuthenticated && cart && cart.items) {
+      const totalItems = cart.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+      setCartItemCount(totalItems);
     } else {
       setCartItemCount(0);
     }
-  }, [isAuthenticated]);
-
-  const fetchCartCount = async () => {
-    try {
-      const res = await axios.get('/api/stores/cart', {
-        withCredentials: true
-      });
-      
-      const totalItems = res.data.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-      setCartItemCount(totalItems);
-    } catch (error) {
-      console.error('Error fetching cart count:', error);
-      setCartItemCount(0);
-    }
-  };
+  }, [isAuthenticated, cart]);
 
   // Function to update cart count (can be called from other components)
   const updateCartCount = (newCount) => {
@@ -46,6 +35,7 @@ export default function CartIcon() {
     <button
       onClick={() => window.location.href = '/cart'}
       className="relative p-2 text-gray-700 hover:text-blue-600 transition-colors"
+      aria-label={`Shopping cart with ${cartItemCount} items`}
     >
       <ShoppingCart size={24} />
       {cartItemCount > 0 && (

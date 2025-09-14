@@ -24,75 +24,102 @@ function StoreCard({ store, showActions = false, onEdit, onDelete, onClick }) {
 
   return (
     <div 
-      className={`bg-white rounded-xl border border-gray-200 overflow-hidden ${
-        onClick ? 'cursor-pointer hover:shadow-lg hover:border-blue-300' : ''
-      } transition-all duration-200`}
+      className={`bg-gray-800/60 rounded-2xl border border-gray-700/50 overflow-hidden ${
+        onClick ? 'cursor-pointer hover:shadow-2xl hover:border-purple-500/50 hover:bg-gray-700/60' : ''
+      } transition-all duration-300 shadow-xl backdrop-blur-sm group flex flex-col h-80`}
       onClick={handleCardClick}
     >
-      {/* Store Logo/Header */}
-      <div className="h-32 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center relative">
+      {/* Header with Logo and Basic Info */}
+      <div className="flex items-center p-4 bg-gradient-to-r from-purple-600/20 to-purple-800/20 border-b border-gray-700/50">
         {store.logo ? (
           <img
             src={store.logo}
             alt={store.name}
-            className="w-16 h-16 rounded-full object-cover border-4 border-white"
+            className="w-12 h-12 rounded-lg object-cover border-2 border-purple-400/50 shadow-lg transition-transform duration-300 group-hover:scale-110"
           />
         ) : (
-          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-            <Store className="h-8 w-8 text-blue-600" />
+          <div className="w-12 h-12 bg-gray-700/80 rounded-lg flex items-center justify-center border-2 border-purple-400/50 shadow-lg transition-transform duration-300 group-hover:scale-110">
+            <Store className="h-6 w-6 text-purple-400" />
           </div>
         )}
+        
+        <div className="ml-3 flex-1 min-w-0">
+          <h3 className="text-lg font-bold text-white truncate group-hover:text-purple-300 transition-colors">
+            {store.name}
+          </h3>
+          {store.owner && (
+            <p className="text-sm text-gray-400 truncate">
+              by {store.owner.profile?.name || store.owner.username}
+            </p>
+          )}
+        </div>
       </div>
 
-      {/* Store Info */}
-      <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2 truncate">
-          {store.name}
-        </h3>
-        
-        {store.description && (
-          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+      {/* Description Section */}
+      <div className="flex-1 p-4">
+        {store.description ? (
+          <p className="text-gray-400 text-sm leading-relaxed line-clamp-3 mb-4">
             {store.description}
+          </p>
+        ) : (
+          <p className="text-gray-500 text-sm italic mb-4">
+            No description available
           </p>
         )}
 
-        <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
-          <div className="flex items-center space-x-1">
-            <Package className="h-4 w-4" />
-            <span>{store.products?.length || 0} products</span>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="bg-gray-700/40 rounded-lg p-3 border border-gray-600/30">
+            <div className="flex items-center space-x-2">
+              <Package className="h-4 w-4 text-purple-400" />
+              <span className="text-xs text-gray-400">Products</span>
+            </div>
+            <div className="text-lg font-semibold text-white mt-1">
+              {store.products?.length || 0}
+            </div>
           </div>
-          <div className="flex items-center space-x-1">
-            <Calendar className="h-4 w-4" />
-            <span>{new Date(store.createdAt).toLocaleDateString()}</span>
+          
+          <div className="bg-gray-700/40 rounded-lg p-3 border border-gray-600/30">
+            <div className="flex items-center space-x-2">
+              <Calendar className="h-4 w-4 text-purple-400" />
+              <span className="text-xs text-gray-400">Since</span>
+            </div>
+            <div className="text-sm font-semibold text-white mt-1">
+              {new Date(store.createdAt).getFullYear()}
+            </div>
           </div>
         </div>
+      </div>
 
-        {store.owner && (
-          <div className="text-sm text-gray-600 mb-3">
-            by {store.owner.profile?.name || store.owner.username}
-          </div>
-        )}
-
-        {/* Actions */}
-        {showActions && (
-          <div className="flex space-x-2 pt-2 border-t border-gray-100">
+      {/* Actions Footer */}
+      {showActions ? (
+        <div className="p-4 bg-gray-800/40 border-t border-gray-700/50">
+          <div className="flex space-x-2">
             <button
               onClick={handleEditClick}
-              className="flex-1 px-3 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors flex items-center justify-center space-x-1"
+              className="flex-1 px-3 py-2 text-sm bg-purple-900/40 text-purple-400 rounded-lg hover:bg-purple-800/50 transition-all duration-300 flex items-center justify-center space-x-2 border border-purple-700/50 transform hover:scale-105"
             >
               <Edit className="h-4 w-4" />
               <span>Edit</span>
             </button>
             <button
               onClick={handleDeleteClick}
-              className="flex-1 px-3 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center space-x-1"
+              className="flex-1 px-3 py-2 text-sm bg-red-900/40 text-red-400 rounded-lg hover:bg-red-800/50 transition-all duration-300 flex items-center justify-center space-x-2 border border-red-700/50 transform hover:scale-105"
             >
               <Trash2 className="h-4 w-4" />
               <span>Delete</span>
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="p-4 bg-gray-800/40 border-t border-gray-700/50">
+          <div className="text-center">
+            <span className="text-xs text-purple-400 font-medium group-hover:text-purple-300 transition-colors">
+              Click to explore store
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

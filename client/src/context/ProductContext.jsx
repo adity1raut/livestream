@@ -538,14 +538,10 @@ export function ProductProvider({ children }) {
       getCartItemQuantity,
       validateCartData,
 
-      // Order Management
       createOrder,
       verifyPayment,
-
-      // Store Analytics
       getStoreAnalytics,
 
-      // State Setters
       setProducts,
       setWishlist,
       setCart

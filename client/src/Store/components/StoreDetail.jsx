@@ -68,7 +68,7 @@ function StoreDetail({ store, onBack }) {
         className={`h-4 w-4 ${
           i < Math.floor(rating)
             ? 'text-yellow-400 fill-current'
-            : 'text-gray-300'
+            : 'text-gray-600'
         }`}
       />
     ));
@@ -81,177 +81,181 @@ function StoreDetail({ store, onBack }) {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20">
-      {/* Back Button */}
-      <button
-        onClick={onBack}
-        className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
-      >
-        <ArrowLeft className="h-5 w-5" />
-        <span>Back to Stores</span>
-      </button>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 p-4 pt-20">
 
-      {/* Store Header */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8 mb-8">
-        <div className="flex items-start space-x-6">
-          {store.logo ? (
-            <img
-              src={store.logo}
-              alt={store.name}
-              className="w-24 h-24 rounded-xl object-cover"
-            />
-          ) : (
-            <div className="w-24 h-24 bg-blue-100 rounded-xl flex items-center justify-center">
-              <Store className="h-12 w-12 text-blue-600" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        {/* Back Button */}
+        <button
+          onClick={onBack}
+          className="flex items-center space-x-2 text-gray-400 hover:text-white mb-6 transition-colors bg-gray-800 px-4 py-2 rounded-lg border border-gray-700"
+        >
+          <ArrowLeft className="h-5 w-5" />
+          <span>Back to Stores</span>
+        </button>
+
+        {/* Store Header */}
+        <div className="bg-gray-800 rounded-xl shadow-2xl border border-gray-700 p-8 mb-8">
+          <div className="flex items-start space-x-6">
+            {store.logo ? (
+              <img
+                src={store.logo}
+                alt={store.name}
+                className="w-24 h-24 rounded-xl object-cover border border-gray-600"
+              />
+            ) : (
+              <div className="w-24 h-24 bg-gray-700 rounded-xl flex items-center justify-center border border-gray-600">
+                <Store className="h-12 w-12 text-purple-400" />
+              </div>
+            )}
+            
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold text-white mb-2">{store.name}</h1>
+              <div className="flex items-center space-x-4 text-gray-400 mb-4">
+                <div className="flex items-center space-x-1">
+                  <User className="h-4 w-4 text-purple-400" />
+                  <span>by {store.owner?.profile?.name || store.owner?.username}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <Calendar className="h-4 w-4 text-purple-400" />
+                  <span>Since {new Date(store.createdAt).toLocaleDateString()}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <Package className="h-4 w-4 text-purple-400" />
+                  <span>{products.length} products</span>
+                </div>
+              </div>
+              {store.description && (
+                <p className="text-gray-300 leading-relaxed">{store.description}</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Products Section */}
+        <div className="bg-gray-800 rounded-xl shadow-2xl border border-gray-700 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-semibold text-white">Products</h2>
+            
+            {/* Sort Controls */}
+            <div className="flex items-center space-x-4">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="createdAt">Date Added</option>
+                <option value="name">Name</option>
+                <option value="price">Price</option>
+              </select>
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+                className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="desc">Descending</option>
+                <option value="asc">Ascending</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 rounded-lg bg-red-900 bg-opacity-20 border border-red-800 text-red-300">
+              {error}
             </div>
           )}
-          
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{store.name}</h1>
-            <div className="flex items-center space-x-4 text-gray-600 mb-4">
-              <div className="flex items-center space-x-1">
-                <User className="h-4 w-4" />
-                <span>by {store.owner?.profile?.name || store.owner?.username}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <Calendar className="h-4 w-4" />
-                <span>Since {new Date(store.createdAt).toLocaleDateString()}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <Package className="h-4 w-4" />
-                <span>{products.length} products</span>
-              </div>
-            </div>
-            {store.description && (
-              <p className="text-gray-600 leading-relaxed">{store.description}</p>
-            )}
-          </div>
-        </div>
-      </div>
 
-      {/* Products Section */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900">Products</h2>
-          
-          {/* Sort Controls */}
-          <div className="flex items-center space-x-4">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="createdAt">Date Added</option>
-              <option value="name">Name</option>
-              <option value="price">Price</option>
-            </select>
-            <select
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="desc">Descending</option>
-              <option value="asc">Ascending</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 p-4 rounded-lg bg-red-50 text-red-800">
-            {error}
-          </div>
-        )}
-
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="bg-gray-200 rounded-xl h-64 animate-pulse"></div>
-            ))}
-          </div>
-        ) : products.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-              {products.map((product) => (
-                <div 
-                  key={product._id} 
-                  className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition-all duration-200 cursor-pointer transform hover:-translate-y-1"
-                  onClick={() => handleProductClick(product._id)}
-                >
-                  {product.images && product.images[0] ? (
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      className="w-full h-48 rounded-lg object-cover mb-4"
-                    />
-                  ) : (
-                    <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center mb-4">
-                      <Package className="h-12 w-12 text-gray-400" />
-                    </div>
-                  )}
-                  
-                  <h3 className="font-semibold text-gray-900 mb-2 truncate">{product.name}</h3>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-lg font-bold text-blue-600">${product.price}</span>
-                    {product.ratings && product.ratings.length > 0 && (
-                      <div className="flex items-center space-x-1">
-                        <div className="flex">
-                          {renderStars(calculateAverageRating(product.ratings))}
-                        </div>
-                        <span className="text-sm text-gray-500">
-                          ({product.ratings.length})
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {product.stock !== undefined && (
-                    <div className="text-sm text-gray-500">
-                      Stock: {product.stock > 0 ? `${product.stock} available` : 'Out of stock'}
-                    </div>
-                  )}
-
-                  {/* Click indicator */}
-                  <div className="mt-3 text-center">
-                    <span className="text-xs text-blue-600 font-medium">Click to view details</span>
-                  </div>
-                </div>
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="bg-gray-700 rounded-xl h-64 animate-pulse"></div>
               ))}
             </div>
+          ) : products.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                {products.map((product) => (
+                  <div 
+                    key={product._id} 
+                    className="bg-gray-700 rounded-xl p-4 hover:shadow-xl hover:bg-gray-600 transition-all duration-200 cursor-pointer transform hover:-translate-y-1 border border-gray-600"
+                    onClick={() => handleProductClick(product._id)}
+                  >
+                    {product.images && product.images[0] ? (
+                      <img
+                        src={product.images[0]}
+                        alt={product.name}
+                        className="w-full h-48 rounded-lg object-cover mb-4"
+                      />
+                    ) : (
+                      <div className="w-full h-48 bg-gray-600 rounded-lg flex items-center justify-center mb-4">
+                        <Package className="h-12 w-12 text-gray-500" />
+                      </div>
+                    )}
+                    
+                    <h3 className="font-semibold text-white mb-2 truncate">{product.name}</h3>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-lg font-bold text-purple-400">${product.price}</span>
+                      {product.ratings && product.ratings.length > 0 && (
+                        <div className="flex items-center space-x-1">
+                          <div className="flex">
+                            {renderStars(calculateAverageRating(product.ratings))}
+                          </div>
+                          <span className="text-sm text-gray-400">
+                            ({product.ratings.length})
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {product.stock !== undefined && (
+                      <div className="text-sm text-gray-400">
+                        Stock: {product.stock > 0 ? `${product.stock} available` : 'Out of stock'}
+                      </div>
+                    )}
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center space-x-4">
-                <button
-                  onClick={handlePrevPage}
-                  disabled={currentPage === 1 || loading}
-                  className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  <span>Previous</span>
-                </button>
-                
-                <span className="px-4 py-2 text-sm text-gray-700">
-                  Page {currentPage} of {totalPages}
-                </span>
-                
-                <button
-                  onClick={handleNextPage}
-                  disabled={currentPage === totalPages || loading}
-                  className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <span>Next</span>
-                  <ChevronRight className="h-4 w-4" />
-                </button>
+                    <div className="mt-3 text-center">
+                      <span className="text-xs text-purple-400 font-medium">Click to view details</span>
+                    </div>
+                  </div>
+                ))}
               </div>
-            )}
-          </>
-        ) : (
-          <div className="text-center py-12">
-            <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">No products available in this store yet.</p>
-          </div>
-        )}
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center space-x-4">
+                  <button
+                    onClick={handlePrevPage}
+                    disabled={currentPage === 1 || loading}
+                    className="flex items-center space-x-2 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    <span>Previous</span>
+                  </button>
+                  
+                  <span className="px-4 py-2 bg-gradient-to-r from-purple-800 to-purple-900 rounded-lg border border-gray-700 text-sm text-white">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  
+                  <button
+                    onClick={handleNextPage}
+                    disabled={currentPage === totalPages || loading}
+                    className="flex items-center space-x-2 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <span>Next</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <div className="bg-gray-700 rounded-xl p-8 max-w-md mx-auto border border-gray-600">
+                <Package className="h-16 w-16 text-gray-500 mx-auto mb-4" />
+                <p className="text-gray-400 text-lg">No products available in this store yet.</p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

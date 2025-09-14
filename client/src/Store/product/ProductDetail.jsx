@@ -270,7 +270,7 @@ export default function ProductDetail() {
       <Star
         key={i}
         size={size}
-        className={i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}
+        className={i < rating ? 'text-yellow-400 fill-current' : 'text-gray-600'}
       />
     ));
   };
@@ -282,16 +282,10 @@ export default function ProductDetail() {
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto p-6">
-        <div className="animate-pulse">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="h-96 bg-gray-200 rounded"></div>
-            <div className="space-y-4">
-              <div className="h-8 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-6 bg-gray-200 rounded w-1/2"></div>
-              <div className="h-20 bg-gray-200 rounded"></div>
-            </div>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4"></div>
+          <p className="text-white">Loading product...</p>
         </div>
       </div>
     );
@@ -299,15 +293,17 @@ export default function ProductDetail() {
 
   if (error && !product) {
     return (
-      <div className="max-w-4xl mx-auto p-6 text-center">
-        <h1 className="text-2xl font-bold text-red-600 mb-4">Product Not Found</h1>
-        <p className="text-gray-600 mb-4">{error}</p>
-        <button
-          onClick={() => window.history.back()}
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          Go Back
-        </button>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 flex items-center justify-center p-4">
+        <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-xl p-8 max-w-md mx-auto text-center">
+          <h1 className="text-2xl font-bold text-red-400 mb-4">Product Not Found</h1>
+          <p className="text-gray-400 mb-4">{error}</p>
+          <button
+            onClick={() => window.history.back()}
+            className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+          >
+            Go Back
+          </button>
+        </div>
       </div>
     );
   }
@@ -315,331 +311,336 @@ export default function ProductDetail() {
   const displayImages = getDisplayImages();
 
   return (
-    <div className="max-w-6xl mx-auto p-6 pt-20">
-      <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={() => window.history.back()}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
-        >
-          <ArrowLeft size={20} />
-          Back
-        </button>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 p-4 pt-32">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => window.history.back()}
+            className="flex items-center gap-2 text-gray-400 hover:text-white bg-gray-800 px-4 py-2 rounded-lg border border-gray-700 transition-colors"
+          >
+            <ArrowLeft size={20} />
+            Back
+          </button>
 
-        {isProductOwner && (
-          <div className="flex gap-2">
-            {isEditing ? (
-              <>
-                <button
-                  onClick={handleUpdateProduct}
-                  disabled={updating}
-                  className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50"
-                >
-                  <Save size={16} />
-                  {updating ? 'Saving...' : 'Save Changes'}
-                </button>
+          {isProductOwner && (
+            <div className="flex gap-2">
+              {isEditing ? (
+                <>
+                  <button
+                    onClick={handleUpdateProduct}
+                    disabled={updating}
+                    className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50"
+                  >
+                    <Save size={16} />
+                    {updating ? 'Saving...' : 'Save Changes'}
+                  </button>
+                  <button
+                    onClick={handleEditToggle}
+                    className="flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+                  >
+                    <X size={16} />
+                    Cancel
+                  </button>
+                </>
+              ) : (
                 <button
                   onClick={handleEditToggle}
-                  className="flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+                  className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
                 >
-                  <X size={16} />
-                  Cancel
+                  <Edit size={16} />
+                  Edit Product
                 </button>
-              </>
-            ) : (
-              <button
-                onClick={handleEditToggle}
-                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-              >
-                <Edit size={16} />
-                Edit Product
-              </button>
-            )}
-          </div>
-        )}
-      </div>
+              )}
+            </div>
+          )}
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Product Images */}
-        <div>
-          <div className="mb-4">
-            {displayImages.length > 0 ? (
-              <div className="relative">
-                <img
-                  src={displayImages[selectedImage] || displayImages[0]}
-                  alt={isEditing ? editData.name : product?.name}
-                  className="w-full h-96 object-cover rounded-lg shadow-md"
-                />
-                {isEditing && (
-                  <button
-                    onClick={() => handleImageRemove(displayImages[selectedImage] || displayImages[0])}
-                    className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full hover:bg-red-700"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+        <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-2xl overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
+            {/* Product Images */}
+            <div>
+              <div className="mb-4">
+                {displayImages.length > 0 ? (
+                  <div className="relative">
+                    <img
+                      src={displayImages[selectedImage] || displayImages[0]}
+                      alt={isEditing ? editData.name : product?.name}
+                      className="w-full h-96 object-cover rounded-lg shadow-md"
+                    />
+                    {isEditing && (
+                      <button
+                        onClick={() => handleImageRemove(displayImages[selectedImage] || displayImages[0])}
+                        className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full hover:bg-red-700"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="w-full h-96 bg-gray-700 rounded-lg flex items-center justify-center">
+                    <span className="text-gray-500 text-lg">No Image Available</span>
+                  </div>
                 )}
               </div>
-            ) : (
-              <div className="w-full h-96 bg-gray-200 rounded-lg flex items-center justify-center">
-                <span className="text-gray-500 text-lg">No Image Available</span>
-              </div>
-            )}
-          </div>
-          
-          {/* Image thumbnails */}
-          {displayImages.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto mb-4">
-              {displayImages.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImage(index)}
-                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
-                    selectedImage === index ? 'border-blue-500' : 'border-gray-300'
-                  }`}
-                >
-                  <img
-                    src={image}
-                    alt={`${isEditing ? editData.name : product?.name} ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* New images preview */}
-          {isEditing && newImages.length > 0 && (
-            <div className="mb-4">
-              <h4 className="text-sm font-medium text-gray-700 mb-2">New Images:</h4>
-              <div className="flex gap-2 overflow-x-auto">
-                {newImages.map((image, index) => (
-                  <div key={index} className="relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 border-green-500">
-                    <img
-                      src={URL.createObjectURL(image)}
-                      alt={`New ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                    <button
-                      onClick={() => handleNewImageRemove(index)}
-                      className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Add images button for editing */}
-          {isEditing && (
-            <div className="mb-4">
-              <label className="flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-lg cursor-pointer hover:bg-blue-200 w-fit">
-                <Plus size={16} />
-                Add Images
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageAdd}
-                  className="hidden"
-                />
-              </label>
-            </div>
-          )}
-        </div>
-
-        {/* Product Details */}
-        <div>
-          {isEditing ? (
-            // Edit mode
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Product Name *</label>
-                <input
-                  type="text"
-                  value={editData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter product name"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Price *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={editData.price}
-                    onChange={(e) => handleInputChange('price', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Stock *</label>
-                  <input
-                    type="number"
-                    value={editData.stock}
-                    onChange={(e) => handleInputChange('stock', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea
-                  value={editData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
-                  rows="4"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter product description"
-                />
-              </div>
-            </div>
-          ) : (
-            // View mode
-            <>
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">{product?.name}</h1>
               
-              <div className="flex items-center gap-4 mb-4">
-                <span className="text-3xl font-bold text-blue-600">${product?.price}</span>
-                <span className={`px-3 py-1 rounded-full text-sm ${
-                  product?.stock > 0 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-red-100 text-red-800'
-                }`}>
-                  {product?.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex items-center">
-                  {renderStars(Math.round(calculateAverageRating()))}
-                </div>
-                <span className="text-gray-600">
-                  {calculateAverageRating()} ({product?.ratings?.length || 0} reviews)
-                </span>
-              </div>
-
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2">Description</h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {product?.description || 'No description available.'}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3 mb-6 p-4 bg-gray-50 rounded-lg">
-                <Store size={24} className="text-gray-600" />
-                <div>
-                  <p className="font-semibold">{product?.store?.name}</p>
-                  <p className="text-sm text-gray-600">Store Owner</p>
-                </div>
-              </div>
-
-              {/* Quantity Selector - only show if not product owner and stock available */}
-              {!isProductOwner && product?.stock > 0 && (
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Quantity
-                  </label>
-                  <div className="flex items-center gap-3">
+              {/* Image thumbnails */}
+              {displayImages.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto mb-4">
+                  {displayImages.map((image, index) => (
                     <button
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                      disabled={quantity <= 1}
+                      key={index}
+                      onClick={() => setSelectedImage(index)}
+                      className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
+                        selectedImage === index ? 'border-purple-500' : 'border-gray-600'
+                      }`}
                     >
-                      -
+                      <img
+                        src={image}
+                        alt={`${isEditing ? editData.name : product?.name} ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
                     </button>
-                    <span className="px-4 py-2 border border-gray-300 rounded-md min-w-[60px] text-center">
-                      {quantity}
-                    </span>
-                    <button
-                      onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                      className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                      disabled={quantity >= product.stock}
-                    >
-                      +
-                    </button>
-                    <span className="text-sm text-gray-500 ml-2">
-                      Max: {product.stock}
-                    </span>
-                  </div>
+                  ))}
                 </div>
               )}
 
-              {/* Action Buttons - only show if not product owner */}
-              {!isProductOwner && (
-                <div className="flex gap-4 mb-8">
-                  <button
-                    onClick={handleAddToCart}
-                    disabled={product?.stock === 0 || addingToCart || quantity > product?.stock}
-                    className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-                  >
-                    <ShoppingCart size={20} />
-                    {addingToCart ? 'Adding to Cart...' :
-                     !isAuthenticated ? 'Login to Add to Cart' : 
-                     product?.stock === 0 ? 'Out of Stock' :
-                     quantity > product?.stock ? 'Insufficient Stock' :
-                     'Add to Cart'}
-                  </button>
-                  
-                  {isAuthenticated && (
-                    <button
-                      onClick={handleWishlistToggle}
-                      className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      <Heart size={20} />
-                    </button>
+              {/* New images preview and add button for editing */}
+              {isEditing && (
+                <>
+                  {newImages.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="text-sm font-medium text-gray-300 mb-2">New Images:</h4>
+                      <div className="flex gap-2 overflow-x-auto">
+                        {newImages.map((image, index) => (
+                          <div key={index} className="relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 border-green-500">
+                            <img
+                              src={URL.createObjectURL(image)}
+                              alt={`New ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                            <button
+                              onClick={() => handleNewImageRemove(index)}
+                              className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
-                </div>
-              )}
 
-              {/* Additional product info */}
-              {!isProductOwner && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-blue-900 mb-2">Quick Actions</h4>
-                  <div className="flex gap-2 text-sm">
-                    <button
-                      onClick={() => navigate('/cart')}
-                      className="text-blue-600 hover:text-blue-800 underline"
-                    >
-                      View Cart
-                    </button>
-                    <span className="text-gray-400">•</span>
-                    <button
-                      onClick={() => navigate('/wishlist')}
-                      className="text-blue-600 hover:text-blue-800 underline"
-                    >
-                      View Wishlist
-                    </button>
-                    <span className="text-gray-400">•</span>
-                    <button
-                      onClick={() => navigate('/products')}
-                      className="text-blue-600 hover:text-blue-800 underline"
-                    >
-                      Continue Shopping
-                    </button>
+                  <div className="mb-4">
+                    <label className="flex items-center gap-2 bg-purple-900/40 text-purple-400 px-4 py-2 rounded-lg cursor-pointer hover:bg-purple-800/50 w-fit border border-purple-700/50">
+                      <Plus size={16} />
+                      Add Images
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageAdd}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Product Details */}
+            <div>
+              {isEditing ? (
+                // Edit mode
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Product Name *</label>
+                    <input
+                      type="text"
+                      value={editData.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
+                      placeholder="Enter product name"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">Price *</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={editData.price}
+                        onChange={(e) => handleInputChange('price', e.target.value)}
+                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">Stock *</label>
+                      <input
+                        type="number"
+                        value={editData.stock}
+                        onChange={(e) => handleInputChange('stock', e.target.value)}
+                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Description</label>
+                    <textarea
+                      value={editData.description}
+                      onChange={(e) => handleInputChange('description', e.target.value)}
+                      rows="4"
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
+                      placeholder="Enter product description"
+                    />
                   </div>
                 </div>
+              ) : (
+                // View mode
+                <>
+                  <h1 className="text-3xl font-bold text-white mb-4">{product?.name}</h1>
+                  
+                  <div className="flex items-center gap-4 mb-4">
+                    <span className="text-3xl font-bold text-purple-400">${product?.price}</span>
+                    <span className={`px-3 py-1 rounded-full text-sm ${
+                      product?.stock > 0 
+                        ? 'bg-green-900/40 text-green-400 border border-green-700/50' 
+                        : 'bg-red-900/40 text-red-400 border border-red-700/50'
+                    }`}>
+                      {product?.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="flex items-center">
+                      {renderStars(Math.round(calculateAverageRating()))}
+                    </div>
+                    <span className="text-gray-400">
+                      {calculateAverageRating()} ({product?.ratings?.length || 0} reviews)
+                    </span>
+                  </div>
+
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold mb-2 text-white">Description</h3>
+                    <p className="text-gray-400 leading-relaxed">
+                      {product?.description || 'No description available.'}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3 mb-6 p-4 bg-gray-700/50 rounded-lg border border-gray-600/50">
+                    <Store size={24} className="text-purple-400" />
+                    <div>
+                      <p className="font-semibold text-white">{product?.store?.name}</p>
+                      <p className="text-sm text-gray-400">Store Owner</p>
+                    </div>
+                  </div>
+
+                  {/* Quantity Selector - only show if not product owner and stock available */}
+                  {!isProductOwner && product?.stock > 0 && (
+                    <div className="mb-6">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Quantity
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                          className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 transition-colors text-white"
+                          disabled={quantity <= 1}
+                        >
+                          -
+                        </button>
+                        <span className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg min-w-[60px] text-center text-white">
+                          {quantity}
+                        </span>
+                        <button
+                          onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                          className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 transition-colors text-white"
+                          disabled={quantity >= product.stock}
+                        >
+                          +
+                        </button>
+                        <span className="text-sm text-gray-400 ml-2">
+                          Max: {product.stock}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Buttons - only show if not product owner */}
+                  {!isProductOwner && (
+                    <div className="flex gap-4 mb-8">
+                      <button
+                        onClick={handleAddToCart}
+                        disabled={product?.stock === 0 || addingToCart || quantity > product?.stock}
+                        className="flex-1 bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                      >
+                        <ShoppingCart size={20} />
+                        {addingToCart ? 'Adding to Cart...' :
+                         !isAuthenticated ? 'Login to Add to Cart' : 
+                         product?.stock === 0 ? 'Out of Stock' :
+                         quantity > product?.stock ? 'Insufficient Stock' :
+                         'Add to Cart'}
+                      </button>
+                      
+                      {isAuthenticated && (
+                        <button
+                          onClick={handleWishlistToggle}
+                          className="px-4 py-3 border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
+                        >
+                          <Heart size={20} />
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Additional product info */}
+                  {!isProductOwner && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-blue-900 mb-2">Quick Actions</h4>
+                      <div className="flex gap-2 text-sm">
+                        <button
+                          onClick={() => navigate('/cart')}
+                          className="text-blue-600 hover:text-blue-800 underline"
+                        >
+                          View Cart
+                        </button>
+                        <span className="text-gray-400">•</span>
+                        <button
+                          onClick={() => navigate('/wishlist')}
+                          className="text-blue-600 hover:text-blue-800 underline"
+                        >
+                          View Wishlist
+                        </button>
+                        <span className="text-gray-400">•</span>
+                        <button
+                          onClick={() => navigate('/products')}
+                          className="text-blue-600 hover:text-blue-800 underline"
+                        >
+                          Continue Shopping
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
-            </>
-          )}
-          
-          {(error || success) && (
-            <div className={`p-4 rounded-lg mb-4 ${
-              error ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
-            }`}>
-              {error || success}
+              
+              {(error || success) && (
+                <div className={`p-4 rounded-lg mb-4 ${
+                  error ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                }`}>
+                  {error || success}
+                </div>
+              )}
             </div>
-          )}
+          </div>
+
+          {/* Rating and Reviews Section - existing code */}
+          {/* ...existing rating and reviews code... */}
         </div>
       </div>
-
-      {/* Rating and Reviews Section - existing code */}
-      {/* ...existing rating and reviews code... */}
     </div>
   );
 }

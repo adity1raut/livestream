@@ -18,6 +18,7 @@ import {
   Zap,
   Crown,
   Sparkles,
+  AppWindowMac ,
   Store,
 } from "lucide-react";
 import NotificationBell from "../Notification/NotificationBell"
@@ -88,6 +89,12 @@ const Navbar = () => {
       name: "Post",
       description: "Chatting with Friends",
       path: "/post",
+    },
+    {
+      icon: <AppWindowMac size={16} />,
+      name: "Stream",
+      description: "Manage your gaming identity",
+      path: "/streams",
     },
     {
       icon: <Store size={16} />,

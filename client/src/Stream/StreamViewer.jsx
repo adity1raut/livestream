@@ -236,34 +236,36 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-3">
+      <div className="bg-white/10 backdrop-blur-md shadow-xl border-b border-white/20 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-6">
               <button
                 onClick={handleBack}
-                className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+                className="flex items-center text-white/90 hover:text-purple-300 transition-all duration-200 font-medium group"
               >
-                <ArrowLeft size={20} className="mr-1" />
+                <ArrowLeft size={20} className="mr-2 group-hover:-translate-x-1 transition-transform" />
                 Back
               </button>
               
-              <div className="border-l pl-4">
-                <h1 className="text-xl font-bold text-gray-900 truncate max-w-md">
+              <div className="border-l border-white/30 pl-6">
+                <h1 className="text-2xl font-bold text-white truncate max-w-md mb-1">
                   {stream.title}
                 </h1>
-                <div className="flex items-center text-sm text-gray-600 space-x-3">
-                  <span>{stream.host?.username}</span>
-                  <span className="flex items-center">
-                    <Users size={14} className="mr-1" />
-                    {viewerCount} viewers
+                <div className="flex items-center text-sm text-white/80 space-x-4">
+                  <span className="font-medium">{stream.host?.username}</span>
+                  <span className="flex items-center bg-purple-500/20 backdrop-blur-sm px-3 py-1 rounded-full border border-purple-400/30">
+                    <Users size={14} className="mr-1 text-purple-300" />
+                    <span className="font-medium text-purple-200">{viewerCount}</span>
                   </span>
                   {stream.startedAt && (
-                    <span className="flex items-center">
-                      <Clock size={14} className="mr-1" />
-                      {formatDuration(stream.startedAt, stream.endedAt)}
+                    <span className="flex items-center bg-emerald-500/20 backdrop-blur-sm px-3 py-1 rounded-full border border-emerald-400/30">
+                      <Clock size={14} className="mr-1 text-emerald-300" />
+                      <span className="font-medium text-emerald-200">
+                        {formatDuration(stream.startedAt, stream.endedAt)}
+                      </span>
                     </span>
                   )}
                 </div>
@@ -273,8 +275,9 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
             <div className="flex items-center space-x-3">
               {/* Live Status */}
               {stream.isLive && (
-                <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium animate-pulse">
-                  🔴 LIVE
+                <span className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg animate-pulse border border-red-400/50">
+                  <span className="inline-block w-2 h-2 bg-white rounded-full mr-2 animate-ping"></span>
+                  LIVE
                 </span>
               )}
 
@@ -283,17 +286,17 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
                 <button
                   onClick={handleFollowToggle}
                   disabled={loading}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  className={`px-6 py-2.5 rounded-full font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 border ${
                     isFollowing
-                      ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      : 'bg-red-500 text-white hover:bg-red-600'
-                  } disabled:opacity-50`}
+                      ? 'bg-white/10 backdrop-blur-sm text-white border-white/30 hover:bg-white/20'
+                      : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-purple-400/50 hover:from-purple-600 hover:to-pink-600'
+                  } disabled:opacity-50 disabled:transform-none`}
                 >
                   {loading ? (
                     <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <>
-                      <Heart size={16} className={`inline mr-1 ${isFollowing ? 'fill-current' : ''}`} />
+                      <Heart size={16} className={`inline mr-2 ${isFollowing ? 'fill-current' : ''}`} />
                       {isFollowing ? 'Following' : 'Follow'}
                     </>
                   )}
@@ -304,31 +307,31 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
               <div className="relative">
                 <button
                   onClick={() => setShowShareMenu(!showShareMenu)}
-                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-3 text-white/90 hover:text-purple-300 hover:bg-white/10 rounded-full transition-all duration-200 shadow-lg hover:shadow-xl backdrop-blur-sm border border-white/20"
                 >
                   <Share2 size={20} />
                 </button>
                 
                 {showShareMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-50">
-                    <div className="py-1">
+                  <div className="absolute right-0 mt-3 w-56 bg-slate-800/95 backdrop-blur-md rounded-xl shadow-2xl border border-white/20 z-50 overflow-hidden">
+                    <div className="py-2">
                       <button
                         onClick={() => handleShare('copy')}
-                        className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors"
+                        className="w-full text-left px-6 py-3 text-white hover:bg-purple-500/20 hover:text-purple-300 transition-all duration-200 font-medium"
                       >
-                        Copy Link
+                        📋 Copy Link
                       </button>
                       <button
                         onClick={() => handleShare('twitter')}
-                        className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors"
+                        className="w-full text-left px-6 py-3 text-white hover:bg-purple-500/20 hover:text-purple-300 transition-all duration-200 font-medium"
                       >
-                        Share on Twitter
+                        🐦 Share on Twitter
                       </button>
                       <button
                         onClick={() => handleShare('facebook')}
-                        className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors"
+                        className="w-full text-left px-6 py-3 text-white hover:bg-purple-500/20 hover:text-purple-300 transition-all duration-200 font-medium"
                       >
-                        Share on Facebook
+                        📘 Share on Facebook
                       </button>
                     </div>
                   </div>
@@ -338,7 +341,7 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
               {/* Report Button */}
               <button
                 onClick={handleReport}
-                className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                className="p-3 text-white/90 hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-200 shadow-lg hover:shadow-xl backdrop-blur-sm border border-white/20"
                 title="Report Stream"
               >
                 <Flag size={20} />
@@ -349,56 +352,68 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Video Player - Takes 3 columns on large screens */}
-          <div className="lg:col-span-3 space-y-6">
-            <StreamPlayer stream={stream} className="aspect-video" />
+          <div className="lg:col-span-3 space-y-8">
+            <div className="bg-slate-800/40 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden border border-white/10">
+              <StreamPlayer stream={stream} className="aspect-video" />
+            </div>
             
             {/* Stream Info */}
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center space-x-4">
-                  <img
-                    src={stream.host?.profile?.profileImage || '/default-avatar.png'}
-                    alt={stream.host?.username}
-                    className="w-12 h-12 rounded-full"
-                    onError={(e) => {
-                      e.target.src = '/default-avatar.png';
-                    }}
-                  />
+            <div className="bg-slate-800/40 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white/10">
+              <div className="flex items-start justify-between mb-6">
+                <div className="flex items-center space-x-6">
+                  <div className="relative">
+                    <img
+                      src={stream.host?.profile?.profileImage || '/default-avatar.png'}
+                      alt={stream.host?.username}
+                      className="w-16 h-16 rounded-full border-4 border-purple-400/50 shadow-xl"
+                      onError={(e) => {
+                        e.target.src = '/default-avatar.png';
+                      }}
+                    />
+                    {stream.isLive && (
+                      <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 border-3 border-slate-800 rounded-full animate-pulse shadow-lg"></div>
+                    )}
+                  </div>
                   <div>
-                    <h3 className="font-semibold text-lg">
+                    <h3 className="font-bold text-xl text-white mb-1">
                       {stream.host?.profile?.name || stream.host?.username}
                     </h3>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-purple-300 font-medium">
                       @{stream.host?.username}
                     </p>
                   </div>
                 </div>
                 
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-blue-600">
+                <div className="text-right bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm p-6 rounded-xl border border-purple-400/30 shadow-lg">
+                  <div className="text-3xl font-bold text-purple-300 mb-1">
                     {viewerCount}
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-purple-400 font-medium">
                     {viewerCount === 1 ? 'viewer' : 'viewers'}
                   </div>
                 </div>
               </div>
 
-              <div className="border-t pt-4">
-                <h4 className="font-semibold mb-2">About this stream</h4>
-                <p className="text-gray-700 leading-relaxed">
+              <div className="border-t border-white/20 pt-6">
+                <h4 className="font-bold text-lg mb-3 text-white">About this stream</h4>
+                <p className="text-slate-300 leading-relaxed text-base">
                   {stream.description || 'No description provided for this stream.'}
                 </p>
                 
                 {stream.startedAt && (
-                  <div className="mt-4 text-sm text-gray-500">
-                    Started {new Date(stream.startedAt).toLocaleString()}
-                    {stream.endedAt && (
-                      <> • Ended {new Date(stream.endedAt).toLocaleString()}</>
-                    )}
+                  <div className="mt-6 p-4 bg-slate-700/40 backdrop-blur-sm rounded-xl border border-white/10">
+                    <div className="text-sm text-slate-400">
+                      <span className="font-medium text-white">Started:</span> {new Date(stream.startedAt).toLocaleString()}
+                      {stream.endedAt && (
+                        <>
+                          <br />
+                          <span className="font-medium text-white">Ended:</span> {new Date(stream.endedAt).toLocaleString()}
+                        </>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -407,11 +422,13 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
 
           {/* Chat Sidebar - Takes 1 column on large screens */}
           <div className="lg:col-span-1">
-            <StreamChat
-              streamId={stream._id}
-              messages={stream.liveChat || []}
-              isLive={stream.isLive}
-            />
+            <div className="bg-slate-800/40 backdrop-blur-md rounded-2xl shadow-2xl border border-white/10 overflow-hidden">
+              <StreamChat
+                streamId={stream._id}
+                messages={stream.liveChat || []}
+                isLive={stream.isLive}
+              />
+            </div>
           </div>
         </div>
       </div>

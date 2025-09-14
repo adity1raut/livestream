@@ -24,180 +24,203 @@ import Cart from "./Store/Card/Cart";
 import { ProductSearch } from "./Store/search/ProductSearch";
 import { Wishlist } from "./Store/search/Wishlist";
 import Checkout from "./Store/order/Checkout";
+import { AuthProvider } from './context/AuthContext';
+import StreamViewer from './Stream/StreamViewer';
+import StreamsList from './Stream/StreamsList';
 
 function App() {
   return (
       <NotificationProvider >
-        <Router>
-          <Navbar />
+        <AuthProvider>
+          <Router>
+            <Navbar />
 
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<GamingDashboard />} />
-            <Route
-              path="/login"
-              element={
-                <PublicRoute>
-                  <Login />
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/signup"
-              element={
-                <PublicRoute>
-                  <RegistrationForm />
-                </PublicRoute>
-              }
-            />
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<GamingDashboard />} />
+              <Route
+                path="/login"
+                element={
+                  <PublicRoute>
+                    <Login />
+                  </PublicRoute>
+                }
+              />
+              <Route
+                path="/signup"
+                element={
+                  <PublicRoute>
+                    <RegistrationForm />
+                  </PublicRoute>
+                }
+              />
 
-            <Route
-              path="/forgot-password"
-              element={
-                <PublicRoute>
-                  <ForgetPassword />
-                </PublicRoute>
-              }
-            />
+              <Route
+                path="/forgot-password"
+                element={
+                  <PublicRoute>
+                    <ForgetPassword />
+                  </PublicRoute>
+                }
+              />
 
-            {/* Protected Routes */}
-            <Route
-              path="/chat"
-              element={
-                <ProtectedRoute>
-                  <ChatApp />
-                </ProtectedRoute>
-              }
-            />
+              {/* Protected Routes */}
+              <Route
+                path="/chat"
+                element={
+                  <ProtectedRoute>
+                    <ChatApp />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/profile/me"
-              element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/profile/me"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/profile/:username"
-              element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/profile/:username"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/notification"
-              element={
-                <ProtectedRoute>
-                  <NotificationPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/myposts"
-              element={
-                <ProtectedRoute>
-                  <MyPosts />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/post"
-              element={
-                <ProtectedRoute>
-                  <Feed />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/notification"
+                element={
+                  <ProtectedRoute>
+                    <NotificationPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/myposts"
+                element={
+                  <ProtectedRoute>
+                    <MyPosts />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/post"
+                element={
+                  <ProtectedRoute>
+                    <Feed />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/my-store"
-              element={
-                <ProtectedRoute>
-                  <MyStore />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/stores"
-              element={
-                <ProtectedRoute>
-                  <AllStores />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/my-store"
+                element={
+                  <ProtectedRoute>
+                    <MyStore />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/stores"
+                element={
+                  <ProtectedRoute>
+                    <AllStores />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Product Routes */}
-            <Route
-              path="/products"
-              element={
-                <PublicProducts />
-              }
-            />
-            <Route
-              path="/products/:productId"
-              element={<ProductDetail />}
-            />
-            <Route
-              path="/add-product"
-              element={
-                <ProtectedRoute>
-                  <AddProduct />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/edit-product/:productId"
-              element={
-                <ProtectedRoute>
-                  <EditProduct />
-                </ProtectedRoute>
-              }
-            />
+              {/* Product Routes */}
+              <Route
+                path="/products"
+                element={
+                  <PublicProducts />
+                }
+              />
+              <Route
+                path="/products/:productId"
+                element={<ProductDetail />}
+              />
+              <Route
+                path="/add-product"
+                element={
+                  <ProtectedRoute>
+                    <AddProduct />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/edit-product/:productId"
+                element={
+                  <ProtectedRoute>
+                    <EditProduct />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Cart Routes */}
-            <Route
-              path="/cart"
-              element={
-                <ProtectedRoute>
-                  <Cart />
-                </ProtectedRoute>
-              }
-            />
-            
-            {/* Checkout Route */}
-            <Route
-              path="/checkout"
-              element={
-                <ProtectedRoute>
-                  <Checkout />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/search"
-              element={
-                <ProductSearch />
-              }
-            />
+              {/* Cart Routes */}
+              <Route
+                path="/cart"
+                element={
+                  <ProtectedRoute>
+                    <Cart />
+                  </ProtectedRoute>
+                }
+              />
+              
+              {/* Checkout Route */}
+              <Route
+                path="/checkout"
+                element={
+                  <ProtectedRoute>
+                    <Checkout />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/search"
+                element={
+                  <ProductSearch />
+                }
+              />
 
-            <Route
-              path="/wishlist"
-              element={
-                <ProtectedRoute>
-                  <Wishlist />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/wishlist"
+                element={
+                  <ProtectedRoute>
+                    <Wishlist />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+              {/* Stream Routes */}
+              <Route
+                path="/streams"
+                element={
+                  <ProtectedRoute>
+                    <StreamsList />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/stream/:id"
+                element={
+                  <ProtectedRoute>
+                    <StreamViewer />
+                  </ProtectedRoute>
+                }
+              />
 
-          <Footer />
-        </Router>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+
+            <Footer />
+          </Router>
+        </AuthProvider>
       </NotificationProvider>
   );
 }

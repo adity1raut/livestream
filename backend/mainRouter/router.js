@@ -18,6 +18,6 @@ router.use("/api/chat" , Message)
 router.use("/api/posts" , Post)
 router.use("/api/notifications" , Notifications)
 router.use("/api/stores" , Store)
-router.use("/api/live" , Live)
+router.use("/api/stream" , Live)
 
 export default router ;

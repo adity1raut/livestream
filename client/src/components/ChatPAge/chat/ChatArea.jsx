@@ -1,8 +1,8 @@
-import React from 'react';
-import { ArrowLeft } from 'lucide-react';
-import ChatHeader from './ChatHeader';
-import MessagesList from './MessagesList';
-import MessageInput from './MessageInput';
+import React from "react";
+import { ArrowLeft } from "lucide-react";
+import ChatHeader from "./ChatHeader";
+import MessagesList from "./MessagesList";
+import MessageInput from "./MessageInput";
 
 const ChatArea = ({
   currentConversation,
@@ -17,7 +17,7 @@ const ChatArea = ({
   handleInputChange,
   handleKeyPress,
   handleTypingStop,
-  sendMessage
+  sendMessage,
 }) => {
   return (
     <>

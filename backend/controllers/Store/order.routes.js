@@ -5,15 +5,15 @@ import Product from "../../models/Product.models.js";
 import User from "../../models/User.models.js";
 import Store from "../../models/Store.models.js";
 
-
 // POST /api/stores/order/create - Create Razorpay order
 export async function createOrder(req, res) {
   try {
     const { addressId } = req.body;
 
     // Get user's cart
-    const cart = await Cart.findOne({ user: req.user._id })
-      .populate("items.product");
+    const cart = await Cart.findOne({ user: req.user._id }).populate(
+      "items.product",
+    );
 
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ error: "Cart is empty" });
@@ -31,8 +31,8 @@ export async function createOrder(req, res) {
     for (const item of cart.items) {
       // Verify stock availability
       if (item.product.stock < item.quantity) {
-        return res.status(400).json({ 
-          error: `Insufficient stock for ${item.product.name}` 
+        return res.status(400).json({
+          error: `Insufficient stock for ${item.product.name}`,
         });
       }
       totalAmount += item.product.price * item.quantity;
@@ -46,8 +46,8 @@ export async function createOrder(req, res) {
       notes: {
         userId: req.user._id.toString(),
         addressId: addressId,
-        itemCount: cart.items.length
-      }
+        itemCount: cart.items.length,
+      },
     };
 
     const razorpayOrder = await razorpay.orders.create(options);
@@ -64,22 +64,27 @@ export async function createOrder(req, res) {
         prefill: {
           name: user.profile.name || user.username,
           email: user.email,
-          contact: address.phone
+          contact: address.phone,
         },
         theme: {
-          color: "#3399cc"
-        }
-      }
+          color: "#3399cc",
+        },
+      },
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}
 
 // POST /api/stores/order/verify - Verify Razorpay payment
 export async function verifyPayment(req, res) {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, addressId } = req.body;
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      addressId,
+    } = req.body;
 
     // Verify signature
     const sign = razorpay_order_id + "|" + razorpay_payment_id;
@@ -93,8 +98,9 @@ export async function verifyPayment(req, res) {
     }
 
     // Get user's cart
-    const cart = await Cart.findOne({ user: req.user._id })
-      .populate("items.product");
+    const cart = await Cart.findOne({ user: req.user._id }).populate(
+      "items.product",
+    );
 
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ error: "Cart is empty" });
@@ -107,10 +113,10 @@ export async function verifyPayment(req, res) {
     // Update stock and prepare order items
     for (const item of cart.items) {
       const product = await Product.findById(item.product._id);
-      
+
       if (product.stock < item.quantity) {
-        return res.status(400).json({ 
-          error: `Insufficient stock for ${product.name}` 
+        return res.status(400).json({
+          error: `Insufficient stock for ${product.name}`,
         });
       }
 
@@ -123,7 +129,7 @@ export async function verifyPayment(req, res) {
         product: product._id,
         quantity: item.quantity,
         price: product.price,
-        storeName: (await Store.findById(product.store)).name
+        storeName: (await Store.findById(product.store)).name,
       });
     }
 
@@ -137,9 +143,9 @@ export async function verifyPayment(req, res) {
       paymentId: razorpay_payment_id,
       orderId: razorpay_order_id,
       amount: totalAmount,
-      items: orderItems
+      items: orderItems,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}

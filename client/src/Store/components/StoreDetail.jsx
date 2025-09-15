@@ -1,7 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Store, User, Calendar, Package, Star, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useStore } from '../../context/StoreContext';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import {
+  ArrowLeft,
+  Store,
+  User,
+  Calendar,
+  Package,
+  Star,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { useStore } from "../../context/StoreContext";
+import { useNavigate } from "react-router-dom";
 
 function StoreDetail({ store, onBack }) {
   const { getStoreProducts } = useStore();
@@ -10,8 +19,8 @@ function StoreDetail({ store, onBack }) {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [sortBy, setSortBy] = useState('createdAt');
-  const [sortOrder, setSortOrder] = useState('desc');
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [sortOrder, setSortOrder] = useState("desc");
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -26,19 +35,19 @@ function StoreDetail({ store, onBack }) {
         page: currentPage,
         limit: 12,
         sort: sortBy,
-        order: sortOrder
+        order: sortOrder,
       });
-      
+
       if (result?.success) {
         setProducts(result.data.products || []);
         setTotalPages(result.data.totalPages || 1);
       } else {
-        setError(result?.message || 'Failed to fetch products');
+        setError(result?.message || "Failed to fetch products");
         setProducts([]);
       }
     } catch (error) {
-      console.error('Error fetching products:', error);
-      setError('Failed to fetch products');
+      console.error("Error fetching products:", error);
+      setError("Failed to fetch products");
       setProducts([]);
     } finally {
       setLoading(false);
@@ -67,8 +76,8 @@ function StoreDetail({ store, onBack }) {
         key={i}
         className={`h-4 w-4 ${
           i < Math.floor(rating)
-            ? 'text-yellow-400 fill-current'
-            : 'text-gray-600'
+            ? "text-yellow-400 fill-current"
+            : "text-gray-600"
         }`}
       />
     ));
@@ -82,7 +91,6 @@ function StoreDetail({ store, onBack }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 p-4 pt-20">
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Back Button */}
         <button
@@ -107,17 +115,23 @@ function StoreDetail({ store, onBack }) {
                 <Store className="h-12 w-12 text-purple-400" />
               </div>
             )}
-            
+
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-white mb-2">{store.name}</h1>
+              <h1 className="text-3xl font-bold text-white mb-2">
+                {store.name}
+              </h1>
               <div className="flex items-center space-x-4 text-gray-400 mb-4">
                 <div className="flex items-center space-x-1">
                   <User className="h-4 w-4 text-purple-400" />
-                  <span>by {store.owner?.profile?.name || store.owner?.username}</span>
+                  <span>
+                    by {store.owner?.profile?.name || store.owner?.username}
+                  </span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <Calendar className="h-4 w-4 text-purple-400" />
-                  <span>Since {new Date(store.createdAt).toLocaleDateString()}</span>
+                  <span>
+                    Since {new Date(store.createdAt).toLocaleDateString()}
+                  </span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <Package className="h-4 w-4 text-purple-400" />
@@ -125,7 +139,9 @@ function StoreDetail({ store, onBack }) {
                 </div>
               </div>
               {store.description && (
-                <p className="text-gray-300 leading-relaxed">{store.description}</p>
+                <p className="text-gray-300 leading-relaxed">
+                  {store.description}
+                </p>
               )}
             </div>
           </div>
@@ -135,7 +151,7 @@ function StoreDetail({ store, onBack }) {
         <div className="bg-gray-800 rounded-xl shadow-2xl border border-gray-700 p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-semibold text-white">Products</h2>
-            
+
             {/* Sort Controls */}
             <div className="flex items-center space-x-4">
               <select
@@ -168,15 +184,18 @@ function StoreDetail({ store, onBack }) {
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[...Array(8)].map((_, i) => (
-                <div key={i} className="bg-gray-700 rounded-xl h-64 animate-pulse"></div>
+                <div
+                  key={i}
+                  className="bg-gray-700 rounded-xl h-64 animate-pulse"
+                ></div>
               ))}
             </div>
           ) : products.length > 0 ? (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
                 {products.map((product) => (
-                  <div 
-                    key={product._id} 
+                  <div
+                    key={product._id}
                     className="bg-gray-700 rounded-xl p-4 hover:shadow-xl hover:bg-gray-600 transition-all duration-200 cursor-pointer transform hover:-translate-y-1 border border-gray-600"
                     onClick={() => handleProductClick(product._id)}
                   >
@@ -191,14 +210,20 @@ function StoreDetail({ store, onBack }) {
                         <Package className="h-12 w-12 text-gray-500" />
                       </div>
                     )}
-                    
-                    <h3 className="font-semibold text-white mb-2 truncate">{product.name}</h3>
+
+                    <h3 className="font-semibold text-white mb-2 truncate">
+                      {product.name}
+                    </h3>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-lg font-bold text-purple-400">${product.price}</span>
+                      <span className="text-lg font-bold text-purple-400">
+                        ${product.price}
+                      </span>
                       {product.ratings && product.ratings.length > 0 && (
                         <div className="flex items-center space-x-1">
                           <div className="flex">
-                            {renderStars(calculateAverageRating(product.ratings))}
+                            {renderStars(
+                              calculateAverageRating(product.ratings),
+                            )}
                           </div>
                           <span className="text-sm text-gray-400">
                             ({product.ratings.length})
@@ -206,15 +231,20 @@ function StoreDetail({ store, onBack }) {
                         </div>
                       )}
                     </div>
-                    
+
                     {product.stock !== undefined && (
                       <div className="text-sm text-gray-400">
-                        Stock: {product.stock > 0 ? `${product.stock} available` : 'Out of stock'}
+                        Stock:{" "}
+                        {product.stock > 0
+                          ? `${product.stock} available`
+                          : "Out of stock"}
                       </div>
                     )}
 
                     <div className="mt-3 text-center">
-                      <span className="text-xs text-purple-400 font-medium">Click to view details</span>
+                      <span className="text-xs text-purple-400 font-medium">
+                        Click to view details
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -231,11 +261,11 @@ function StoreDetail({ store, onBack }) {
                     <ChevronLeft className="h-4 w-4" />
                     <span>Previous</span>
                   </button>
-                  
+
                   <span className="px-4 py-2 bg-gradient-to-r from-purple-800 to-purple-900 rounded-lg border border-gray-700 text-sm text-white">
                     Page {currentPage} of {totalPages}
                   </span>
-                  
+
                   <button
                     onClick={handleNextPage}
                     disabled={currentPage === totalPages || loading}
@@ -251,7 +281,9 @@ function StoreDetail({ store, onBack }) {
             <div className="text-center py-12">
               <div className="bg-gray-700 rounded-xl p-8 max-w-md mx-auto border border-gray-600">
                 <Package className="h-16 w-16 text-gray-500 mx-auto mb-4" />
-                <p className="text-gray-400 text-lg">No products available in this store yet.</p>
+                <p className="text-gray-400 text-lg">
+                  No products available in this store yet.
+                </p>
               </div>
             </div>
           )}

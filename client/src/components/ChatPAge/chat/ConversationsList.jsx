@@ -1,12 +1,12 @@
-import React from 'react';
-import { Shield } from 'lucide-react';
+import React from "react";
+import { Shield } from "lucide-react";
 
 const ConversationsList = ({
   conversations,
   user,
   openConversation,
   getOtherUser,
-  formatTime
+  formatTime,
 }) => {
   return (
     <div className="p-4">
@@ -16,7 +16,9 @@ const ConversationsList = ({
             <Shield className="w-8 h-8 text-purple-400" />
           </div>
           <p className="mb-2 text-lg font-medium">No conversations yet</p>
-          <p className="text-sm text-gray-500">Start a new chat to begin your gaming journey</p>
+          <p className="text-sm text-gray-500">
+            Start a new chat to begin your gaming journey
+          </p>
         </div>
       ) : (
         conversations.map((conversation) => {
@@ -38,8 +40,7 @@ const ConversationsList = ({
                   <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold mr-4 shadow-lg group-hover:shadow-purple-500/50">
                     {otherUser?.profile?.name
                       ? otherUser.profile.name.charAt(0).toUpperCase()
-                      : otherUser?.username.charAt(0).toUpperCase()
-                    }
+                      : otherUser?.username.charAt(0).toUpperCase()}
                   </div>
                 )}
                 <div className="absolute bottom-0 right-2 w-4 h-4 bg-green-500 border-2 border-gray-800 rounded-full shadow-lg"></div>
@@ -69,4 +70,4 @@ const ConversationsList = ({
   );
 };
 
-export default ConversationsList
+export default ConversationsList;

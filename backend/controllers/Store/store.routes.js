@@ -4,12 +4,10 @@ import Store from "../../models/Store.models.js";
 import User from "../../models/User.models.js";
 
 // GET /api/stores - Get all stores (public)
-export async function getAllStores (req, res) {
+export async function getAllStores(req, res) {
   try {
     const { page = 1, limit = 10, search } = req.query;
-    const query = search 
-      ? { name: { $regex: search, $options: "i" } }
-      : {};
+    const query = search ? { name: { $regex: search, $options: "i" } } : {};
 
     const stores = await Store.find(query)
       .populate("owner", "username profile.name")
@@ -29,10 +27,10 @@ export async function getAllStores (req, res) {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}
 
 // GET /api/stores/:id - Get specific store (public)
-export async function getStoreById (req, res) {
+export async function getStoreById(req, res) {
   try {
     const store = await Store.findById(req.params.id)
       .populate("owner", "username profile.name profile.profileImage")
@@ -40,8 +38,8 @@ export async function getStoreById (req, res) {
         path: "products",
         populate: {
           path: "ratings.user",
-          select: "username profile.name"
-        }
+          select: "username profile.name",
+        },
       });
 
     if (!store) {
@@ -52,10 +50,10 @@ export async function getStoreById (req, res) {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}
 
 // POST /api/stores - Create new store
-export async function createStore (req, res) {
+export async function createStore(req, res) {
   try {
     const { name, description } = req.body;
 
@@ -71,10 +69,10 @@ export async function createStore (req, res) {
         // Convert buffer to base64
         const b64 = Buffer.from(req.file.buffer).toString("base64");
         let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
-        
+
         const result = await cloudinary.uploader.upload(dataURI, {
           folder: "store-logos",
-          resource_type: "auto"
+          resource_type: "auto",
         });
         logoUrl = result.secure_url;
       } catch (cloudinaryError) {
@@ -94,17 +92,19 @@ export async function createStore (req, res) {
     // Update user with store reference
     await User.findByIdAndUpdate(req.user._id, { store: store._id });
 
-    const populatedStore = await Store.findById(store._id)
-      .populate("owner", "username profile.name");
+    const populatedStore = await Store.findById(store._id).populate(
+      "owner",
+      "username profile.name",
+    );
 
     res.status(201).json(populatedStore);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}
 
 // PUT /api/stores/:id - Update store
-export async function updateStore (req, res) {
+export async function updateStore(req, res) {
   try {
     const { name, description } = req.body;
 
@@ -129,15 +129,15 @@ export async function updateStore (req, res) {
           // Silently handle error
         }
       }
-      
+
       try {
         // Convert buffer to base64
         const b64 = Buffer.from(req.file.buffer).toString("base64");
         let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
-        
+
         const result = await cloudinary.uploader.upload(dataURI, {
           folder: "store-logos",
-          resource_type: "auto"
+          resource_type: "auto",
         });
         updateData.logo = result.secure_url;
       } catch (cloudinaryError) {
@@ -148,17 +148,17 @@ export async function updateStore (req, res) {
     const updatedStore = await Store.findByIdAndUpdate(
       req.params.id,
       updateData,
-      { new: true }
+      { new: true },
     ).populate("owner", "username profile.name");
 
     res.status(200).json(updatedStore);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}
 
 // DELETE /api/stores/:id - Delete store
-export async function deleteStore (req, res) {
+export async function deleteStore(req, res) {
   try {
     // Delete all products associated with this store
     await Product.deleteMany({ store: req.store._id });
@@ -182,10 +182,10 @@ export async function deleteStore (req, res) {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}
 
 // GET /api/stores/user/:userId - Get user's store
-export async function getUserStore (req, res) {
+export async function getUserStore(req, res) {
   try {
     const store = await Store.findOne({ owner: req.params.userId })
       .populate("owner", "username profile.name")
@@ -199,13 +199,18 @@ export async function getUserStore (req, res) {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}
 
 // GET /api/stores/:id/products - Get all products of a store
-export async function getStoreProducts (req, res) {
+export async function getStoreProducts(req, res) {
   try {
-    const { page = 1, limit = 12, sort = "createdAt", order = "desc" } = req.query;
-    
+    const {
+      page = 1,
+      limit = 12,
+      sort = "createdAt",
+      order = "desc",
+    } = req.query;
+
     const store = await Store.findById(req.params.id);
     if (!store) {
       return res.status(404).json({ error: "Store not found" });
@@ -232,10 +237,10 @@ export async function getStoreProducts (req, res) {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}
 
 // GET /api/stores/my/store - Get current user's store
-export async function getCurrentUserStore (req, res) {
+export async function getCurrentUserStore(req, res) {
   try {
     const store = await Store.findOne({ owner: req.user._id })
       .populate("owner", "username profile.name")
@@ -249,4 +254,4 @@ export async function getCurrentUserStore (req, res) {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}

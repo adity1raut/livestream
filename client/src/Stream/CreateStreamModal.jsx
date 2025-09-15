@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { X } from 'lucide-react';
-import axios from 'axios';
+import React, { useState } from "react";
+import { X } from "lucide-react";
+import axios from "axios";
 
 const CreateStreamModal = ({ isOpen, onClose, onStreamCreated }) => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -12,27 +12,27 @@ const CreateStreamModal = ({ isOpen, onClose, onStreamCreated }) => {
 
     setLoading(true);
     try {
-      const response = await axios.post('/api/stream/create', {
+      const response = await axios.post("/api/stream/create", {
         title: title.trim(),
-        description: description.trim()
+        description: description.trim(),
       });
 
       if (response.status === 201) {
         onStreamCreated(response.data);
-        setTitle('');
-        setDescription('');
+        setTitle("");
+        setDescription("");
         onClose();
       }
     } catch (error) {
-      console.error('Error creating stream:', error);
-      alert('Failed to create stream. Please try again.');
+      console.error("Error creating stream:", error);
+      alert("Failed to create stream. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && e.ctrlKey) {
+    if (e.key === "Enter" && e.ctrlKey) {
       handleSubmit();
     }
   };
@@ -44,17 +44,19 @@ const CreateStreamModal = ({ isOpen, onClose, onStreamCreated }) => {
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Create New Stream</h2>
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="text-gray-500 hover:text-gray-700 transition-colors"
           >
             <X size={24} />
           </button>
         </div>
-        
+
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Stream Title *</label>
+            <label className="block text-sm font-medium mb-2">
+              Stream Title *
+            </label>
             <input
               type="text"
               value={title}
@@ -65,9 +67,11 @@ const CreateStreamModal = ({ isOpen, onClose, onStreamCreated }) => {
               maxLength={100}
             />
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium mb-2">Description</label>
+            <label className="block text-sm font-medium mb-2">
+              Description
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -80,7 +84,7 @@ const CreateStreamModal = ({ isOpen, onClose, onStreamCreated }) => {
               {description.length}/500 characters
             </div>
           </div>
-          
+
           <div className="flex gap-3 pt-2">
             <button
               type="button"
@@ -95,7 +99,7 @@ const CreateStreamModal = ({ isOpen, onClose, onStreamCreated }) => {
               disabled={loading || !title.trim()}
               className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? 'Creating...' : 'Create Stream'}
+              {loading ? "Creating..." : "Create Stream"}
             </button>
           </div>
         </div>

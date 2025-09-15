@@ -1,5 +1,5 @@
-import React from 'react';
-import { Store, Edit, Trash2, Package, Calendar } from 'lucide-react';
+import React from "react";
+import { Store, Edit, Trash2, Package, Calendar } from "lucide-react";
 
 function StoreCard({ store, showActions = false, onEdit, onDelete, onClick }) {
   const handleCardClick = () => {
@@ -23,9 +23,11 @@ function StoreCard({ store, showActions = false, onEdit, onDelete, onClick }) {
   };
 
   return (
-    <div 
+    <div
       className={`bg-gray-800/60 rounded-2xl border border-gray-700/50 overflow-hidden ${
-        onClick ? 'cursor-pointer hover:shadow-2xl hover:border-purple-500/50 hover:bg-gray-700/60' : ''
+        onClick
+          ? "cursor-pointer hover:shadow-2xl hover:border-purple-500/50 hover:bg-gray-700/60"
+          : ""
       } transition-all duration-300 shadow-xl backdrop-blur-sm group flex flex-col h-80`}
       onClick={handleCardClick}
     >
@@ -42,7 +44,7 @@ function StoreCard({ store, showActions = false, onEdit, onDelete, onClick }) {
             <Store className="h-6 w-6 text-purple-400" />
           </div>
         )}
-        
+
         <div className="ml-3 flex-1 min-w-0">
           <h3 className="text-lg font-bold text-white truncate group-hover:text-purple-300 transition-colors">
             {store.name}
@@ -78,7 +80,7 @@ function StoreCard({ store, showActions = false, onEdit, onDelete, onClick }) {
               {store.products?.length || 0}
             </div>
           </div>
-          
+
           <div className="bg-gray-700/40 rounded-lg p-3 border border-gray-600/30">
             <div className="flex items-center space-x-2">
               <Calendar className="h-4 w-4 text-purple-400" />

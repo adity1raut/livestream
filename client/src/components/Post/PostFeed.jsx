@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import CreatePost from './CreatePost';
-import Post from './PostCard';
-import { useAuth } from '../../context/AuthContext';
-import axios from 'axios';
-import {MessageCircle} from "lucide-react"
+import React, { useState, useEffect } from "react";
+import CreatePost from "./CreatePost";
+import Post from "./PostCard";
+import { useAuth } from "../../context/AuthContext";
+import axios from "axios";
+import { MessageCircle } from "lucide-react";
 
 const Feed = () => {
   const [posts, setPosts] = useState([]);
@@ -16,14 +16,14 @@ const Feed = () => {
   const fetchPosts = async (pageNum = 1, append = false) => {
     try {
       if (pageNum > 1) setLoadingMore(true);
-      
+
       const res = await axios.get(`/api/posts/feed?page=${pageNum}&limit=10`, {
-        withCredentials: true
+        withCredentials: true,
       });
-      
+
       if (res.data.success) {
         if (append) {
-          setPosts(prev => [...prev, ...res.data.posts]);
+          setPosts((prev) => [...prev, ...res.data.posts]);
         } else {
           setPosts(res.data.posts);
         }
@@ -31,7 +31,7 @@ const Feed = () => {
         setPage(pageNum);
       }
     } catch (error) {
-      console.error('Error fetching posts:', error);
+      console.error("Error fetching posts:", error);
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -45,11 +45,11 @@ const Feed = () => {
   }, [user]);
 
   const handleNewPost = (newPost) => {
-    setPosts(prev => [newPost, ...prev]);
+    setPosts((prev) => [newPost, ...prev]);
   };
 
   const handleDeletePost = (postId) => {
-    setPosts(prev => prev.filter(post => post._id !== postId));
+    setPosts((prev) => prev.filter((post) => post._id !== postId));
   };
 
   const loadMore = () => {
@@ -73,7 +73,9 @@ const Feed = () => {
   }
 
   // Filter out current user's posts
-  const filteredPosts = posts.filter(post => post.author !== user?._id && post.author?._id !== user?._id);
+  const filteredPosts = posts.filter(
+    (post) => post.author !== user?._id && post.author?._id !== user?._id,
+  );
 
   return (
     <div className="max-w-2xl mx-auto pt-40 p-4">
@@ -90,15 +92,11 @@ const Feed = () => {
 
       {/* Create Post */}
       <CreatePost onPostCreated={handleNewPost} />
-      
+
       {/* Posts List */}
       <div className="space-y-4">
         {filteredPosts.map((post) => (
-          <Post 
-            key={post._id} 
-            post={post} 
-            onDelete={handleDeletePost}
-          />
+          <Post key={post._id} post={post} onDelete={handleDeletePost} />
         ))}
       </div>
 
@@ -116,7 +114,7 @@ const Feed = () => {
                 <span>Loading...</span>
               </div>
             ) : (
-              'Load More'
+              "Load More"
             )}
           </button>
         </div>
@@ -128,8 +126,12 @@ const Feed = () => {
           <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
             <MessageCircle className="w-12 h-12 text-gray-400" />
           </div>
-          <h3 className="text-xl font-semibold text-gray-600 mb-2">No posts yet</h3>
-          <p className="text-gray-500">Be the first to share something with your friends!</p>
+          <h3 className="text-xl font-semibold text-gray-600 mb-2">
+            No posts yet
+          </h3>
+          <p className="text-gray-500">
+            Be the first to share something with your friends!
+          </p>
         </div>
       )}
     </div>

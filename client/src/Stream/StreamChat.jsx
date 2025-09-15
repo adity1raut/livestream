@@ -1,10 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Send, Smile } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import React, { useState, useEffect, useRef } from "react";
+import { MessageCircle, Send, Smile } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import axios from "axios";
 
-const StreamChat = ({ streamId, messages = [], onSendMessage, isLive = true }) => {
-  const [message, setMessage] = useState('');
+const StreamChat = ({
+  streamId,
+  messages = [],
+  onSendMessage,
+  isLive = true,
+}) => {
+  const [message, setMessage] = useState("");
   const [chatMessages, setChatMessages] = useState(messages);
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -27,68 +32,68 @@ const StreamChat = ({ streamId, messages = [], onSendMessage, isLive = true }) =
     if (!message.trim() || loading || !isLive) return;
 
     const tempMessage = {
-      _id: 'temp-' + Date.now(),
+      _id: "temp-" + Date.now(),
       message: message.trim(),
       sender: user,
       createdAt: new Date().toISOString(),
-      isTemp: true
+      isTemp: true,
     };
 
     // Optimistically add message
-    setChatMessages(prev => [...prev, tempMessage]);
+    setChatMessages((prev) => [...prev, tempMessage]);
     const currentMessage = message.trim();
-    setMessage('');
+    setMessage("");
     setLoading(true);
 
     try {
       const response = await axios.post(`/api/stream/${streamId}/chat`, {
-        message: currentMessage
+        message: currentMessage,
       });
 
       if (response.status === 201) {
         // Replace temp message with real one
-        setChatMessages(prev => 
-          prev.map(msg => 
-            msg._id === tempMessage._id ? response.data : msg
-          )
+        setChatMessages((prev) =>
+          prev.map((msg) =>
+            msg._id === tempMessage._id ? response.data : msg,
+          ),
         );
         if (onSendMessage) onSendMessage(response.data);
       }
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error("Error sending message:", error);
       // Remove temp message on error
-      setChatMessages(prev => 
-        prev.filter(msg => msg._id !== tempMessage._id)
+      setChatMessages((prev) =>
+        prev.filter((msg) => msg._id !== tempMessage._id),
       );
       setMessage(currentMessage); // Restore message
-      alert('Failed to send message. Please try again.');
+      alert("Failed to send message. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
 
   const formatTime = (timestamp) => {
-    return new Date(timestamp).toLocaleTimeString('en-US', {
+    return new Date(timestamp).toLocaleTimeString("en-US", {
       hour12: false,
-      hour: '2-digit',
-      minute: '2-digit'
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const getUserDisplayName = (sender) => {
-    if (!sender) return 'Anonymous';
-    return sender.profile?.name || sender.username || 'Anonymous';
+    if (!sender) return "Anonymous";
+    return sender.profile?.name || sender.username || "Anonymous";
   };
 
   const getUserAvatar = (sender) => {
-    return sender?.profile?.profileImage || '/default-avatar.png';
+    return sender?.profile?.profileImage || "/default-avatar.png";
   };
 
   return (
@@ -105,7 +110,7 @@ const StreamChat = ({ streamId, messages = [], onSendMessage, isLive = true }) =
           </span>
         </h3>
       </div>
-      
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
         {chatMessages.length === 0 ? (
@@ -116,16 +121,16 @@ const StreamChat = ({ streamId, messages = [], onSendMessage, isLive = true }) =
           </div>
         ) : (
           chatMessages.map((msg, index) => (
-            <div 
-              key={msg._id || index} 
-              className={`flex gap-2 ${msg.isTemp ? 'opacity-70' : ''}`}
+            <div
+              key={msg._id || index}
+              className={`flex gap-2 ${msg.isTemp ? "opacity-70" : ""}`}
             >
-              <img 
+              <img
                 src={getUserAvatar(msg.sender)}
                 alt="Avatar"
                 className="w-6 h-6 rounded-full flex-shrink-0 mt-0.5"
                 onError={(e) => {
-                  e.target.src = '/default-avatar.png';
+                  e.target.src = "/default-avatar.png";
                 }}
               />
               <div className="flex-1 min-w-0">
@@ -192,7 +197,7 @@ const StreamChat = ({ streamId, messages = [], onSendMessage, isLive = true }) =
             <p className="text-sm">Stream has ended. Chat is disabled.</p>
           </div>
         )}
-        
+
         {message.length > 450 && (
           <div className="text-xs text-gray-500 mt-1">
             {message.length}/500 characters

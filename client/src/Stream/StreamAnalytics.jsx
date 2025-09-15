@@ -1,6 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { BarChart3, Users, MessageCircle, Clock, TrendingUp, Eye, X } from 'lucide-react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import {
+  BarChart3,
+  Users,
+  MessageCircle,
+  Clock,
+  TrendingUp,
+  Eye,
+  X,
+} from "lucide-react";
+import axios from "axios";
 
 const StreamAnalytics = ({ streamId, isOpen, onClose }) => {
   const [analytics, setAnalytics] = useState(null);
@@ -10,15 +18,15 @@ const StreamAnalytics = ({ streamId, isOpen, onClose }) => {
   const fetchAnalytics = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await axios.get(`/api/stream/${streamId}/analytics`);
       if (response.status === 200) {
         setAnalytics(response.data);
       }
     } catch (error) {
-      setError('Failed to load analytics data');
-      console.error('Error fetching analytics:', error);
+      setError("Failed to load analytics data");
+      console.error("Error fetching analytics:", error);
     } finally {
       setLoading(false);
     }
@@ -33,7 +41,7 @@ const StreamAnalytics = ({ streamId, isOpen, onClose }) => {
   const formatDuration = (minutes) => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    
+
     if (hours > 0) {
       return `${hours}h ${mins}m`;
     }
@@ -52,13 +60,13 @@ const StreamAnalytics = ({ streamId, isOpen, onClose }) => {
   };
 
   const getPerformanceRating = () => {
-    if (!analytics) return 'N/A';
+    if (!analytics) return "N/A";
     const { totalViewers, duration } = analytics.analytics;
-    
-    if (totalViewers > 100 && duration > 60) return 'Excellent';
-    if (totalViewers > 50 && duration > 30) return 'Good';
-    if (totalViewers > 10 && duration > 15) return 'Fair';
-    return 'Needs Improvement';
+
+    if (totalViewers > 100 && duration > 60) return "Excellent";
+    if (totalViewers > 50 && duration > 30) return "Good";
+    if (totalViewers > 10 && duration > 15) return "Fair";
+    return "Needs Improvement";
   };
 
   if (!isOpen) return null;
@@ -110,7 +118,9 @@ const StreamAnalytics = ({ streamId, isOpen, onClose }) => {
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-blue-600 text-sm font-medium">Total Viewers</p>
+                      <p className="text-blue-600 text-sm font-medium">
+                        Total Viewers
+                      </p>
                       <p className="text-2xl font-bold text-blue-700">
                         {analytics.analytics.totalViewers}
                       </p>
@@ -122,7 +132,9 @@ const StreamAnalytics = ({ streamId, isOpen, onClose }) => {
                 <div className="bg-green-50 p-4 rounded-lg">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-green-600 text-sm font-medium">Messages</p>
+                      <p className="text-green-600 text-sm font-medium">
+                        Messages
+                      </p>
                       <p className="text-2xl font-bold text-green-700">
                         {analytics.analytics.totalMessages}
                       </p>
@@ -134,7 +146,9 @@ const StreamAnalytics = ({ streamId, isOpen, onClose }) => {
                 <div className="bg-purple-50 p-4 rounded-lg">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-purple-600 text-sm font-medium">Duration</p>
+                      <p className="text-purple-600 text-sm font-medium">
+                        Duration
+                      </p>
                       <p className="text-2xl font-bold text-purple-700">
                         {formatDuration(analytics.analytics.duration)}
                       </p>
@@ -146,7 +160,9 @@ const StreamAnalytics = ({ streamId, isOpen, onClose }) => {
                 <div className="bg-orange-50 p-4 rounded-lg">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-orange-600 text-sm font-medium">Engagement</p>
+                      <p className="text-orange-600 text-sm font-medium">
+                        Engagement
+                      </p>
                       <p className="text-2xl font-bold text-orange-700">
                         {getEngagementRate()}%
                       </p>
@@ -167,10 +183,14 @@ const StreamAnalytics = ({ streamId, isOpen, onClose }) => {
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Status:</span>
-                        <span className={`font-medium ${
-                          analytics.analytics.isLive ? 'text-green-600' : 'text-gray-600'
-                        }`}>
-                          {analytics.analytics.isLive ? 'Live' : 'Ended'}
+                        <span
+                          className={`font-medium ${
+                            analytics.analytics.isLive
+                              ? "text-green-600"
+                              : "text-gray-600"
+                          }`}
+                        >
+                          {analytics.analytics.isLive ? "Live" : "Ended"}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -198,12 +218,16 @@ const StreamAnalytics = ({ streamId, isOpen, onClose }) => {
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Avg. Messages/Viewer:</span>
+                        <span className="text-gray-600">
+                          Avg. Messages/Viewer:
+                        </span>
                         <span className="font-medium">
-                          {analytics.analytics.totalViewers > 0 
-                            ? (analytics.analytics.totalMessages / analytics.analytics.totalViewers).toFixed(1)
-                            : '0'
-                          }
+                          {analytics.analytics.totalViewers > 0
+                            ? (
+                                analytics.analytics.totalMessages /
+                                analytics.analytics.totalViewers
+                              ).toFixed(1)
+                            : "0"}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -219,21 +243,25 @@ const StreamAnalytics = ({ streamId, isOpen, onClose }) => {
 
               {/* Engagement Insights */}
               <div className="bg-white border rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-4">Engagement Insights</h3>
+                <h3 className="text-lg font-semibold mb-4">
+                  Engagement Insights
+                </h3>
                 <div className="space-y-4">
                   <div className="bg-gray-50 p-4 rounded">
                     <h4 className="font-medium mb-2">Chat Activity</h4>
                     <p className="text-sm text-gray-600">
-                      Your stream had {analytics.analytics.totalMessages} messages from viewers, 
-                      showing {getEngagementRate()}% engagement rate.
+                      Your stream had {analytics.analytics.totalMessages}{" "}
+                      messages from viewers, showing {getEngagementRate()}%
+                      engagement rate.
                     </p>
                   </div>
-                  
+
                   <div className="bg-gray-50 p-4 rounded">
                     <h4 className="font-medium mb-2">Viewership</h4>
                     <p className="text-sm text-gray-600">
-                      {analytics.analytics.totalViewers} unique viewers joined your stream 
-                      over {formatDuration(analytics.analytics.duration)}.
+                      {analytics.analytics.totalViewers} unique viewers joined
+                      your stream over{" "}
+                      {formatDuration(analytics.analytics.duration)}.
                     </p>
                   </div>
 
@@ -241,16 +269,26 @@ const StreamAnalytics = ({ streamId, isOpen, onClose }) => {
                     <h4 className="font-medium mb-2">Recommendations</h4>
                     <ul className="text-sm text-gray-600 space-y-1">
                       {analytics.analytics.totalViewers < 10 && (
-                        <li>• Try streaming at different times to reach more viewers</li>
+                        <li>
+                          • Try streaming at different times to reach more
+                          viewers
+                        </li>
                       )}
                       {getEngagementRate() < 5 && (
-                        <li>• Encourage more chat interaction to boost engagement</li>
+                        <li>
+                          • Encourage more chat interaction to boost engagement
+                        </li>
                       )}
                       {analytics.analytics.duration < 30 && (
-                        <li>• Consider longer streaming sessions for better discovery</li>
+                        <li>
+                          • Consider longer streaming sessions for better
+                          discovery
+                        </li>
                       )}
                       {analytics.analytics.totalMessages < 5 && (
-                        <li>• Ask questions to encourage viewer participation</li>
+                        <li>
+                          • Ask questions to encourage viewer participation
+                        </li>
                       )}
                     </ul>
                   </div>
@@ -266,7 +304,7 @@ const StreamAnalytics = ({ streamId, isOpen, onClose }) => {
                   <button
                     onClick={() => {
                       // Implement export to CSV
-                      console.log('Export to CSV');
+                      console.log("Export to CSV");
                     }}
                     className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
                   >

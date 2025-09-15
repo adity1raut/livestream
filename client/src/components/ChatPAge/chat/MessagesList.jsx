@@ -1,13 +1,13 @@
-import React from 'react';
-import MessageBubble from './MessageBubble';
-import TypingIndicator from './TypingIndicator';
+import React from "react";
+import MessageBubble from "./MessageBubble";
+import TypingIndicator from "./TypingIndicator";
 
 const MessagesList = ({
   messages,
   user,
   isUserTyping,
   messagesEndRef,
-  formatTime
+  formatTime,
 }) => {
   return (
     <div className="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-gray-900/50 to-black/50 custom-scrollbar">
@@ -28,5 +28,3 @@ const MessagesList = ({
 };
 
 export default MessagesList;
-
-

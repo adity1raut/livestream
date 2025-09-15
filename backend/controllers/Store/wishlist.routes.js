@@ -1,8 +1,7 @@
 import Product from "../../models/Product.models.js";
 import User from "../../models/User.models.js";
 
-
- export async function addToWishlist (req, res) {
+export async function addToWishlist(req, res) {
   try {
     const { productId } = req.params;
 
@@ -12,7 +11,7 @@ import User from "../../models/User.models.js";
     }
 
     const user = await User.findById(req.user._id);
-    
+
     // Check if product already in wishlist
     if (!user.wishlist) {
       user.wishlist = [];
@@ -22,9 +21,11 @@ import User from "../../models/User.models.js";
 
     if (isInWishlist) {
       // Remove from wishlist
-      user.wishlist = user.wishlist.filter(id => id.toString() !== productId);
+      user.wishlist = user.wishlist.filter((id) => id.toString() !== productId);
       await user.save();
-      res.status(200).json({ message: "Removed from wishlist", inWishlist: false });
+      res
+        .status(200)
+        .json({ message: "Removed from wishlist", inWishlist: false });
     } else {
       // Add to wishlist
       user.wishlist.push(productId);
@@ -34,8 +35,7 @@ import User from "../../models/User.models.js";
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
-
+}
 
 export async function getUserWishlist(req, res) {
   try {
@@ -45,12 +45,12 @@ export async function getUserWishlist(req, res) {
       path: "wishlist",
       populate: {
         path: "store",
-        select: "name logo"
+        select: "name logo",
       },
       options: {
         limit: limit * 1,
-        skip: (page - 1) * limit
-      }
+        skip: (page - 1) * limit,
+      },
     });
 
     const total = user.wishlist ? user.wishlist.length : 0;
@@ -59,9 +59,9 @@ export async function getUserWishlist(req, res) {
       products: user.wishlist || [],
       totalPages: Math.ceil(total / limit),
       currentPage: page,
-      total
+      total,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}

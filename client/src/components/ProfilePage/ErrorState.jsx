@@ -1,10 +1,11 @@
-
-import React from 'react';
+import React from "react";
 
 const ErrorState = ({ error, onRetry }) => (
   <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center">
     <div className="text-center">
-      <h2 className="text-2xl font-bold text-gray-800 mb-2">Error loading profile</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-2">
+        Error loading profile
+      </h2>
       <p className="text-gray-600">{error}</p>
       <button
         onClick={onRetry}

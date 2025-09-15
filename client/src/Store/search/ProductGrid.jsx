@@ -1,7 +1,7 @@
-import React from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { useProduct } from '../../context/ProductContext';
-import ProductCard from './ProductCard';
+import React from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useProduct } from "../../context/ProductContext";
+import ProductCard from "./ProductCard";
 
 export function ProductGrid({ products }) {
   const { toggleWishlist } = useProduct();
@@ -10,10 +10,10 @@ export function ProductGrid({ products }) {
   const handleWishlistToggle = async (productId, e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      alert('Please login to add to wishlist');
+      alert("Please login to add to wishlist");
       return;
     }
-    
+
     const result = await toggleWishlist(productId);
     if (result.success) {
       console.log(result.message);

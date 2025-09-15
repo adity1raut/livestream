@@ -18,10 +18,10 @@ import {
   Zap,
   Crown,
   Sparkles,
-  AppWindowMac ,
+  AppWindowMac,
   Store,
 } from "lucide-react";
-import NotificationBell from "../Notification/NotificationBell"
+import NotificationBell from "../Notification/NotificationBell";
 
 const Navbar = () => {
   const { user, isAuthenticated, logout, loading } = useAuth();
@@ -41,7 +41,6 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -65,7 +64,7 @@ const Navbar = () => {
   const handleNavigation = (action) => {
     setIsMobileMenuOpen(false);
     setDropdownOpen(false);
-    if (typeof action === 'function') {
+    if (typeof action === "function") {
       action();
     }
   };
@@ -113,19 +112,24 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+          scrolled
             ? "bg-gray-900 shadow-lg py-2 border-b border-purple-900"
             : "bg-gradient-to-b from-gray-900 to-black py-4"
-          }`}
+        }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             {/* Logo Section */}
             <div className="flex items-center">
-              <Link to="/" className="flex items-center focus:outline-none group">
+              <Link
+                to="/"
+                className="flex items-center focus:outline-none group"
+              >
                 <div
-                  className={`relative overflow-hidden transition-all duration-300 ${scrolled ? "h-10 w-10" : "h-12 w-12"
-                    }`}
+                  className={`relative overflow-hidden transition-all duration-300 ${
+                    scrolled ? "h-10 w-10" : "h-12 w-12"
+                  }`}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg transform group-hover:scale-110 transition-transform duration-300">
                     <Gamepad2 className="h-full w-full p-2 text-white" />
@@ -136,14 +140,16 @@ const Navbar = () => {
                 </div>
                 <div className="ml-3">
                   <span
-                    className={`font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400 transition-all duration-300 ${scrolled ? "text-xl" : "text-2xl"
-                      }`}
+                    className={`font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400 transition-all duration-300 ${
+                      scrolled ? "text-xl" : "text-2xl"
+                    }`}
                   >
                     GAME PORTAL
                   </span>
                   <div
-                    className={`text-xs text-gray-400 transition-opacity duration-300 ${scrolled ? "opacity-0 h-0" : "opacity-100"
-                      }`}
+                    className={`text-xs text-gray-400 transition-opacity duration-300 ${
+                      scrolled ? "opacity-0 h-0" : "opacity-100"
+                    }`}
                   >
                     Level Up Your Gaming Experience
                   </div>
@@ -166,14 +172,20 @@ const Navbar = () => {
                     to="/login"
                     className="flex items-center text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 text-gray-300 hover:text-white hover:bg-gray-800 group"
                   >
-                    <LogIn size={16} className="mr-1 group-hover:scale-110 transition-transform" />
+                    <LogIn
+                      size={16}
+                      className="mr-1 group-hover:scale-110 transition-transform"
+                    />
                     Login
                   </Link>
                   <Link
                     to="/signup"
                     className="flex items-center text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 text-gray-300 hover:text-white hover:bg-gray-800 group"
                   >
-                    <User size={16} className="mr-1 group-hover:scale-110 transition-transform" />
+                    <User
+                      size={16}
+                      className="mr-1 group-hover:scale-110 transition-transform"
+                    />
                     Sign Up
                   </Link>
                 </>
@@ -186,7 +198,10 @@ const Navbar = () => {
                     to="/"
                     className="flex items-center text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 text-gray-300 hover:text-white hover:bg-gray-800 group"
                   >
-                    <Home size={16} className="mr-1 group-hover:scale-110 transition-transform" />
+                    <Home
+                      size={16}
+                      className="mr-1 group-hover:scale-110 transition-transform"
+                    />
                     Dashboard
                   </Link>
 
@@ -199,17 +214,22 @@ const Navbar = () => {
                   <div className="relative dropdown-container">
                     <button
                       onClick={toggleDropdown}
-                      className={`flex items-center text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 group ${dropdownOpen
+                      className={`flex items-center text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 group ${
+                        dropdownOpen
                           ? "text-white bg-gray-800"
                           : "text-gray-300 hover:text-white hover:bg-gray-800"
-                        }`}
+                      }`}
                     >
-                      <Shield size={16} className="mr-1 group-hover:scale-110 transition-transform" />
+                      <Shield
+                        size={16}
+                        className="mr-1 group-hover:scale-110 transition-transform"
+                      />
                       Menu
                       <ChevronDown
                         size={16}
-                        className={`ml-1 transition-transform duration-200 ${dropdownOpen ? "transform rotate-180" : ""
-                          }`}
+                        className={`ml-1 transition-transform duration-200 ${
+                          dropdownOpen ? "transform rotate-180" : ""
+                        }`}
                       />
                     </button>
 
@@ -223,7 +243,9 @@ const Navbar = () => {
                               onClick={() => setDropdownOpen(false)}
                               className="flex w-full p-3 hover:bg-purple-900 rounded-lg transition-all duration-150 text-left group hover:transform hover:scale-105"
                             >
-                              <div className="text-purple-400 group-hover:text-purple-300">{item.icon}</div>
+                              <div className="text-purple-400 group-hover:text-purple-300">
+                                {item.icon}
+                              </div>
                               <div className="ml-3">
                                 <div className="text-sm font-medium text-white">
                                   {item.name}
@@ -244,7 +266,10 @@ const Navbar = () => {
                     onClick={() => handleNavigation(logout)}
                     className="flex items-center text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 text-red-400 hover:text-red-300 hover:bg-gray-800 group"
                   >
-                    <LogOut size={16} className="mr-1 group-hover:scale-110 transition-transform" />
+                    <LogOut
+                      size={16}
+                      className="mr-1 group-hover:scale-110 transition-transform"
+                    />
                     Logout
                   </button>
                 </>
@@ -260,9 +285,15 @@ const Navbar = () => {
                     to="/profile/me"
                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-lg hover:shadow-purple-500/25 transition-all duration-200 flex items-center group"
                   >
-                    <Crown size={16} className="mr-2 group-hover:animate-pulse" />
+                    <Crown
+                      size={16}
+                      className="mr-2 group-hover:animate-pulse"
+                    />
                     <span className="max-w-xs truncate">
-                      {user?.username || user?.firstName || user?.email || "Player"}
+                      {user?.username ||
+                        user?.firstName ||
+                        user?.email ||
+                        "Player"}
                     </span>
                     <Sparkles size={14} className="ml-1 text-yellow-300" />
                   </Link>
@@ -298,13 +329,15 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       <div
-        className={`fixed inset-0 bg-black bg-opacity-70 z-40 md:hidden transition-opacity duration-300 ${isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
+        className={`fixed inset-0 bg-black bg-opacity-70 z-40 md:hidden transition-opacity duration-300 ${
+          isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
         onClick={() => setIsMobileMenuOpen(false)}
       >
         <div
-          className={`fixed inset-y-0 right-0 max-w-xs w-full bg-gray-900 shadow-xl z-50 transform transition-transform duration-300 ease-in-out border-l border-purple-800 ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
-            }`}
+          className={`fixed inset-y-0 right-0 max-w-xs w-full bg-gray-900 shadow-xl z-50 transform transition-transform duration-300 ease-in-out border-l border-purple-800 ${
+            isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex justify-between items-center p-4 border-b border-purple-800">
@@ -312,7 +345,9 @@ const Navbar = () => {
               <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded flex items-center justify-center">
                 <Gamepad2 className="h-5 w-5 text-white" />
               </div>
-              <span className="ml-2 font-bold text-lg text-white">GAME PORTAL</span>
+              <span className="ml-2 font-bold text-lg text-white">
+                GAME PORTAL
+              </span>
             </div>
             <button
               onClick={() => setIsMobileMenuOpen(false)}
@@ -357,11 +392,17 @@ const Navbar = () => {
                 <div className="px-4 py-3 border-b border-purple-800 mb-2">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center font-semibold text-white">
-                      {(user?.username || user?.firstName || user?.email || "P")[0].toUpperCase()}
+                      {(user?.username ||
+                        user?.firstName ||
+                        user?.email ||
+                        "P")[0].toUpperCase()}
                     </div>
                     <div>
                       <div className="text-white font-medium">
-                        {user?.username || user?.firstName || user?.email || "Player"}
+                        {user?.username ||
+                          user?.firstName ||
+                          user?.email ||
+                          "Player"}
                       </div>
                       <div className="text-xs text-purple-400 flex items-center">
                         <span>Level 25</span>
@@ -379,7 +420,11 @@ const Navbar = () => {
                     onClick={() => handleNavigation()}
                     className="flex items-center px-4 py-3 w-full text-left rounded-lg transition-all duration-200 text-gray-300 hover:bg-purple-900 hover:text-white group"
                   >
-                    {item.icon && <span className="mr-3 group-hover:scale-110">{item.icon}</span>}
+                    {item.icon && (
+                      <span className="mr-3 group-hover:scale-110">
+                        {item.icon}
+                      </span>
+                    )}
                     {item.name}
                   </Link>
                 ))}

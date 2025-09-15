@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useProduct } from '../../context/ProductContext';
-import ProductGrid from './ProductGrid';
+import React, { useState, useEffect } from "react";
+import { useProduct } from "../../context/ProductContext";
+import ProductGrid from "./ProductGrid";
 
 export function TrendingProducts() {
   const { getTrendingProducts, loading } = useProduct();

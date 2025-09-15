@@ -2,7 +2,7 @@ import Store from "../../models/Store.models.js";
 import User from "../../models/User.models.js";
 
 // POST /api/stores/:storeId/follow - Follow/Unfollow a store
-export async function followStore (req, res) {
+export async function followStore(req, res) {
   try {
     const { storeId } = req.params;
 
@@ -13,7 +13,9 @@ export async function followStore (req, res) {
 
     // Can't follow your own store
     if (store.owner.toString() === req.user._id.toString()) {
-      return res.status(400).json({ error: "You cannot follow your own store" });
+      return res
+        .status(400)
+        .json({ error: "You cannot follow your own store" });
     }
 
     const user = await User.findById(req.user._id);
@@ -24,12 +26,18 @@ export async function followStore (req, res) {
 
     if (isFollowing) {
       // Unfollow
-      user.following = user.following.filter(id => id.toString() !== store.owner.toString());
-      storeOwner.followers = storeOwner.followers.filter(id => id.toString() !== req.user._id.toString());
+      user.following = user.following.filter(
+        (id) => id.toString() !== store.owner.toString(),
+      );
+      storeOwner.followers = storeOwner.followers.filter(
+        (id) => id.toString() !== req.user._id.toString(),
+      );
       await user.save();
       await storeOwner.save();
 
-      res.status(200).json({ message: "Unfollowed store successfully", following: false });
+      res
+        .status(200)
+        .json({ message: "Unfollowed store successfully", following: false });
     } else {
       // Follow
       user.following.push(store.owner);
@@ -37,15 +45,17 @@ export async function followStore (req, res) {
       await user.save();
       await storeOwner.save();
 
-      res.status(200).json({ message: "Following store successfully", following: true });
+      res
+        .status(200)
+        .json({ message: "Following store successfully", following: true });
     }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}
 
 // GET /api/stores/:storeId/follow-status - Check if user is following a store
-export async  function getFollowStatus(req, res) {
+export async function getFollowStatus(req, res) {
   try {
     const { storeId } = req.params;
 
@@ -61,7 +71,7 @@ export async  function getFollowStatus(req, res) {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}
 
 // GET /api/stores/following/stores - Get stores that user is following
 export async function getFollowingStores(req, res) {
@@ -69,7 +79,7 @@ export async function getFollowingStores(req, res) {
     const { page = 1, limit = 10 } = req.query;
 
     const user = await User.findById(req.user._id).populate("following");
-    const followingUserIds = user.following.map(u => u._id);
+    const followingUserIds = user.following.map((u) => u._id);
 
     const stores = await Store.find({ owner: { $in: followingUserIds } })
       .populate("owner", "username profile.name")
@@ -78,7 +88,9 @@ export async function getFollowingStores(req, res) {
       .limit(limit * 1)
       .skip((page - 1) * limit);
 
-    const total = await Store.countDocuments({ owner: { $in: followingUserIds } });
+    const total = await Store.countDocuments({
+      owner: { $in: followingUserIds },
+    });
 
     res.status(200).json({
       stores,
@@ -89,5 +101,4 @@ export async function getFollowingStores(req, res) {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
-
+}

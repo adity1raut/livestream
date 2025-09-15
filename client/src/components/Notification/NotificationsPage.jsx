@@ -1,16 +1,16 @@
-import React from 'react';
-import { useNotifications } from '../../context/NotificationContext';
-import NotificationItem from './NotificationItem';
-import { Bell, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import React from "react";
+import { useNotifications } from "../../context/NotificationContext";
+import NotificationItem from "./NotificationItem";
+import { Bell, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 
 function NotificationsPage() {
-  const { 
-    notifications, 
-    loading, 
-    pagination, 
-    fetchNotifications, 
-    markAllAsRead, 
-    unreadCount 
+  const {
+    notifications,
+    loading,
+    pagination,
+    fetchNotifications,
+    markAllAsRead,
+    unreadCount,
   } = useNotifications();
 
   const handlePageChange = (newPage) => {
@@ -28,7 +28,8 @@ function NotificationsPage() {
               Notifications
             </h1>
             <p className="text-gray-400">
-              {unreadCount} unread {unreadCount === 1 ? 'notification' : 'notifications'}
+              {unreadCount} unread{" "}
+              {unreadCount === 1 ? "notification" : "notifications"}
             </p>
           </div>
           {unreadCount > 0 && (
@@ -54,24 +55,34 @@ function NotificationsPage() {
               <div className="w-16 h-16 mx-auto mb-4 bg-gray-750 rounded-full flex items-center justify-center">
                 <Bell className="w-8 h-8 text-gray-600" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">No notifications</h3>
-              <p className="text-gray-500">You're all caught up! Check back later for new notifications.</p>
+              <h3 className="text-lg font-semibold text-white mb-2">
+                No notifications
+              </h3>
+              <p className="text-gray-500">
+                You're all caught up! Check back later for new notifications.
+              </p>
             </div>
           ) : (
             <>
               {notifications.map((notification) => (
-                <NotificationItem key={notification._id} notification={notification} />
+                <NotificationItem
+                  key={notification._id}
+                  notification={notification}
+                />
               ))}
-              
+
               {/* Pagination */}
               {pagination.totalPages > 1 && (
                 <div className="p-4 border-t border-gray-700 flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-850">
                   <p className="text-sm text-gray-400">
-                    Showing {((pagination.page - 1) * pagination.limit) + 1} to{' '}
-                    {Math.min(pagination.page * pagination.limit, pagination.totalCount)} of{' '}
-                    {pagination.totalCount} notifications
+                    Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
+                    {Math.min(
+                      pagination.page * pagination.limit,
+                      pagination.totalCount,
+                    )}{" "}
+                    of {pagination.totalCount} notifications
                   </p>
-                  
+
                   <div className="flex gap-2">
                     <button
                       onClick={() => handlePageChange(pagination.page - 1)}

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { X, Loader2 } from 'lucide-react';
-import axios from 'axios';
+import React, { useState } from "react";
+import { X, Loader2 } from "lucide-react";
+import axios from "axios";
 
 const EditProfileModal = ({
   profileData,
@@ -10,42 +10,42 @@ const EditProfileModal = ({
   setUpdating,
   setSuccess,
   setError,
-  setProfileData
+  setProfileData,
 }) => {
   const [editForm, setEditForm] = useState({
-    name: profileData.profile?.name || '',
-    bio: profileData.profile?.bio || '',
-    email: profileData.email || ''
+    name: profileData.profile?.name || "",
+    bio: profileData.profile?.bio || "",
+    email: profileData.email || "",
   });
 
   const handleUpdateProfile = async () => {
     try {
       setUpdating(true);
-      setError('');
+      setError("");
 
       const updateData = {
         name: editForm.name.trim(),
         email: editForm.email.trim(),
-        bio: editForm.bio.trim()
+        bio: editForm.bio.trim(),
       };
 
-      const response = await axios.put('/api/auth/profile', updateData, {
+      const response = await axios.put("/api/auth/profile", updateData, {
         withCredentials: true,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       });
 
       if (response.data.success) {
         const updatedUser = response.data.data;
         setProfileData(updatedUser);
         setIsEditing(false);
-        setSuccess('Profile updated successfully!');
-        setTimeout(() => setSuccess(''), 3000);
+        setSuccess("Profile updated successfully!");
+        setTimeout(() => setSuccess(""), 3000);
       } else {
-        setError(response.data.message || 'Failed to update profile');
+        setError(response.data.message || "Failed to update profile");
       }
     } catch (error) {
-      console.error('Update failed:', error);
-      setError(error.response?.data?.message || 'Failed to update profile');
+      console.error("Update failed:", error);
+      setError(error.response?.data?.message || "Failed to update profile");
     } finally {
       setUpdating(false);
     }
@@ -67,11 +67,15 @@ const EditProfileModal = ({
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Name
+            </label>
             <input
               type="text"
               value={editForm.name}
-              onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+              onChange={(e) =>
+                setEditForm({ ...editForm, name: e.target.value })
+              }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
               disabled={updating}
               placeholder="Enter your full name"
@@ -79,11 +83,15 @@ const EditProfileModal = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
             <input
               type="email"
               value={editForm.email}
-              onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+              onChange={(e) =>
+                setEditForm({ ...editForm, email: e.target.value })
+              }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
               disabled={updating}
               placeholder="Enter your email"
@@ -91,10 +99,14 @@ const EditProfileModal = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Bio
+            </label>
             <textarea
               value={editForm.bio}
-              onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+              onChange={(e) =>
+                setEditForm({ ...editForm, bio: e.target.value })
+              }
               rows={4}
               maxLength={200}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all resize-none"
@@ -126,7 +138,7 @@ const EditProfileModal = ({
                 Saving...
               </>
             ) : (
-              'Save Changes'
+              "Save Changes"
             )}
           </button>
         </div>
@@ -143,7 +155,7 @@ const EditProfileModal = ({
             transform: scale(1);
           }
         }
-        
+
         .animate-scale-up {
           animation: scale-up 0.2s ease-out;
         }

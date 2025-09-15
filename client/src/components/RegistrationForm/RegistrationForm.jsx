@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { 
-  User, 
-  Mail, 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  Check, 
-  X, 
-  Loader, 
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import {
+  User,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  Check,
+  X,
+  Loader,
   UserCheck,
   Shield,
   Send,
   RefreshCw,
-  Gamepad2
-} from 'lucide-react';
+  Gamepad2,
+} from "lucide-react";
 
 // Toast component
 const Toast = ({ message, type, onClose }) => {
@@ -25,11 +25,25 @@ const Toast = ({ message, type, onClose }) => {
     return () => clearTimeout(timer);
   }, [onClose]);
 
-  const bgColor = type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-purple-600';
-  const icon = type === 'success' ? <Check size={20} /> : type === 'error' ? <X size={20} /> : <Shield size={20} />;
+  const bgColor =
+    type === "success"
+      ? "bg-green-600"
+      : type === "error"
+        ? "bg-red-600"
+        : "bg-purple-600";
+  const icon =
+    type === "success" ? (
+      <Check size={20} />
+    ) : type === "error" ? (
+      <X size={20} />
+    ) : (
+      <Shield size={20} />
+    );
 
   return (
-    <div className={`fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 z-50 animate-slide-in`}>
+    <div
+      className={`fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 z-50 animate-slide-in`}
+    >
       {icon}
       <span>{message}</span>
       <button onClick={onClose} className="ml-2 hover:opacity-80">
@@ -43,13 +57,13 @@ const Toast = ({ message, type, onClose }) => {
 const useToast = () => {
   const [toasts, setToasts] = useState([]);
 
-  const addToast = (message, type = 'info') => {
+  const addToast = (message, type = "info") => {
     const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
+    setToasts((prev) => [...prev, { id, message, type }]);
   };
 
   const removeToast = (id) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
   };
 
   return { toasts, addToast, removeToast };
@@ -58,12 +72,12 @@ const useToast = () => {
 const RegistrationForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    name: '',
-    password: '',
-    confirmPassword: '',
-    otp: ''
+    username: "",
+    email: "",
+    name: "",
+    password: "",
+    confirmPassword: "",
+    otp: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -71,7 +85,7 @@ const RegistrationForm = () => {
   const [availability, setAvailability] = useState({});
   const [otpSent, setOtpSent] = useState(false);
   const [otpTimer, setOtpTimer] = useState(0);
-  
+
   const { toasts, addToast, removeToast } = useToast();
 
   // Timer for OTP resend
@@ -79,7 +93,7 @@ const RegistrationForm = () => {
     let interval;
     if (otpTimer > 0) {
       interval = setInterval(() => {
-        setOtpTimer(prev => prev - 1);
+        setOtpTimer((prev) => prev - 1);
       }, 1000);
     }
     return () => clearInterval(interval);
@@ -87,40 +101,44 @@ const RegistrationForm = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
     // Clear availability check when user types
-    if (name === 'username' || name === 'email') {
-      setAvailability(prev => ({ ...prev, [name]: null }));
+    if (name === "username" || name === "email") {
+      setAvailability((prev) => ({ ...prev, [name]: null }));
     }
   };
 
   const checkAvailability = async (field) => {
     if (!formData[field]) return;
-    
+
     try {
-      setAvailability(prev => ({ ...prev, [field]: 'checking' }));
-      await axios.post('/api/auth/check-availability', {
-        identifier: formData[field]
+      setAvailability((prev) => ({ ...prev, [field]: "checking" }));
+      await axios.post("/api/auth/check-availability", {
+        identifier: formData[field],
       });
-      setAvailability(prev => ({ ...prev, [field]: 'available' }));
+      setAvailability((prev) => ({ ...prev, [field]: "available" }));
     } catch (error) {
-      setAvailability(prev => ({ ...prev, [field]: 'unavailable' }));
-      const errorMessage = error.response?.data?.message || error.message || 'Availability check failed';
-      addToast(errorMessage, 'error');
+      setAvailability((prev) => ({ ...prev, [field]: "unavailable" }));
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Availability check failed";
+      addToast(errorMessage, "error");
     }
   };
 
   const sendOTP = async () => {
     try {
       setLoading(true);
-      await axios.post('/api/auth/send-otp', { email: formData.email });
+      await axios.post("/api/auth/send-otp", { email: formData.email });
       setOtpSent(true);
       setOtpTimer(300); // 5 minutes
-      addToast('OTP sent to your email', 'success');
+      addToast("OTP sent to your email", "success");
     } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to send OTP';
-      addToast(errorMessage, 'error');
+      const errorMessage =
+        error.response?.data?.message || error.message || "Failed to send OTP";
+      addToast(errorMessage, "error");
     } finally {
       setLoading(false);
     }
@@ -129,12 +147,15 @@ const RegistrationForm = () => {
   const resendOTP = async () => {
     try {
       setLoading(true);
-      await axios.post('/api/auth/resend-otp', { email: formData.email });
+      await axios.post("/api/auth/resend-otp", { email: formData.email });
       setOtpTimer(300);
-      addToast('New OTP sent to your email', 'success');
+      addToast("New OTP sent to your email", "success");
     } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to resend OTP';
-      addToast(errorMessage, 'error');
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to resend OTP";
+      addToast(errorMessage, "error");
     } finally {
       setLoading(false);
     }
@@ -143,15 +164,18 @@ const RegistrationForm = () => {
   const verifyOTP = async () => {
     try {
       setLoading(true);
-      await axios.post('/api/auth/verify-otp', {
+      await axios.post("/api/auth/verify-otp", {
         email: formData.email,
-        otp: formData.otp
+        otp: formData.otp,
       });
-      addToast('OTP verified successfully', 'success');
+      addToast("OTP verified successfully", "success");
       setCurrentStep(3);
     } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message || 'OTP verification failed';
-      addToast(errorMessage, 'error');
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "OTP verification failed";
+      addToast(errorMessage, "error");
     } finally {
       setLoading(false);
     }
@@ -160,25 +184,26 @@ const RegistrationForm = () => {
   const registerUser = async () => {
     try {
       setLoading(true);
-      const response = await axios.post('/api/auth/register', formData);
-      addToast('Account created successfully!', 'success');
+      const response = await axios.post("/api/auth/register", formData);
+      addToast("Account created successfully!", "success");
       // Reset form or redirect
       setTimeout(() => {
         setCurrentStep(1);
         setFormData({
-          username: '',
-          email: '',
-          name: '',
-          password: '',
-          confirmPassword: '',
-          otp: ''
+          username: "",
+          email: "",
+          name: "",
+          password: "",
+          confirmPassword: "",
+          otp: "",
         });
         setOtpSent(false);
         setAvailability({});
       }, 2000);
     } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message || 'Registration failed';
-      addToast(errorMessage, 'error');
+      const errorMessage =
+        error.response?.data?.message || error.message || "Registration failed";
+      addToast(errorMessage, "error");
     } finally {
       setLoading(false);
     }
@@ -188,11 +213,14 @@ const RegistrationForm = () => {
     if (currentStep === 1) {
       // Validate step 1
       if (!formData.username || !formData.email || !formData.name) {
-        addToast('Please fill all required fields', 'error');
+        addToast("Please fill all required fields", "error");
         return;
       }
-      if (availability.username !== 'available' || availability.email !== 'available') {
-        addToast('Please check username and email availability', 'error');
+      if (
+        availability.username !== "available" ||
+        availability.email !== "available"
+      ) {
+        addToast("Please check username and email availability", "error");
         return;
       }
       setCurrentStep(2);
@@ -204,22 +232,28 @@ const RegistrationForm = () => {
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const renderStepIndicator = () => (
     <div className="flex items-center justify-center mb-8">
       {[1, 2, 3].map((step) => (
         <React.Fragment key={step}>
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-            currentStep >= step ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-400'
-          }`}>
+          <div
+            className={`w-10 h-10 rounded-full flex items-center justify-center ${
+              currentStep >= step
+                ? "bg-purple-600 text-white"
+                : "bg-gray-700 text-gray-400"
+            }`}
+          >
             {step}
           </div>
           {step < 3 && (
-            <div className={`w-16 h-1 mx-2 ${
-              currentStep > step ? 'bg-purple-600' : 'bg-gray-700'
-            }`} />
+            <div
+              className={`w-16 h-1 mx-2 ${
+                currentStep > step ? "bg-purple-600" : "bg-gray-700"
+              }`}
+            />
           )}
         </React.Fragment>
       ))}
@@ -235,12 +269,17 @@ const RegistrationForm = () => {
         </div>
         <p className="text-gray-400">Join the gaming community</p>
       </div>
-      
+
       {/* Name */}
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Full Name
+        </label>
         <div className="relative">
-          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
+          <User
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+            size={20}
+          />
           <input
             type="text"
             name="name"
@@ -255,53 +294,79 @@ const RegistrationForm = () => {
 
       {/* Username */}
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Username</label>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Username
+        </label>
         <div className="relative">
-          <UserCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
+          <UserCheck
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+            size={20}
+          />
           <input
             type="text"
             name="username"
             value={formData.username}
             onChange={handleInputChange}
-            onBlur={() => checkAvailability('username')}
+            onBlur={() => checkAvailability("username")}
             className="w-full pl-10 pr-12 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
             placeholder="Choose a username"
             required
           />
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-            {availability.username === 'checking' && <Loader className="animate-spin text-gray-500" size={20} />}
-            {availability.username === 'available' && <Check className="text-green-500" size={20} />}
-            {availability.username === 'unavailable' && <X className="text-red-500" size={20} />}
+            {availability.username === "checking" && (
+              <Loader className="animate-spin text-gray-500" size={20} />
+            )}
+            {availability.username === "available" && (
+              <Check className="text-green-500" size={20} />
+            )}
+            {availability.username === "unavailable" && (
+              <X className="text-red-500" size={20} />
+            )}
           </div>
         </div>
       </div>
 
       {/* Email */}
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Email
+        </label>
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
+          <Mail
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+            size={20}
+          />
           <input
             type="email"
             name="email"
             value={formData.email}
             onChange={handleInputChange}
-            onBlur={() => checkAvailability('email')}
+            onBlur={() => checkAvailability("email")}
             className="w-full pl-10 pr-12 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
             placeholder="Enter your email"
             required
           />
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-            {availability.email === 'checking' && <Loader className="animate-spin text-gray-500" size={20} />}
-            {availability.email === 'available' && <Check className="text-green-500" size={20} />}
-            {availability.email === 'unavailable' && <X className="text-red-500" size={20} />}
+            {availability.email === "checking" && (
+              <Loader className="animate-spin text-gray-500" size={20} />
+            )}
+            {availability.email === "available" && (
+              <Check className="text-green-500" size={20} />
+            )}
+            {availability.email === "unavailable" && (
+              <X className="text-red-500" size={20} />
+            )}
           </div>
         </div>
       </div>
 
       <button
         onClick={nextStep}
-        disabled={loading || availability.username !== 'available' || availability.email !== 'available'}
+        disabled={
+          loading ||
+          availability.username !== "available" ||
+          availability.email !== "available"
+        }
         className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all font-medium tracking-wide"
       >
         Next Step
@@ -317,7 +382,7 @@ const RegistrationForm = () => {
           <h2 className="text-2xl font-bold text-white">Verify Email</h2>
         </div>
       </div>
-      
+
       {!otpSent ? (
         <div className="text-center space-y-4">
           <p className="text-gray-400">We'll send a verification code to:</p>
@@ -327,15 +392,24 @@ const RegistrationForm = () => {
             disabled={loading}
             className="bg-purple-600 text-white py-3 px-6 rounded-lg hover:bg-purple-700 disabled:opacity-50 flex items-center justify-center gap-2 mx-auto transition-all"
           >
-            {loading ? <Loader className="animate-spin" size={20} /> : <Send size={20} />}
+            {loading ? (
+              <Loader className="animate-spin" size={20} />
+            ) : (
+              <Send size={20} />
+            )}
             Send OTP
           </button>
         </div>
       ) : (
         <div className="space-y-4">
-          <p className="text-center text-gray-400">Enter the 6-digit code sent to your email</p>
+          <p className="text-center text-gray-400">
+            Enter the 6-digit code sent to your email
+          </p>
           <div className="relative">
-            <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
+            <Shield
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+              size={20}
+            />
             <input
               type="text"
               name="otp"
@@ -346,10 +420,12 @@ const RegistrationForm = () => {
               maxLength="6"
             />
           </div>
-          
+
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-500">
-              {otpTimer > 0 ? `Resend in ${formatTime(otpTimer)}` : 'OTP expired'}
+              {otpTimer > 0
+                ? `Resend in ${formatTime(otpTimer)}`
+                : "OTP expired"}
             </span>
             <button
               onClick={resendOTP}
@@ -366,7 +442,11 @@ const RegistrationForm = () => {
             disabled={loading || formData.otp.length !== 6}
             className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
           >
-            {loading ? <Loader className="animate-spin" size={20} /> : <Check size={20} />}
+            {loading ? (
+              <Loader className="animate-spin" size={20} />
+            ) : (
+              <Check size={20} />
+            )}
             Verify OTP
           </button>
         </div>
@@ -382,14 +462,19 @@ const RegistrationForm = () => {
           <h2 className="text-2xl font-bold text-white">Set Password</h2>
         </div>
       </div>
-      
+
       {/* Password */}
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Password
+        </label>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
+          <Lock
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+            size={20}
+          />
           <input
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             name="password"
             value={formData.password}
             onChange={handleInputChange}
@@ -409,11 +494,16 @@ const RegistrationForm = () => {
 
       {/* Confirm Password */}
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Confirm Password
+        </label>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
+          <Lock
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+            size={20}
+          />
           <input
-            type={showConfirmPassword ? 'text' : 'password'}
+            type={showConfirmPassword ? "text" : "password"}
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleInputChange}
@@ -441,7 +531,9 @@ const RegistrationForm = () => {
           ) : (
             <>
               <X className="text-red-500" size={16} />
-              <span className="text-red-400 text-sm">Passwords don't match</span>
+              <span className="text-red-400 text-sm">
+                Passwords don't match
+              </span>
             </>
           )}
         </div>
@@ -449,10 +541,18 @@ const RegistrationForm = () => {
 
       <button
         onClick={registerUser}
-        disabled={loading || formData.password !== formData.confirmPassword || !formData.password}
+        disabled={
+          loading ||
+          formData.password !== formData.confirmPassword ||
+          !formData.password
+        }
         className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all font-medium tracking-wide"
       >
-        {loading ? <Loader className="animate-spin" size={20} /> : <UserCheck size={20} />}
+        {loading ? (
+          <Loader className="animate-spin" size={20} />
+        ) : (
+          <UserCheck size={20} />
+        )}
         Create Account
       </button>
     </div>
@@ -466,9 +566,9 @@ const RegistrationForm = () => {
           <div className="absolute top-0 left-0 w-32 h-32 border-4 border-white rounded-full transform -translate-x-16 -translate-y-16"></div>
           <div className="absolute bottom-0 right-0 w-32 h-32 border-4 border-white rounded-full translate-x-16 translate-y-16"></div>
         </div>
-        
+
         {renderStepIndicator()}
-        
+
         {currentStep === 1 && renderStep1()}
         {currentStep === 2 && renderStep2()}
         {currentStep === 3 && renderStep3()}
@@ -484,7 +584,7 @@ const RegistrationForm = () => {
       </div>
 
       {/* Toast notifications */}
-      {toasts.map(toast => (
+      {toasts.map((toast) => (
         <Toast
           key={toast.id}
           message={toast.message}

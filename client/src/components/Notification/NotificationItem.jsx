@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useNotifications } from '../../context/NotificationContext';
-import { Check, Trash2, X } from 'lucide-react';
+import React, { useState } from "react";
+import { useNotifications } from "../../context/NotificationContext";
+import { Check, Trash2, X } from "lucide-react";
 
 function NotificationItem({ notification }) {
   const { markAsRead, deleteNotification } = useNotifications();
@@ -21,10 +21,12 @@ function NotificationItem({ notification }) {
     const notifDate = new Date(date);
     const diffInSeconds = Math.floor((now - notifDate) / 1000);
 
-    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 60) return "Just now";
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    if (diffInSeconds < 2592000)
+      return `${Math.floor(diffInSeconds / 86400)}d ago`;
 
     return notifDate.toLocaleDateString();
   };
@@ -32,7 +34,7 @@ function NotificationItem({ notification }) {
   return (
     <div
       className={`p-3 border-b border-gray-700 hover:bg-gray-750 relative transition-colors duration-150 ${
-        !notification.isRead ? 'bg-purple-900 bg-opacity-20' : 'bg-gray-800'
+        !notification.isRead ? "bg-purple-900 bg-opacity-20" : "bg-gray-800"
       }`}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
@@ -44,11 +46,11 @@ function NotificationItem({ notification }) {
               <div className="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0"></div>
             )}
             <p className="text-sm font-medium text-gray-200 truncate">
-              {notification.title || 'Notification'}
+              {notification.title || "Notification"}
             </p>
           </div>
           <p className="text-sm text-gray-400 line-clamp-2">
-            {notification.message || notification.content || 'New notification'}
+            {notification.message || notification.content || "New notification"}
           </p>
           <p className="text-xs text-purple-400 mt-1">
             {formatTimeAgo(notification.createdAt)}

@@ -1,10 +1,11 @@
-import React from 'react';
-import { useNotifications } from '../../context/NotificationContext';
-import NotificationItem from './NotificationItem';
-import { Bell, X, CheckCircle } from 'lucide-react';
+import React from "react";
+import { useNotifications } from "../../context/NotificationContext";
+import NotificationItem from "./NotificationItem";
+import { Bell, X, CheckCircle } from "lucide-react";
 
 function NotificationDropdown({ onClose }) {
-  const { notifications, unreadCount, markAllAsRead, loading } = useNotifications();
+  const { notifications, unreadCount, markAllAsRead, loading } =
+    useNotifications();
 
   return (
     <div className="max-h-96 overflow-hidden bg-gray-800 border border-gray-700 rounded-lg shadow-xl">
@@ -53,12 +54,19 @@ function NotificationDropdown({ onClose }) {
               <Bell className="w-6 h-6 text-gray-600" />
             </div>
             <p className="text-sm">No notifications yet</p>
-            <p className="text-xs mt-1 text-gray-600">We'll notify you when something arrives</p>
+            <p className="text-xs mt-1 text-gray-600">
+              We'll notify you when something arrives
+            </p>
           </div>
         ) : (
-          notifications.slice(0, 5).map((notification) => (
-            <NotificationItem key={notification._id} notification={notification} />
-          ))
+          notifications
+            .slice(0, 5)
+            .map((notification) => (
+              <NotificationItem
+                key={notification._id}
+                notification={notification}
+              />
+            ))
         )}
       </div>
 
@@ -68,7 +76,7 @@ function NotificationDropdown({ onClose }) {
           <button
             onClick={() => {
               onClose();
-              window.location.href = '/notification';
+              window.location.href = "/notification";
             }}
             className="w-full text-center text-purple-400 hover:text-purple-300 font-medium transition-colors text-sm"
           >

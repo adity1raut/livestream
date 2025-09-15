@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React from "react";
 
 const LoadingState = () => (
   <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center">

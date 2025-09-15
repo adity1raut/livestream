@@ -1,10 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, Heart, Share2, Flag, Settings, Clock } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import StreamPlayer from './StreamPlayer';
-import StreamChat from './StreamChat';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  ArrowLeft,
+  Users,
+  Heart,
+  Share2,
+  Flag,
+  Settings,
+  Clock,
+} from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import StreamPlayer from "./StreamPlayer";
+import StreamChat from "./StreamChat";
+import axios from "axios";
 
 const StreamViewer = ({ stream: initialStream, onBack }) => {
   const { id } = useParams();
@@ -24,16 +32,18 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
       setLoading(true);
       setError(null);
       const response = await axios.get(`/api/stream/${streamId}`, {
-        headers: isAuthenticated ? { Authorization: `Bearer ${localStorage.getItem('token')}` } : {}
+        headers: isAuthenticated
+          ? { Authorization: `Bearer ${localStorage.getItem("token")}` }
+          : {},
       });
-      
+
       if (response.status === 200) {
         setStream(response.data);
         setViewerCount(response.data.viewers?.length || 0);
       }
     } catch (error) {
-      console.error('Error fetching stream:', error);
-      setError('Failed to load stream');
+      console.error("Error fetching stream:", error);
+      setError("Failed to load stream");
     } finally {
       setLoading(false);
     }
@@ -55,15 +65,19 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
     if (!stream?.isLive || hasJoined || !isAuthenticated) return;
 
     try {
-      const response = await axios.post(`/api/stream/${stream._id}/join`, {}, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      const response = await axios.post(
+        `/api/stream/${stream._id}/join`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        },
+      );
       if (response.status === 200) {
         setHasJoined(true);
         setViewerCount(response.data.viewers);
       }
     } catch (error) {
-      console.error('Error joining stream:', error);
+      console.error("Error joining stream:", error);
     }
   };
 
@@ -72,38 +86,46 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
     if (!hasJoined || !stream) return;
 
     try {
-      const response = await axios.post(`/api/stream/${stream._id}/leave`, {}, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      const response = await axios.post(
+        `/api/stream/${stream._id}/leave`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        },
+      );
       if (response.status === 200) {
         setHasJoined(false);
         setViewerCount(response.data.viewers);
       }
     } catch (error) {
-      console.error('Error leaving stream:', error);
+      console.error("Error leaving stream:", error);
     }
   };
 
   // Handle follow/unfollow
   const handleFollowToggle = async () => {
     if (!isAuthenticated) {
-      alert('Please log in to follow streamers');
+      alert("Please log in to follow streamers");
       return;
     }
 
     setLoading(true);
     try {
       // This would be your follow/unfollow API endpoint
-      const endpoint = isFollowing ? 'unfollow' : 'follow';
-      const response = await axios.post(`/api/users/${stream.host._id}/${endpoint}`, {}, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      
+      const endpoint = isFollowing ? "unfollow" : "follow";
+      const response = await axios.post(
+        `/api/users/${stream.host._id}/${endpoint}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        },
+      );
+
       if (response.status === 200) {
         setIsFollowing(!isFollowing);
       }
     } catch (error) {
-      console.error('Error toggling follow:', error);
+      console.error("Error toggling follow:", error);
     } finally {
       setLoading(false);
     }
@@ -115,19 +137,23 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
     const shareText = `Check out "${stream.title}" by ${stream.host?.username}`;
 
     switch (platform) {
-      case 'copy':
+      case "copy":
         try {
           await navigator.clipboard.writeText(streamUrl);
-          alert('Link copied to clipboard!');
+          alert("Link copied to clipboard!");
         } catch (error) {
-          console.error('Failed to copy:', error);
+          console.error("Failed to copy:", error);
         }
         break;
-      case 'twitter':
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(streamUrl)}`);
+      case "twitter":
+        window.open(
+          `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(streamUrl)}`,
+        );
         break;
-      case 'facebook':
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(streamUrl)}`);
+      case "facebook":
+        window.open(
+          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(streamUrl)}`,
+        );
         break;
       default:
         break;
@@ -138,20 +164,22 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
   // Report stream
   const handleReport = () => {
     if (!isAuthenticated) {
-      alert('Please log in to report content');
+      alert("Please log in to report content");
       return;
     }
     // Implement report functionality
-    alert('Report functionality would be implemented here');
+    alert("Report functionality would be implemented here");
   };
 
   // Format duration
   const formatDuration = (start, end) => {
-    if (!start) return '0m';
-    const duration = end ? new Date(end) - new Date(start) : Date.now() - new Date(start);
+    if (!start) return "0m";
+    const duration = end
+      ? new Date(end) - new Date(start)
+      : Date.now() - new Date(start);
     const minutes = Math.floor(duration / 1000 / 60);
     const hours = Math.floor(minutes / 60);
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes % 60}m`;
     }
@@ -163,7 +191,7 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
     if (onBack) {
       onBack();
     } else {
-      navigate('/streams');
+      navigate("/streams");
     }
   };
 
@@ -188,14 +216,16 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
     const interval = setInterval(async () => {
       try {
         const response = await axios.get(`/api/stream/${stream._id}`, {
-          headers: isAuthenticated ? { Authorization: `Bearer ${localStorage.getItem('token')}` } : {}
+          headers: isAuthenticated
+            ? { Authorization: `Bearer ${localStorage.getItem("token")}` }
+            : {},
         });
         if (response.status === 200) {
           setStream(response.data);
           setViewerCount(response.data.viewers?.length || 0);
         }
       } catch (error) {
-        console.error('Error refreshing stream:', error);
+        console.error("Error refreshing stream:", error);
       }
     }, 30000); // Refresh every 30 seconds
 
@@ -220,9 +250,12 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Stream Not Found</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Stream Not Found
+          </h2>
           <p className="text-gray-600 mb-4">
-            {error || 'The stream you\'re looking for doesn\'t exist or has been removed.'}
+            {error ||
+              "The stream you're looking for doesn't exist or has been removed."}
           </p>
           <button
             onClick={handleBack}
@@ -246,10 +279,13 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
                 onClick={handleBack}
                 className="flex items-center text-white/90 hover:text-purple-300 transition-all duration-200 font-medium group"
               >
-                <ArrowLeft size={20} className="mr-2 group-hover:-translate-x-1 transition-transform" />
+                <ArrowLeft
+                  size={20}
+                  className="mr-2 group-hover:-translate-x-1 transition-transform"
+                />
                 Back
               </button>
-              
+
               <div className="border-l border-white/30 pl-6">
                 <h1 className="text-2xl font-bold text-white truncate max-w-md mb-1">
                   {stream.title}
@@ -258,7 +294,9 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
                   <span className="font-medium">{stream.host?.username}</span>
                   <span className="flex items-center bg-purple-500/20 backdrop-blur-sm px-3 py-1 rounded-full border border-purple-400/30">
                     <Users size={14} className="mr-1 text-purple-300" />
-                    <span className="font-medium text-purple-200">{viewerCount}</span>
+                    <span className="font-medium text-purple-200">
+                      {viewerCount}
+                    </span>
                   </span>
                   {stream.startedAt && (
                     <span className="flex items-center bg-emerald-500/20 backdrop-blur-sm px-3 py-1 rounded-full border border-emerald-400/30">
@@ -288,16 +326,19 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
                   disabled={loading}
                   className={`px-6 py-2.5 rounded-full font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 border ${
                     isFollowing
-                      ? 'bg-white/10 backdrop-blur-sm text-white border-white/30 hover:bg-white/20'
-                      : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-purple-400/50 hover:from-purple-600 hover:to-pink-600'
+                      ? "bg-white/10 backdrop-blur-sm text-white border-white/30 hover:bg-white/20"
+                      : "bg-gradient-to-r from-purple-500 to-pink-500 text-white border-purple-400/50 hover:from-purple-600 hover:to-pink-600"
                   } disabled:opacity-50 disabled:transform-none`}
                 >
                   {loading ? (
                     <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <>
-                      <Heart size={16} className={`inline mr-2 ${isFollowing ? 'fill-current' : ''}`} />
-                      {isFollowing ? 'Following' : 'Follow'}
+                      <Heart
+                        size={16}
+                        className={`inline mr-2 ${isFollowing ? "fill-current" : ""}`}
+                      />
+                      {isFollowing ? "Following" : "Follow"}
                     </>
                   )}
                 </button>
@@ -311,24 +352,24 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
                 >
                   <Share2 size={20} />
                 </button>
-                
+
                 {showShareMenu && (
                   <div className="absolute right-0 mt-3 w-56 bg-slate-800/95 backdrop-blur-md rounded-xl shadow-2xl border border-white/20 z-50 overflow-hidden">
                     <div className="py-2">
                       <button
-                        onClick={() => handleShare('copy')}
+                        onClick={() => handleShare("copy")}
                         className="w-full text-left px-6 py-3 text-white hover:bg-purple-500/20 hover:text-purple-300 transition-all duration-200 font-medium"
                       >
                         📋 Copy Link
                       </button>
                       <button
-                        onClick={() => handleShare('twitter')}
+                        onClick={() => handleShare("twitter")}
                         className="w-full text-left px-6 py-3 text-white hover:bg-purple-500/20 hover:text-purple-300 transition-all duration-200 font-medium"
                       >
                         🐦 Share on Twitter
                       </button>
                       <button
-                        onClick={() => handleShare('facebook')}
+                        onClick={() => handleShare("facebook")}
                         className="w-full text-left px-6 py-3 text-white hover:bg-purple-500/20 hover:text-purple-300 transition-all duration-200 font-medium"
                       >
                         📘 Share on Facebook
@@ -359,18 +400,21 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
             <div className="bg-slate-800/40 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden border border-white/10">
               <StreamPlayer stream={stream} className="aspect-video" />
             </div>
-            
+
             {/* Stream Info */}
             <div className="bg-slate-800/40 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white/10">
               <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center space-x-6">
                   <div className="relative">
                     <img
-                      src={stream.host?.profile?.profileImage || '/default-avatar.png'}
+                      src={
+                        stream.host?.profile?.profileImage ||
+                        "/default-avatar.png"
+                      }
                       alt={stream.host?.username}
                       className="w-16 h-16 rounded-full border-4 border-purple-400/50 shadow-xl"
                       onError={(e) => {
-                        e.target.src = '/default-avatar.png';
+                        e.target.src = "/default-avatar.png";
                       }}
                     />
                     {stream.isLive && (
@@ -386,31 +430,38 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="text-right bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm p-6 rounded-xl border border-purple-400/30 shadow-lg">
                   <div className="text-3xl font-bold text-purple-300 mb-1">
                     {viewerCount}
                   </div>
                   <div className="text-sm text-purple-400 font-medium">
-                    {viewerCount === 1 ? 'viewer' : 'viewers'}
+                    {viewerCount === 1 ? "viewer" : "viewers"}
                   </div>
                 </div>
               </div>
 
               <div className="border-t border-white/20 pt-6">
-                <h4 className="font-bold text-lg mb-3 text-white">About this stream</h4>
+                <h4 className="font-bold text-lg mb-3 text-white">
+                  About this stream
+                </h4>
                 <p className="text-slate-300 leading-relaxed text-base">
-                  {stream.description || 'No description provided for this stream.'}
+                  {stream.description ||
+                    "No description provided for this stream."}
                 </p>
-                
+
                 {stream.startedAt && (
                   <div className="mt-6 p-4 bg-slate-700/40 backdrop-blur-sm rounded-xl border border-white/10">
                     <div className="text-sm text-slate-400">
-                      <span className="font-medium text-white">Started:</span> {new Date(stream.startedAt).toLocaleString()}
+                      <span className="font-medium text-white">Started:</span>{" "}
+                      {new Date(stream.startedAt).toLocaleString()}
                       {stream.endedAt && (
                         <>
                           <br />
-                          <span className="font-medium text-white">Ended:</span> {new Date(stream.endedAt).toLocaleString()}
+                          <span className="font-medium text-white">
+                            Ended:
+                          </span>{" "}
+                          {new Date(stream.endedAt).toLocaleString()}
                         </>
                       )}
                     </div>

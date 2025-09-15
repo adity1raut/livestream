@@ -6,7 +6,7 @@ const StreamSchema = new mongoose.Schema(
     title: { type: String, required: true },
     description: { type: String },
 
-    streamKey: { type: String, required: true, unique: true }, 
+    streamKey: { type: String, required: true, unique: true },
     streamUrl: { type: String },
 
     isLive: { type: Boolean, default: true },
@@ -17,9 +17,9 @@ const StreamSchema = new mongoose.Schema(
     recordedUrl: { type: String },
 
     startedAt: { type: Date, default: Date.now },
-    endedAt: { type: Date }
+    endedAt: { type: Date },
   },
-  { timestamps: true } 
+  { timestamps: true },
 );
 
 const Stream = mongoose.model("Stream", StreamSchema);

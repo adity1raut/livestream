@@ -1,7 +1,7 @@
-import React from 'react';
-import { Gamepad2, Search, MessageCircle, Users } from 'lucide-react';
-import ConversationsList from './ConversationsList';
-import SearchSection from './SearchSection';
+import React from "react";
+import { Gamepad2, Search, MessageCircle, Users } from "lucide-react";
+import ConversationsList from "./ConversationsList";
+import SearchSection from "./SearchSection";
 
 const Sidebar = ({
   activeView,
@@ -17,7 +17,7 @@ const Sidebar = ({
   openConversation,
   startConversation,
   getOtherUser,
-  formatTime
+  formatTime,
 }) => {
   return (
     <div className="w-80 bg-gray-800/80 backdrop-blur-sm border-r border-purple-500/30 flex flex-col shadow-lg">
@@ -32,7 +32,7 @@ const Sidebar = ({
             </h1>
           </div>
           <button
-            onClick={() => setActiveView('search')}
+            onClick={() => setActiveView("search")}
             className="p-3 rounded-xl bg-gray-700/80 hover:bg-gray-600/80 transition-all duration-300 text-purple-400 hover:scale-105 shadow-lg hover:shadow-purple-500/25"
           >
             <Search className="w-5 h-5" />
@@ -42,22 +42,22 @@ const Sidebar = ({
         {/* Navigation Tabs */}
         <div className="flex gap-3">
           <button
-            onClick={() => setActiveView('conversations')}
+            onClick={() => setActiveView("conversations")}
             className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-300 flex items-center justify-center shadow-lg ${
-              activeView === 'conversations'
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-purple-500/50 scale-105'
-                : 'bg-gray-700/60 text-gray-300 hover:bg-gray-600/60 hover:scale-102'
+              activeView === "conversations"
+                ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-purple-500/50 scale-105"
+                : "bg-gray-700/60 text-gray-300 hover:bg-gray-600/60 hover:scale-102"
             }`}
           >
             <MessageCircle className="w-4 h-4 mr-2" />
             Chats
           </button>
           <button
-            onClick={() => setActiveView('search')}
+            onClick={() => setActiveView("search")}
             className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-300 flex items-center justify-center shadow-lg ${
-              activeView === 'search'
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-purple-500/50 scale-105'
-                : 'bg-gray-700/60 text-gray-300 hover:bg-gray-600/60 hover:scale-102'
+              activeView === "search"
+                ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-purple-500/50 scale-105"
+                : "bg-gray-700/60 text-gray-300 hover:bg-gray-600/60 hover:scale-102"
             }`}
           >
             <Users className="w-4 h-4 mr-2" />
@@ -67,7 +67,7 @@ const Sidebar = ({
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar">
-        {activeView === 'conversations' ? (
+        {activeView === "conversations" ? (
           <ConversationsList
             conversations={conversations}
             user={user}

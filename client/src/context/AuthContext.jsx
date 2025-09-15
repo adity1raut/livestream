@@ -32,7 +32,7 @@ export function AuthProvider({ children }) {
       const res = await axios.post(
         "/api/auth/login",
         { identifier, password },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       if (res.status === 200) {
         const profileRes = await axios.get("/api/auth/profile", {
@@ -44,7 +44,10 @@ export function AuthProvider({ children }) {
         return { success: true };
       }
     } catch (error) {
-      return { success: false, message: error.response?.data?.message || error.message };
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message,
+      };
     }
   };
 
@@ -68,7 +71,10 @@ export function AuthProvider({ children }) {
         return { success: true, message: res.data.message };
       }
     } catch (error) {
-      return { success: false, message: error.response?.data?.message || error.message };
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message,
+      };
     }
   };
 

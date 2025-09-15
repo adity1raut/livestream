@@ -1,14 +1,14 @@
 import express from "express";
-import { 
-  createStream, 
-  endStream, 
-  getAllLiveStreams, 
-  getStreamById, 
-  getUserStreams, 
-  joinStream, 
-  leaveStream, 
+import {
+  createStream,
+  endStream,
+  getAllLiveStreams,
+  getStreamById,
+  getUserStreams,
+  joinStream,
+  leaveStream,
   sendChatMessage,
-  getStreamAnalytics
+  getStreamAnalytics,
 } from "../controllers/Stream/steam.router.js";
 import authenticateToken from "../middleware/Auth.js";
 

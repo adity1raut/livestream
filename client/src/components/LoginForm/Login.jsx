@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { Eye, EyeOff, Lock, Mail, AlertCircle, Gamepad2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { Eye, EyeOff, Lock, Mail, AlertCircle, Gamepad2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const LoginForm = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localError, setLocalError] = useState(null);
@@ -18,12 +18,12 @@ const LoginForm = () => {
 
   // Redirect if already logged in
   useEffect(() => {
-    if (user) navigate('/profile');
+    if (user) navigate("/profile");
   }, [user, navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (localError) setLocalError(null);
   };
 
@@ -31,7 +31,7 @@ const LoginForm = () => {
     e.preventDefault();
 
     if (!formData.email || !formData.password) {
-      setLocalError('Please fill in all fields');
+      setLocalError("Please fill in all fields");
       return;
     }
 
@@ -39,7 +39,7 @@ const LoginForm = () => {
     setLocalError(null);
 
     const res = await login(formData.email, formData.password);
-    if (!res.success) setLocalError(res.message || 'Login failed');
+    if (!res.success) setLocalError(res.message || "Login failed");
 
     setIsSubmitting(false);
   };
@@ -47,7 +47,12 @@ const LoginForm = () => {
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && formData.email && formData.password && !isSubmitting) {
+    if (
+      e.key === "Enter" &&
+      formData.email &&
+      formData.password &&
+      !isSubmitting
+    ) {
       handleSubmit(e);
     }
   };
@@ -71,13 +76,17 @@ const LoginForm = () => {
           <div className="absolute top-0 left-0 w-32 h-32 border-4 border-white rounded-full transform -translate-x-16 -translate-y-16"></div>
           <div className="absolute bottom-0 right-0 w-32 h-32 border-4 border-white rounded-full translate-x-16 translate-y-16"></div>
         </div>
-        
+
         <div className="bg-gradient-to-r from-purple-800 to-purple-900 px-8 py-6 border-b border-gray-700 relative">
           <div className="flex items-center justify-center mb-2">
             <Gamepad2 className="w-6 h-6 text-purple-400 mr-2" />
-            <h2 className="text-2xl font-bold text-white text-center">GAME PORTAL</h2>
+            <h2 className="text-2xl font-bold text-white text-center">
+              GAME PORTAL
+            </h2>
           </div>
-          <p className="text-purple-300 text-center mt-2 text-sm">Sign in to continue your adventure</p>
+          <p className="text-purple-300 text-center mt-2 text-sm">
+            Sign in to continue your adventure
+          </p>
         </div>
 
         <div className="px-8 py-6 relative">
@@ -90,7 +99,10 @@ const LoginForm = () => {
 
           <div className="space-y-4" onKeyPress={handleKeyPress}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-300 mb-2"
+              >
                 Email Address
               </label>
               <div className="relative">
@@ -112,7 +124,10 @@ const LoginForm = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-300 mb-2"
+              >
                 Password
               </label>
               <div className="relative">
@@ -120,7 +135,7 @@ const LoginForm = () => {
                   <Lock className="h-5 w-5 text-gray-500" />
                 </div>
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
                   value={formData.password}
@@ -136,7 +151,11 @@ const LoginForm = () => {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-300 transition-colors"
                   disabled={isSubmitting}
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
                 </button>
               </div>
             </div>
@@ -152,18 +171,24 @@ const LoginForm = () => {
                   Signing In...
                 </>
               ) : (
-                'Sign In'
+                "Sign In"
               )}
             </button>
           </div>
 
           <div className="mt-6 text-center space-y-3">
-            <a href="/forgot-password" className="text-sm text-purple-400 hover:text-purple-300 hover:underline transition-colors block">
+            <a
+              href="/forgot-password"
+              className="text-sm text-purple-400 hover:text-purple-300 hover:underline transition-colors block"
+            >
               Forgot your password?
             </a>
             <div className="text-sm text-gray-500">
-              Don't have an account?{' '}
-              <a href="/register" className="text-purple-400 hover:text-purple-300 hover:underline transition-colors font-medium">
+              Don't have an account?{" "}
+              <a
+                href="/register"
+                className="text-purple-400 hover:text-purple-300 hover:underline transition-colors font-medium"
+              >
                 Sign up now
               </a>
             </div>

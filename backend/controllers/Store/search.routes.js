@@ -2,15 +2,15 @@ import Product from "../../models/Product.models.js";
 
 export async function searchProducts(req, res) {
   try {
-    const { 
-      q, 
-      minPrice, 
-      maxPrice, 
-      store, 
-      page = 1, 
-      limit = 12, 
-      sort = "createdAt", 
-      order = "desc" 
+    const {
+      q,
+      minPrice,
+      maxPrice,
+      store,
+      page = 1,
+      limit = 12,
+      sort = "createdAt",
+      order = "desc",
     } = req.query;
 
     let query = {};
@@ -19,7 +19,7 @@ export async function searchProducts(req, res) {
     if (q) {
       query.$or = [
         { name: { $regex: q, $options: "i" } },
-        { description: { $regex: q, $options: "i" } }
+        { description: { $regex: q, $options: "i" } },
       ];
     }
 
@@ -55,12 +55,12 @@ export async function searchProducts(req, res) {
       totalPages: Math.ceil(total / limit),
       currentPage: page,
       total,
-      filters: { q, minPrice, maxPrice, store }
+      filters: { q, minPrice, maxPrice, store },
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}
 
 // GET /api/stores/trending/products - Get trending products
 export async function getTrendingProducts(req, res) {
@@ -72,33 +72,32 @@ export async function getTrendingProducts(req, res) {
       {
         $match: {
           stock: { $gt: 0 },
-          ratings: { $exists: true, $not: { $size: 0 } }
-        }
+          ratings: { $exists: true, $not: { $size: 0 } },
+        },
       },
       {
         $addFields: {
           averageRating: { $avg: "$ratings.rating" },
-          ratingCount: { $size: "$ratings" }
-        }
+          ratingCount: { $size: "$ratings" },
+        },
       },
       {
         $sort: {
           averageRating: -1,
           ratingCount: -1,
-          createdAt: -1
-        }
+          createdAt: -1,
+        },
       },
-      { $limit: parseInt(limit) }
+      { $limit: parseInt(limit) },
     ]);
 
     const populatedProducts = await Product.populate(products, [
       { path: "store", select: "name logo owner" },
-      { path: "ratings.user", select: "username profile.name" }
+      { path: "ratings.user", select: "username profile.name" },
     ]);
 
     res.status(200).json(populatedProducts);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
-
+}

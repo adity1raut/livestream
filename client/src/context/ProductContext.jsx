@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
-import { useAuth } from './AuthContext';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import axios from "axios";
+import { useAuth } from "./AuthContext";
 
 const ProductContext = createContext();
 
@@ -18,11 +18,11 @@ export function ProductProvider({ children }) {
   const getAllProducts = async (params = {}) => {
     setLoading(true);
     try {
-      const res = await axios.get('/api/stores/products', { params });
+      const res = await axios.get("/api/stores/products", { params });
       setProducts(res.data.products || []);
       return res.data;
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error("Error fetching products:", error);
       return null;
     } finally {
       setLoading(false);
@@ -34,52 +34,71 @@ export function ProductProvider({ children }) {
       const res = await axios.get(`/api/stores/products/${id}`);
       return res.data;
     } catch (error) {
-      console.error('Error fetching product:', error);
+      console.error("Error fetching product:", error);
       return null;
     }
   };
 
   const addProduct = async (storeId, formData) => {
     try {
-      const res = await axios.post(`/api/stores/${storeId}/products`, formData, {
-        withCredentials: true,
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await axios.post(
+        `/api/stores/${storeId}/products`,
+        formData,
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        },
+      );
       return { success: true, data: res.data };
     } catch (error) {
-      return { success: false, message: error.response?.data?.error || error.message };
+      return {
+        success: false,
+        message: error.response?.data?.error || error.message,
+      };
     }
   };
 
   const updateProduct = async (storeId, productId, formData) => {
     try {
-      const res = await axios.put(`/api/stores/${storeId}/products/${productId}`, formData, {
-        withCredentials: true,
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await axios.put(
+        `/api/stores/${storeId}/products/${productId}`,
+        formData,
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        },
+      );
       return { success: true, data: res.data };
     } catch (error) {
-      return { success: false, message: error.response?.data?.error || error.message };
+      return {
+        success: false,
+        message: error.response?.data?.error || error.message,
+      };
     }
   };
 
   const deleteProduct = async (storeId, productId) => {
     try {
       await axios.delete(`/api/stores/${storeId}/products/${productId}`, {
-        withCredentials: true
+        withCredentials: true,
       });
       return { success: true };
     } catch (error) {
-      return { success: false, message: error.response?.data?.error || error.message };
+      return {
+        success: false,
+        message: error.response?.data?.error || error.message,
+      };
     }
   };
 
   const getStoreProducts = async (storeId, params = {}) => {
     try {
-      const res = await axios.get(`/api/stores/${storeId}/products`, { params });
+      const res = await axios.get(`/api/stores/${storeId}/products`, {
+        params,
+      });
       return res.data;
     } catch (error) {
-      console.error('Error fetching store products:', error);
+      console.error("Error fetching store products:", error);
       return null;
     }
   };
@@ -89,11 +108,14 @@ export function ProductProvider({ children }) {
       const res = await axios.post(
         `/api/stores/products/${productId}/rating`,
         { rating, review },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       return { success: true, data: res.data };
     } catch (error) {
-      return { success: false, message: error.response?.data?.error || error.message };
+      return {
+        success: false,
+        message: error.response?.data?.error || error.message,
+      };
     }
   };
 
@@ -101,11 +123,11 @@ export function ProductProvider({ children }) {
   const searchProducts = async (params = {}) => {
     setSearchLoading(true);
     try {
-      const res = await axios.get('/api/stores/search/products', { params });
+      const res = await axios.get("/api/stores/search/products", { params });
       setProducts(res.data.products || []);
       return res.data;
     } catch (error) {
-      console.error('Error searching products:', error);
+      console.error("Error searching products:", error);
       return null;
     } finally {
       setSearchLoading(false);
@@ -115,12 +137,12 @@ export function ProductProvider({ children }) {
   const getTrendingProducts = async (limit = 20) => {
     setLoading(true);
     try {
-      const res = await axios.get('/api/stores/trending/products', {
-        params: { limit }
+      const res = await axios.get("/api/stores/trending/products", {
+        params: { limit },
       });
       return res.data;
     } catch (error) {
-      console.error('Error fetching trending products:', error);
+      console.error("Error fetching trending products:", error);
       return null;
     } finally {
       setLoading(false);
@@ -130,21 +152,25 @@ export function ProductProvider({ children }) {
   // Wishlist Management
   const toggleWishlist = async (productId) => {
     try {
-      const res = await axios.post(`/api/stores/wishlist/add/${productId}`, {}, {
-        withCredentials: true
-      });
-      
+      const res = await axios.post(
+        `/api/stores/wishlist/add/${productId}`,
+        {},
+        {
+          withCredentials: true,
+        },
+      );
+
       if (res.data.inWishlist) {
-        setWishlist(prev => [...prev, res.data.product]);
+        setWishlist((prev) => [...prev, res.data.product]);
         return { success: true, message: res.data.message, inWishlist: true };
       } else {
-        setWishlist(prev => prev.filter(item => item._id !== productId));
+        setWishlist((prev) => prev.filter((item) => item._id !== productId));
         return { success: true, message: res.data.message, inWishlist: false };
       }
     } catch (error) {
-      return { 
-        success: false, 
-        message: error.response?.data?.error || error.message 
+      return {
+        success: false,
+        message: error.response?.data?.error || error.message,
       };
     }
   };
@@ -152,14 +178,14 @@ export function ProductProvider({ children }) {
   const getUserWishlist = async (page = 1, limit = 12) => {
     setLoading(true);
     try {
-      const res = await axios.get('/api/stores/wishlist', {
+      const res = await axios.get("/api/stores/wishlist", {
         params: { page, limit },
-        withCredentials: true
+        withCredentials: true,
       });
       setWishlist(res.data.products || []);
       return res.data;
     } catch (error) {
-      console.error('Error fetching wishlist:', error);
+      console.error("Error fetching wishlist:", error);
       return null;
     } finally {
       setLoading(false);
@@ -170,15 +196,16 @@ export function ProductProvider({ children }) {
   const createOrder = async (addressId) => {
     setOrderLoading(true);
     try {
-      const res = await axios.post('/api/stores/order/create', 
-        { addressId }, 
-        { withCredentials: true }
+      const res = await axios.post(
+        "/api/stores/order/create",
+        { addressId },
+        { withCredentials: true },
       );
       return { success: true, data: res.data };
     } catch (error) {
-      return { 
-        success: false, 
-        message: error.response?.data?.error || error.message 
+      return {
+        success: false,
+        message: error.response?.data?.error || error.message,
       };
     } finally {
       setOrderLoading(false);
@@ -188,14 +215,14 @@ export function ProductProvider({ children }) {
   const verifyPayment = async (paymentData) => {
     setOrderLoading(true);
     try {
-      const res = await axios.post('/api/stores/order/verify', paymentData, {
-        withCredentials: true
+      const res = await axios.post("/api/stores/order/verify", paymentData, {
+        withCredentials: true,
       });
       return { success: true, data: res.data };
     } catch (error) {
-      return { 
-        success: false, 
-        message: error.response?.data?.error || error.message 
+      return {
+        success: false,
+        message: error.response?.data?.error || error.message,
       };
     } finally {
       setOrderLoading(false);
@@ -207,11 +234,11 @@ export function ProductProvider({ children }) {
     setLoading(true);
     try {
       const res = await axios.get(`/api/stores/${storeId}/analytics`, {
-        withCredentials: true
+        withCredentials: true,
       });
       return res.data;
     } catch (error) {
-      console.error('Error fetching analytics:', error);
+      console.error("Error fetching analytics:", error);
       return null;
     } finally {
       setLoading(false);
@@ -221,20 +248,20 @@ export function ProductProvider({ children }) {
   // Helper function to update cart icon
   const updateCartIcon = (items) => {
     if (!Array.isArray(items)) return;
-    
+
     const totalItems = items.reduce((sum, item) => {
       const quantity = Number(item.quantity) || 0;
       return sum + quantity;
     }, 0);
-    
+
     // Update global cart count if function exists
-    if (typeof window !== 'undefined' && window.updateCartCount) {
+    if (typeof window !== "undefined" && window.updateCartCount) {
       window.updateCartCount(totalItems);
     }
-    
+
     // Also update document title or favicon if needed
-    if (typeof document !== 'undefined') {
-      const title = document.title.replace(/\(\d+\)/, '');
+    if (typeof document !== "undefined") {
+      const title = document.title.replace(/\(\d+\)/, "");
       document.title = totalItems > 0 ? `(${totalItems}) ${title}` : title;
     }
   };
@@ -248,51 +275,51 @@ export function ProductProvider({ children }) {
       updateCartIcon([]);
       return emptyCart;
     }
-    
+
     setCartLoading(true);
     try {
-      const response = await axios.get('/api/stores/cart', {
+      const response = await axios.get("/api/stores/cart", {
         withCredentials: true,
-        timeout: 10000 // Add timeout for better UX
+        timeout: 10000, // Add timeout for better UX
       });
-      
+
       // Backend already handles filtering null products and calculating totalAmount
       const cartData = response.data || { items: [], totalAmount: 0 };
-      
+
       // Ensure totalAmount is properly formatted
       const formattedCart = {
         ...cartData,
         totalAmount: Number(cartData.totalAmount || 0),
-        items: cartData.items || []
+        items: cartData.items || [],
       };
-      
+
       setCart(formattedCart);
       updateCartIcon(formattedCart.items);
-      
-      console.log('Cart fetched successfully:', {
+
+      console.log("Cart fetched successfully:", {
         itemCount: formattedCart.items.length,
-        totalAmount: formattedCart.totalAmount
+        totalAmount: formattedCart.totalAmount,
       });
-      
+
       return formattedCart;
     } catch (error) {
-      console.error('Error fetching cart:', error);
-      
+      console.error("Error fetching cart:", error);
+
       // Handle different error scenarios
       if (error.response?.status === 401) {
-        console.log('User not authenticated, clearing cart');
+        console.log("User not authenticated, clearing cart");
         const emptyCart = { items: [], totalAmount: 0 };
         setCart(emptyCart);
         updateCartIcon([]);
         return emptyCart;
       }
-      
+
       if (error.response?.status === 500) {
-        console.error('Server error while fetching cart:', error.response.data);
+        console.error("Server error while fetching cart:", error.response.data);
         // Keep existing cart state on server error to avoid data loss
         return cart;
       }
-      
+
       // For other errors, return empty cart but log for debugging
       const emptyCart = { items: [], totalAmount: 0 };
       setCart(emptyCart);
@@ -305,37 +332,42 @@ export function ProductProvider({ children }) {
 
   const addToCart = async (productId, quantity = 1, storeId) => {
     if (!isAuthenticated) {
-      return { 
-        success: false, 
-        message: 'Please login to add items to cart' 
+      return {
+        success: false,
+        message: "Please login to add items to cart",
       };
     }
-    
+
     if (!storeId) {
-      return { 
-        success: false, 
-        message: 'Store ID is required' 
+      return {
+        success: false,
+        message: "Store ID is required",
       };
     }
-    
+
     setCartLoading(true);
     try {
       const response = await axios.post(
         `/api/stores/${storeId}/cart/add`,
         { productId, quantity },
-        { withCredentials: true }
+        { withCredentials: true },
       );
-      
+
       const cartData = response.data || { items: [], totalAmount: 0 };
       setCart(cartData);
       updateCartIcon(cartData.items);
-      return { success: true, data: cartData, message: 'Item added to cart successfully' };
+      return {
+        success: true,
+        data: cartData,
+        message: "Item added to cart successfully",
+      };
     } catch (error) {
-      const errorMessage = error.response?.data?.error || 'Failed to add to cart';
-      console.error('Error adding to cart:', error);
-      return { 
-        success: false, 
-        message: errorMessage
+      const errorMessage =
+        error.response?.data?.error || "Failed to add to cart";
+      console.error("Error adding to cart:", error);
+      return {
+        success: false,
+        message: errorMessage,
       };
     } finally {
       setCartLoading(false);
@@ -344,37 +376,42 @@ export function ProductProvider({ children }) {
 
   const updateCartItem = async (productId, quantity) => {
     if (!isAuthenticated) {
-      return { 
-        success: false, 
-        message: 'Please login to update cart' 
+      return {
+        success: false,
+        message: "Please login to update cart",
       };
     }
-    
+
     if (!productId) {
-      return { 
-        success: false, 
-        message: 'Product ID is required' 
+      return {
+        success: false,
+        message: "Product ID is required",
       };
     }
-    
+
     setCartLoading(true);
     try {
       const response = await axios.put(
-        '/api/stores/cart/update',
+        "/api/stores/cart/update",
         { productId, quantity },
-        { withCredentials: true }
+        { withCredentials: true },
       );
-      
+
       const cartData = response.data || { items: [], totalAmount: 0 };
       setCart(cartData);
       updateCartIcon(cartData.items);
-      return { success: true, data: cartData, message: 'Cart updated successfully' };
+      return {
+        success: true,
+        data: cartData,
+        message: "Cart updated successfully",
+      };
     } catch (error) {
-      const errorMessage = error.response?.data?.error || 'Failed to update cart';
-      console.error('Error updating cart:', error);
-      return { 
-        success: false, 
-        message: errorMessage
+      const errorMessage =
+        error.response?.data?.error || "Failed to update cart";
+      console.error("Error updating cart:", error);
+      return {
+        success: false,
+        message: errorMessage,
       };
     } finally {
       setCartLoading(false);
@@ -383,35 +420,43 @@ export function ProductProvider({ children }) {
 
   const removeFromCart = async (productId) => {
     if (!isAuthenticated) {
-      return { 
-        success: false, 
-        message: 'Please login to remove items from cart' 
+      return {
+        success: false,
+        message: "Please login to remove items from cart",
       };
     }
-    
+
     if (!productId) {
-      return { 
-        success: false, 
-        message: 'Product ID is required' 
+      return {
+        success: false,
+        message: "Product ID is required",
       };
     }
-    
+
     setCartLoading(true);
     try {
-      const response = await axios.delete(`/api/stores/cart/remove/${productId}`, {
-        withCredentials: true
-      });
-      
+      const response = await axios.delete(
+        `/api/stores/cart/remove/${productId}`,
+        {
+          withCredentials: true,
+        },
+      );
+
       const cartData = response.data || { items: [], totalAmount: 0 };
       setCart(cartData);
       updateCartIcon(cartData.items);
-      return { success: true, data: cartData, message: 'Item removed from cart successfully' };
+      return {
+        success: true,
+        data: cartData,
+        message: "Item removed from cart successfully",
+      };
     } catch (error) {
-      const errorMessage = error.response?.data?.error || 'Failed to remove from cart';
-      console.error('Error removing from cart:', error);
-      return { 
-        success: false, 
-        message: errorMessage
+      const errorMessage =
+        error.response?.data?.error || "Failed to remove from cart";
+      console.error("Error removing from cart:", error);
+      return {
+        success: false,
+        message: errorMessage,
       };
     } finally {
       setCartLoading(false);
@@ -420,28 +465,29 @@ export function ProductProvider({ children }) {
 
   const clearCart = async () => {
     if (!isAuthenticated) {
-      return { 
-        success: false, 
-        message: 'Please login to clear cart' 
+      return {
+        success: false,
+        message: "Please login to clear cart",
       };
     }
-    
+
     setCartLoading(true);
     try {
-      const response = await axios.delete('/api/stores/cart/clear', {
-        withCredentials: true
+      const response = await axios.delete("/api/stores/cart/clear", {
+        withCredentials: true,
       });
-      
+
       const emptyCart = { items: [], totalAmount: 0 };
       setCart(emptyCart);
       updateCartIcon([]);
-      return { success: true, message: 'Cart cleared successfully' };
+      return { success: true, message: "Cart cleared successfully" };
     } catch (error) {
-      const errorMessage = error.response?.data?.error || 'Failed to clear cart';
-      console.error('Error clearing cart:', error);
-      return { 
-        success: false, 
-        message: errorMessage
+      const errorMessage =
+        error.response?.data?.error || "Failed to clear cart";
+      console.error("Error clearing cart:", error);
+      return {
+        success: false,
+        message: errorMessage,
       };
     } finally {
       setCartLoading(false);
@@ -459,33 +505,35 @@ export function ProductProvider({ children }) {
 
   const isInCart = (productId) => {
     if (!cart.items || !Array.isArray(cart.items) || !productId) return false;
-    return cart.items.some(item => 
-      item.product && 
-      (item.product._id === productId || item.product === productId)
+    return cart.items.some(
+      (item) =>
+        item.product &&
+        (item.product._id === productId || item.product === productId),
     );
   };
 
   const getCartItemQuantity = (productId) => {
     if (!cart.items || !Array.isArray(cart.items) || !productId) return 0;
-    const item = cart.items.find(item => 
-      item.product && 
-      (item.product._id === productId || item.product === productId)
+    const item = cart.items.find(
+      (item) =>
+        item.product &&
+        (item.product._id === productId || item.product === productId),
     );
     return Number(item?.quantity) || 0;
   };
 
   // Cart validation function
   const validateCartData = (cartData) => {
-    if (!cartData || typeof cartData !== 'object') {
+    if (!cartData || typeof cartData !== "object") {
       return { items: [], totalAmount: 0 };
     }
-    
+
     return {
       items: Array.isArray(cartData.items) ? cartData.items : [],
       totalAmount: Number(cartData.totalAmount) || 0,
       user: cartData.user,
       _id: cartData._id,
-      updatedAt: cartData.updatedAt
+      updatedAt: cartData.updatedAt,
     };
   };
 
@@ -500,52 +548,54 @@ export function ProductProvider({ children }) {
   }, [isAuthenticated]);
 
   return (
-    <ProductContext.Provider value={{
-      // State
-      products,
-      wishlist,
-      cart,
-      loading,
-      searchLoading,
-      orderLoading,
-      cartLoading,
+    <ProductContext.Provider
+      value={{
+        // State
+        products,
+        wishlist,
+        cart,
+        loading,
+        searchLoading,
+        orderLoading,
+        cartLoading,
 
-      // Product Management
-      getAllProducts,
-      getProductById,
-      addProduct,
-      updateProduct,
-      deleteProduct,
-      getStoreProducts,
-      addProductRating,
+        // Product Management
+        getAllProducts,
+        getProductById,
+        addProduct,
+        updateProduct,
+        deleteProduct,
+        getStoreProducts,
+        addProductRating,
 
-      // Search and Discovery
-      searchProducts,
-      getTrendingProducts,
+        // Search and Discovery
+        searchProducts,
+        getTrendingProducts,
 
-      // Wishlist Management
-      toggleWishlist,
-      getUserWishlist,
+        // Wishlist Management
+        toggleWishlist,
+        getUserWishlist,
 
-      // Cart Management
-      fetchCart,
-      addToCart,
-      updateCartItem,
-      removeFromCart,
-      clearCart,
-      getCartItemCount,
-      isInCart,
-      getCartItemQuantity,
-      validateCartData,
+        // Cart Management
+        fetchCart,
+        addToCart,
+        updateCartItem,
+        removeFromCart,
+        clearCart,
+        getCartItemCount,
+        isInCart,
+        getCartItemQuantity,
+        validateCartData,
 
-      createOrder,
-      verifyPayment,
-      getStoreAnalytics,
+        createOrder,
+        verifyPayment,
+        getStoreAnalytics,
 
-      setProducts,
-      setWishlist,
-      setCart
-    }}>
+        setProducts,
+        setWishlist,
+        setCart,
+      }}
+    >
       {children}
     </ProductContext.Provider>
   );

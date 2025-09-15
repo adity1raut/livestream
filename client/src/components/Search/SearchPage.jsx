@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Search } from 'lucide-react';
-import PostCard from '../Post/PostCard';
-import axios from 'axios';
+import React, { useState } from "react";
+import { Search } from "lucide-react";
+import PostCard from "../Post/PostCard";
+import axios from "axios";
 
 const SearchPage = () => {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -17,15 +17,18 @@ const SearchPage = () => {
     setHasSearched(true);
 
     try {
-      const response = await axios.get(`/api/posts/search/${encodeURIComponent(query)}`, {
-        withCredentials: true
-      });
+      const response = await axios.get(
+        `/api/posts/search/${encodeURIComponent(query)}`,
+        {
+          withCredentials: true,
+        },
+      );
 
       if (response.data.success) {
         setResults(response.data.posts);
       }
     } catch (error) {
-      console.error('Error searching posts:', error);
+      console.error("Error searching posts:", error);
     } finally {
       setLoading(false);
     }
@@ -50,15 +53,18 @@ const SearchPage = () => {
             disabled={loading}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
           >
-            {loading ? 'Searching...' : 'Search'}
+            {loading ? "Searching..." : "Search"}
           </button>
         </form>
       </div>
 
       {loading && (
         <div className="space-y-4">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-lg shadow-md p-6 animate-pulse">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="bg-white rounded-lg shadow-md p-6 animate-pulse"
+            >
               <div className="flex items-center space-x-4 mb-4">
                 <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
                 <div className="space-y-2">
@@ -83,13 +89,15 @@ const SearchPage = () => {
       {!loading && hasSearched && (
         <div className="space-y-4">
           {results.length > 0 ? (
-            results.map(post => (
-              <PostCard key={post._id} post={post} />
-            ))
+            results.map((post) => <PostCard key={post._id} post={post} />)
           ) : (
             <div className="bg-white rounded-lg shadow-md p-6 text-center">
-              <p className="text-gray-500 text-lg">No posts found matching your search.</p>
-              <p className="text-gray-400 mt-2">Try different keywords or hashtags.</p>
+              <p className="text-gray-500 text-lg">
+                No posts found matching your search.
+              </p>
+              <p className="text-gray-400 mt-2">
+                Try different keywords or hashtags.
+              </p>
             </div>
           )}
         </div>
@@ -98,8 +106,12 @@ const SearchPage = () => {
       {!hasSearched && (
         <div className="bg-white rounded-lg shadow-md p-6 text-center">
           <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">Search for Posts</h2>
-          <p className="text-gray-500">Enter keywords, hashtags, or content to find posts.</p>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">
+            Search for Posts
+          </h2>
+          <p className="text-gray-500">
+            Enter keywords, hashtags, or content to find posts.
+          </p>
         </div>
       )}
     </div>

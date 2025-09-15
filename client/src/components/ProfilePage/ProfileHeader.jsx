@@ -1,6 +1,6 @@
-import React, { useRef } from 'react';
-import { Camera, Edit2, Mail, Calendar, User, Loader2 } from 'lucide-react';
-import axios from 'axios';
+import React, { useRef } from "react";
+import { Camera, Edit2, Mail, Calendar, User, Loader2 } from "lucide-react";
+import axios from "axios";
 
 const ProfileHeader = ({
   profileData,
@@ -11,7 +11,7 @@ const ProfileHeader = ({
   setError,
   setProfileData,
   setIsEditing,
-  currentUserId
+  currentUserId,
 }) => {
   const profileImageRef = useRef(null);
   const coverImageRef = useRef(null);
@@ -30,12 +30,12 @@ const ProfileHeader = ({
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be less than 5MB');
+      alert("File size must be less than 5MB");
       return;
     }
 
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file");
       return;
     }
 
@@ -44,55 +44,61 @@ const ProfileHeader = ({
     try {
       const base64 = await fileToBase64(file);
       const updateData = {
-        [type === 'profile' ? 'profileImage' : 'coverImage']: base64
+        [type === "profile" ? "profileImage" : "coverImage"]: base64,
       };
 
-      const response = await axios.put('/api/auth/profile', updateData, {
+      const response = await axios.put("/api/auth/profile", updateData, {
         withCredentials: true,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       });
 
       if (response.data.success) {
         const updatedUser = response.data.data;
         setProfileData(updatedUser);
-        setSuccess('Image uploaded successfully!');
-        setTimeout(() => setSuccess(''), 3000);
+        setSuccess("Image uploaded successfully!");
+        setTimeout(() => setSuccess(""), 3000);
       } else {
-        setError(response.data.message || 'Failed to upload image');
-        setTimeout(() => setError(''), 3000);
+        setError(response.data.message || "Failed to upload image");
+        setTimeout(() => setError(""), 3000);
       }
     } catch (error) {
-      console.error('Upload failed:', error);
-      setError(error.response?.data?.message || 'Failed to upload image');
-      setTimeout(() => setError(''), 3000);
+      console.error("Upload failed:", error);
+      setError(error.response?.data?.message || "Failed to upload image");
+      setTimeout(() => setError(""), 3000);
     } finally {
       setUploadingImage(false);
     }
   };
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long'
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
     });
   };
 
   const getDisplayName = () => {
-    const profileName = profileData.profile?.name || '';
+    const profileName = profileData.profile?.name || "";
     return profileName || profileData.username;
   };
 
   // Follow button state
   const [followLoading, setFollowLoading] = React.useState(false);
   // Ensure followers is always an array
-  const followersArr = Array.isArray(profileData.followers) ? profileData.followers : [];
+  const followersArr = Array.isArray(profileData.followers)
+    ? profileData.followers
+    : [];
   const [isFollowing, setIsFollowing] = React.useState(
-    followersArr.some(f => f === currentUserId)
+    followersArr.some((f) => f === currentUserId),
   );
-  const [followersCount, setFollowersCount] = React.useState(followersArr.length);
+  const [followersCount, setFollowersCount] = React.useState(
+    followersArr.length,
+  );
 
   React.useEffect(() => {
-    const arr = Array.isArray(profileData.followers) ? profileData.followers : [];
+    const arr = Array.isArray(profileData.followers)
+      ? profileData.followers
+      : [];
     setFollowersCount(arr.length);
     setIsFollowing(arr.includes(currentUserId));
   }, [profileData, currentUserId]);
@@ -100,14 +106,21 @@ const ProfileHeader = ({
   const handleFollow = async () => {
     setFollowLoading(true);
     try {
-      const res = await axios.post(`/api/auth/profile/${profileData.username}/follow`, {}, { withCredentials: true });
+      const res = await axios.post(
+        `/api/auth/profile/${profileData.username}/follow`,
+        {},
+        { withCredentials: true },
+      );
       if (res.data.success) {
         setIsFollowing(res.data.followed);
         setFollowersCount(res.data.followersCount);
-        setProfileData((prev) => ({ ...prev, followers: res.data.followersCount }));
+        setProfileData((prev) => ({
+          ...prev,
+          followers: res.data.followersCount,
+        }));
       }
     } catch (err) {
-      setError('Failed to follow/unfollow');
+      setError("Failed to follow/unfollow");
     } finally {
       setFollowLoading(false);
     }
@@ -147,7 +160,7 @@ const ProfileHeader = ({
               type="file"
               className="hidden"
               accept="image/*"
-              onChange={(e) => handleImageUpload(e, 'cover')}
+              onChange={(e) => handleImageUpload(e, "cover")}
               disabled={uploadingImage}
             />
           </>
@@ -193,17 +206,23 @@ const ProfileHeader = ({
                       type="file"
                       className="hidden"
                       accept="image/*"
-                      onChange={(e) => handleImageUpload(e, 'profile')}
+                      onChange={(e) => handleImageUpload(e, "profile")}
                       disabled={uploadingImage}
                     />
                   </>
                 ) : (
                   <button
                     onClick={handleFollow}
-                    className={`absolute bottom-0 right-0 bg-pink-600 p-2.5 rounded-full shadow-lg text-white font-semibold hover:bg-pink-700 transition-all transform hover:scale-105 ${followLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    className={`absolute bottom-0 right-0 bg-pink-600 p-2.5 rounded-full shadow-lg text-white font-semibold hover:bg-pink-700 transition-all transform hover:scale-105 ${followLoading ? "opacity-60 cursor-not-allowed" : ""}`}
                     disabled={followLoading}
                   >
-                    {followLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : isFollowing ? 'Unfollow' : 'Follow'}
+                    {followLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : isFollowing ? (
+                      "Unfollow"
+                    ) : (
+                      "Follow"
+                    )}
                   </button>
                 )}
               </div>
@@ -215,9 +234,11 @@ const ProfileHeader = ({
                     <h1 className="text-3xl font-bold text-gray-900 mb-1">
                       {getDisplayName()}
                     </h1>
-                    <p className="text-gray-500 mb-3">@{profileData.username}</p>
+                    <p className="text-gray-500 mb-3">
+                      @{profileData.username}
+                    </p>
                     <p className="text-gray-700 max-w-lg">
-                      {profileData.profile?.bio || 'No bio yet'}
+                      {profileData.profile?.bio || "No bio yet"}
                     </p>
                   </div>
                   {isOwnProfile && (

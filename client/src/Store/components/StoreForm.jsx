@@ -1,17 +1,23 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { X, Upload, Store } from 'lucide-react';
+import React, { useState, useRef, useEffect } from "react";
+import { X, Upload, Store } from "lucide-react";
 
-function StoreForm({ isOpen, onClose, onSubmit, store = null, loading = false }) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+function StoreForm({
+  isOpen,
+  onClose,
+  onSubmit,
+  store = null,
+  loading = false,
+}) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) {
-      setName(store?.name || '');
-      setDescription(store?.description || '');
+      setName(store?.name || "");
+      setDescription(store?.description || "");
       setLogoFile(null);
       setLogoPreview(store?.logo || null);
     }
@@ -31,19 +37,19 @@ function StoreForm({ isOpen, onClose, onSubmit, store = null, loading = false })
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     const storeData = {
       name: name.trim(),
       description: description.trim(),
-      logo: logoFile
+      logo: logoFile,
     };
 
     onSubmit(storeData);
   };
 
   const resetForm = () => {
-    setName('');
-    setDescription('');
+    setName("");
+    setDescription("");
     setLogoFile(null);
     setLogoPreview(null);
   };
@@ -61,7 +67,7 @@ function StoreForm({ isOpen, onClose, onSubmit, store = null, loading = false })
         <div className="bg-gradient-to-r from-purple-800 to-purple-900 px-6 py-4 border-b border-gray-700 relative">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold text-white">
-              {store ? 'Edit Store' : 'Create New Store'}
+              {store ? "Edit Store" : "Create New Store"}
             </h2>
             <button
               onClick={handleClose}
@@ -111,7 +117,10 @@ function StoreForm({ isOpen, onClose, onSubmit, store = null, loading = false })
 
             {/* Store Name */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-300 mb-2"
+              >
                 Store Name *
               </label>
               <input
@@ -127,7 +136,10 @@ function StoreForm({ isOpen, onClose, onSubmit, store = null, loading = false })
 
             {/* Description */}
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-2">
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-gray-300 mb-2"
+              >
                 Description
               </label>
               <textarea
@@ -155,7 +167,11 @@ function StoreForm({ isOpen, onClose, onSubmit, store = null, loading = false })
                 disabled={loading || !name.trim()}
                 className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-sm font-medium hover:from-purple-700 hover:to-purple-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg"
               >
-                {loading ? 'Saving...' : (store ? 'Update Store' : 'Create Store')}
+                {loading
+                  ? "Saving..."
+                  : store
+                    ? "Update Store"
+                    : "Create Store"}
               </button>
             </div>
           </form>

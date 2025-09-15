@@ -1,21 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-import { useAuth } from '../../../context/AuthContext';
-import io from 'socket.io-client';
-import Sidebar from './Sidebar';
-import ChatArea from './ChatArea';
-import WelcomeScreen from './WelcomeScreen';
+import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
+import { useAuth } from "../../../context/AuthContext";
+import io from "socket.io-client";
+import Sidebar from "./Sidebar";
+import ChatArea from "./ChatArea";
+import WelcomeScreen from "./WelcomeScreen";
 
 const ChatApplication = () => {
   const { user } = useAuth();
-  const [activeView, setActiveView] = useState('conversations');
+  const [activeView, setActiveView] = useState("conversations");
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [currentConversation, setCurrentConversation] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchType, setSearchType] = useState('username');
-  const [messageInput, setMessageInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchType, setSearchType] = useState("username");
+  const [messageInput, setMessageInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [socket, setSocket] = useState(null);
   const [typingUsers, setTypingUsers] = useState({});
@@ -23,14 +23,14 @@ const ChatApplication = () => {
 
   // Socket initialization
   useEffect(() => {
-    const newSocket = io('http://localhost:5000', {
+    const newSocket = io("http://localhost:5000", {
       withCredentials: true,
       auth: {
         token: document.cookie
-          .split('; ')
-          .find(row => row.startsWith('token='))
-          ?.split('=')[1]
-      }
+          .split("; ")
+          .find((row) => row.startsWith("token="))
+          ?.split("=")[1],
+      },
     });
 
     setSocket(newSocket);
@@ -41,59 +41,73 @@ const ChatApplication = () => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on('new-message', (message) => {
-      setMessages(prev => [...prev, message]);
-      setConversations(prev => prev.map(conv =>
-        conv._id === message.conversation
-          ? { ...conv, lastMessage: message }
-          : conv
-      ));
+    socket.on("new-message", (message) => {
+      setMessages((prev) => [...prev, message]);
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv._id === message.conversation
+            ? { ...conv, lastMessage: message }
+            : conv,
+        ),
+      );
     });
 
-    socket.on('conversation-updated', (updatedConversation) => {
-      setConversations(prev => prev.map(conv =>
-        conv._id === updatedConversation._id
-          ? updatedConversation
-          : conv
-      ));
+    socket.on("conversation-updated", (updatedConversation) => {
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv._id === updatedConversation._id ? updatedConversation : conv,
+        ),
+      );
     });
 
-    socket.on('user-typing', (data) => {
-      setTypingUsers(prev => ({
+    socket.on("user-typing", (data) => {
+      setTypingUsers((prev) => ({
         ...prev,
-        [data.conversationId]: [...(prev[data.conversationId] || []).filter(id => id !== data.userId), data.userId]
+        [data.conversationId]: [
+          ...(prev[data.conversationId] || []).filter(
+            (id) => id !== data.userId,
+          ),
+          data.userId,
+        ],
       }));
     });
 
-    socket.on('user-stop-typing', (data) => {
-      setTypingUsers(prev => ({
+    socket.on("user-stop-typing", (data) => {
+      setTypingUsers((prev) => ({
         ...prev,
-        [data.conversationId]: (prev[data.conversationId] || []).filter(id => id !== data.userId)
+        [data.conversationId]: (prev[data.conversationId] || []).filter(
+          (id) => id !== data.userId,
+        ),
       }));
     });
 
-    socket.on('message-read', (data) => {
-      setMessages(prev => prev.map(msg =>
-        msg._id === data.messageId
-          ? {
-            ...msg,
-            readBy: [...(msg.readBy || []), { user: data.userId, readAt: new Date() }]
-          }
-          : msg
-      ));
+    socket.on("message-read", (data) => {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === data.messageId
+            ? {
+                ...msg,
+                readBy: [
+                  ...(msg.readBy || []),
+                  { user: data.userId, readAt: new Date() },
+                ],
+              }
+            : msg,
+        ),
+      );
     });
 
-    socket.on('error', (error) => {
-      console.error('Socket error:', error);
+    socket.on("error", (error) => {
+      console.error("Socket error:", error);
     });
 
     return () => {
-      socket.off('new-message');
-      socket.off('conversation-updated');
-      socket.off('user-typing');
-      socket.off('user-stop-typing');
-      socket.off('message-read');
-      socket.off('error');
+      socket.off("new-message");
+      socket.off("conversation-updated");
+      socket.off("user-typing");
+      socket.off("user-stop-typing");
+      socket.off("message-read");
+      socket.off("error");
     };
   }, [socket]);
 
@@ -105,8 +119,8 @@ const ChatApplication = () => {
   // Join conversation rooms when socket is ready
   useEffect(() => {
     if (socket && conversations.length > 0) {
-      conversations.forEach(conv => {
-        socket.emit('join-conversation', conv._id);
+      conversations.forEach((conv) => {
+        socket.emit("join-conversation", conv._id);
       });
     }
   }, [socket, conversations]);
@@ -114,12 +128,12 @@ const ChatApplication = () => {
   // Join current conversation room when it changes
   useEffect(() => {
     if (socket && currentConversation) {
-      socket.emit('join-conversation', currentConversation._id);
+      socket.emit("join-conversation", currentConversation._id);
     }
 
     return () => {
       if (socket && currentConversation) {
-        socket.emit('leave-conversation', currentConversation._id);
+        socket.emit("leave-conversation", currentConversation._id);
       }
     };
   }, [socket, currentConversation]);
@@ -130,20 +144,20 @@ const ChatApplication = () => {
   }, [messages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   // Fetch all conversations
   const fetchConversations = async () => {
     try {
-      const response = await axios.get('/api/chat/conversations', {
-        withCredentials: true
+      const response = await axios.get("/api/chat/conversations", {
+        withCredentials: true,
       });
       if (response.data.success) {
         setConversations(response.data.conversations);
       }
     } catch (error) {
-      console.error('Error fetching conversations:', error);
+      console.error("Error fetching conversations:", error);
     }
   };
 
@@ -156,15 +170,15 @@ const ChatApplication = () => {
 
     setLoading(true);
     try {
-      const response = await axios.get('/api/chat/search', {
+      const response = await axios.get("/api/chat/search", {
         params: { query, type: searchType },
-        withCredentials: true
+        withCredentials: true,
       });
       if (response.data.success) {
         setSearchResults(response.data.users);
       }
     } catch (error) {
-      console.error('Error searching users:', error);
+      console.error("Error searching users:", error);
     }
     setLoading(false);
   };
@@ -172,7 +186,7 @@ const ChatApplication = () => {
   // Handle search input change with debouncing
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
-      if (activeView === 'search') {
+      if (activeView === "search") {
         searchUsers(searchQuery);
       }
     }, 300);
@@ -183,33 +197,37 @@ const ChatApplication = () => {
   // Create or get conversation with a user
   const startConversation = async (userId) => {
     try {
-      const response = await axios.post('/api/chat/conversations',
+      const response = await axios.post(
+        "/api/chat/conversations",
         { userId },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       if (response.data.success) {
         const conversation = response.data.conversation;
         setCurrentConversation(conversation);
         fetchMessages(conversation._id);
-        setActiveView('chat');
+        setActiveView("chat");
         fetchConversations();
       }
     } catch (error) {
-      console.error('Error creating conversation:', error);
+      console.error("Error creating conversation:", error);
     }
   };
 
   // Fetch messages for a conversation
   const fetchMessages = async (conversationId) => {
     try {
-      const response = await axios.get(`/api/chat/conversations/${conversationId}/messages`, {
-        withCredentials: true
-      });
+      const response = await axios.get(
+        `/api/chat/conversations/${conversationId}/messages`,
+        {
+          withCredentials: true,
+        },
+      );
       if (response.data.success) {
         setMessages(response.data.messages);
       }
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      console.error("Error fetching messages:", error);
     }
   };
 
@@ -218,44 +236,45 @@ const ChatApplication = () => {
     if (!messageInput.trim() || !currentConversation || !socket) return;
 
     try {
-      socket.emit('send-message', {
+      socket.emit("send-message", {
         conversationId: currentConversation._id,
         content: messageInput.trim(),
-        type: 'text'
+        type: "text",
       });
 
-      setMessageInput('');
-      socket.emit('typing-stop', currentConversation._id);
+      setMessageInput("");
+      socket.emit("typing-stop", currentConversation._id);
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error("Error sending message:", error);
     }
   };
 
   // Handle typing indicators
   const handleTypingStart = () => {
     if (socket && currentConversation) {
-      socket.emit('typing-start', currentConversation._id);
+      socket.emit("typing-start", currentConversation._id);
     }
   };
 
   const handleTypingStop = () => {
     if (socket && currentConversation) {
-      socket.emit('typing-stop', currentConversation._id);
+      socket.emit("typing-stop", currentConversation._id);
     }
   };
 
   // Mark messages as read
   const markMessagesAsRead = () => {
     if (socket && currentConversation && messages.length > 0) {
-      const unreadMessages = messages.filter(msg =>
-        msg.sender._id !== user._id &&
-        !msg.readBy?.some(read => read.user === user._id)
+      const unreadMessages = messages.filter(
+        (msg) =>
+          msg.sender._id !== user._id &&
+          !msg.readBy?.some((read) => read.user === user._id),
       );
 
-      unreadMessages.forEach(msg => {
-        socket.emit('mark-as-read', {
+      unreadMessages.forEach((msg) => {
+        socket.emit("mark-as-read", {
           messageId: msg._id,
-          conversationId: currentConversation._id
+          conversationId: currentConversation._id,
         });
       });
     }
@@ -272,12 +291,12 @@ const ChatApplication = () => {
   const openConversation = (conversation) => {
     setCurrentConversation(conversation);
     fetchMessages(conversation._id);
-    setActiveView('chat');
+    setActiveView("chat");
   };
 
   // Get other user in conversation
   const getOtherUser = (conversation) => {
-    return conversation.members.find(member => member._id !== user._id);
+    return conversation.members.find((member) => member._id !== user._id);
   };
 
   // Format timestamp
@@ -287,14 +306,17 @@ const ChatApplication = () => {
     const diffInHours = (now - date) / (1000 * 60 * 60);
 
     if (diffInHours < 24) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     } else {
       return date.toLocaleDateString();
     }
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
@@ -312,7 +334,8 @@ const ChatApplication = () => {
   };
 
   // Check if user is typing in current conversation
-  const isUserTyping = currentConversation &&
+  const isUserTyping =
+    currentConversation &&
     typingUsers[currentConversation._id] &&
     typingUsers[currentConversation._id].length > 0;
 
@@ -342,7 +365,7 @@ const ChatApplication = () => {
           />
 
           <div className="flex-1 flex flex-col">
-            {activeView === 'chat' && currentConversation ? (
+            {activeView === "chat" && currentConversation ? (
               <ChatArea
                 currentConversation={currentConversation}
                 messages={messages}
@@ -369,17 +392,17 @@ const ChatApplication = () => {
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;
         }
-        
+
         .custom-scrollbar::-webkit-scrollbar-track {
           background: rgba(75, 85, 99, 0.3);
           border-radius: 10px;
         }
-        
+
         .custom-scrollbar::-webkit-scrollbar-thumb {
           background: linear-gradient(to bottom, #9333ea, #ec4899);
           border-radius: 10px;
         }
-        
+
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: linear-gradient(to bottom, #7c3aed, #db2777);
         }

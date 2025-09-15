@@ -1,32 +1,43 @@
-import Post from '../../models/Post.models.js';
-import User from '../../models/User.models.js';
-import cloudinary from '../../config/cloudinary.js';
-import { getNotificationService } from '../../socket/socketHandlers.js';
+import Post from "../../models/Post.models.js";
+import User from "../../models/User.models.js";
+import cloudinary from "../../config/cloudinary.js";
+import { getNotificationService } from "../../socket/socketHandlers.js";
 
 // Helper function to upload to cloudinary
 const uploadToCloudinary = (buffer, resourceType, folder) => {
   return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload_stream(
-      {
-        resource_type: resourceType,
-        folder: folder,
-        transformation: resourceType === 'video' ? 
-          [{ quality: 'auto', format: 'mp4' }] : 
-          [{ quality: 'auto', format: 'jpg', width: 1200, height: 1200, crop: 'limit' }]
-      },
-      (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result);
-        }
-      }
-    ).end(buffer);
+    cloudinary.uploader
+      .upload_stream(
+        {
+          resource_type: resourceType,
+          folder: folder,
+          transformation:
+            resourceType === "video"
+              ? [{ quality: "auto", format: "mp4" }]
+              : [
+                  {
+                    quality: "auto",
+                    format: "jpg",
+                    width: 1200,
+                    height: 1200,
+                    crop: "limit",
+                  },
+                ],
+        },
+        (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(result);
+          }
+        },
+      )
+      .end(buffer);
   });
 };
 
 // Create a new post
-export async function CreatePost (req, res) {
+export async function CreatePost(req, res) {
   try {
     const { content } = req.body;
     const userId = req.user.id;
@@ -34,35 +45,39 @@ export async function CreatePost (req, res) {
     if (!content) {
       return res.status(400).json({
         success: false,
-        message: 'Content is required'
+        message: "Content is required",
       });
     }
 
     let mediaData = {
-      type: 'none',
-      url: '',
-      publicId: ''
+      type: "none",
+      url: "",
+      publicId: "",
     };
 
     // Handle media upload if file exists
     if (req.file) {
-      const isVideo = req.file.mimetype.startsWith('video/');
-      const resourceType = isVideo ? 'video' : 'image';
-      const folder = isVideo ? 'social_app/videos' : 'social_app/images';
+      const isVideo = req.file.mimetype.startsWith("video/");
+      const resourceType = isVideo ? "video" : "image";
+      const folder = isVideo ? "social_app/videos" : "social_app/images";
 
       try {
-        const result = await uploadToCloudinary(req.file.buffer, resourceType, folder);
-        
+        const result = await uploadToCloudinary(
+          req.file.buffer,
+          resourceType,
+          folder,
+        );
+
         mediaData = {
-          type: isVideo ? 'video' : 'image',
+          type: isVideo ? "video" : "image",
           url: result.secure_url,
-          publicId: result.public_id
+          publicId: result.public_id,
         };
       } catch (uploadError) {
-        console.error('Cloudinary upload error:', uploadError);
+        console.error("Cloudinary upload error:", uploadError);
         return res.status(500).json({
           success: false,
-          message: 'Failed to upload media'
+          message: "Failed to upload media",
         });
       }
     }
@@ -71,44 +86,46 @@ export async function CreatePost (req, res) {
     const newPost = new Post({
       author: userId,
       content,
-      media: mediaData
+      media: mediaData,
     });
 
     await newPost.save();
 
     // Add post to user's posts array
     await User.findByIdAndUpdate(userId, {
-      $push: { posts: newPost._id }
+      $push: { posts: newPost._id },
     });
 
     // Populate author details for response
-    await newPost.populate('author', 'username profile.name profile.profileImage');
+    await newPost.populate(
+      "author",
+      "username profile.name profile.profileImage",
+    );
 
     res.status(201).json({
       success: true,
-      message: 'Post created successfully',
-      post: newPost
+      message: "Post created successfully",
+      post: newPost,
     });
-
   } catch (error) {
-    console.error('Error creating post:', error);
+    console.error("Error creating post:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error while creating post'
+      message: "Server error while creating post",
     });
   }
-};
+}
 
 // Get all posts (feed)
-export async function getFeed (req, res) {
+export async function getFeed(req, res) {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
     const posts = await Post.find()
-      .populate('author', 'username profile.name profile.profileImage')
-      .populate('comments.user', 'username profile.name profile.profileImage')
+      .populate("author", "username profile.name profile.profileImage")
+      .populate("comments.user", "username profile.name profile.profileImage")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -117,59 +134,57 @@ export async function getFeed (req, res) {
       success: true,
       posts,
       currentPage: page,
-      hasMore: posts.length === limit
+      hasMore: posts.length === limit,
     });
-
   } catch (error) {
-    console.error('Error fetching posts:', error);
+    console.error("Error fetching posts:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error while fetching posts'
+      message: "Server error while fetching posts",
     });
   }
-};
+}
 
 // Get single post
-export async function SinglePost (req, res) {
+export async function SinglePost(req, res) {
   try {
     const post = await Post.findById(req.params.postId)
-      .populate('author', 'username profile.name profile.profileImage')
-      .populate('comments.user', 'username profile.name profile.profileImage')
-      .populate('likes', 'username profile.name profile.profileImage');
+      .populate("author", "username profile.name profile.profileImage")
+      .populate("comments.user", "username profile.name profile.profileImage")
+      .populate("likes", "username profile.name profile.profileImage");
 
     if (!post) {
       return res.status(404).json({
         success: false,
-        message: 'Post not found'
+        message: "Post not found",
       });
     }
 
     res.status(200).json({
       success: true,
-      post
+      post,
     });
-
   } catch (error) {
-    console.error('Error fetching post:', error);
+    console.error("Error fetching post:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error while fetching post'
+      message: "Server error while fetching post",
     });
   }
 }
 
 // Like post
-export async function likePost (req, res) {
+export async function likePost(req, res) {
   try {
     const postId = req.params.postId;
     const userId = req.user.id;
 
-    const post = await Post.findById(postId).populate('author', 'username');
+    const post = await Post.findById(postId).populate("author", "username");
 
     if (!post) {
       return res.status(404).json({
         success: false,
-        message: 'Post not found'
+        message: "Post not found",
       });
     }
 
@@ -177,14 +192,14 @@ export async function likePost (req, res) {
 
     if (isLiked) {
       // Unlike the post
-      post.likes = post.likes.filter(id => id.toString() !== userId);
+      post.likes = post.likes.filter((id) => id.toString() !== userId);
       await post.save();
 
       res.status(200).json({
         success: true,
-        message: 'Post unliked',
+        message: "Post unliked",
         isLiked: false,
-        likesCount: post.likes.length
+        likesCount: post.likes.length,
       });
     } else {
       // Like the post
@@ -199,29 +214,28 @@ export async function likePost (req, res) {
           post.author._id,
           userId,
           liker.username,
-          postId
+          postId,
         );
       }
 
       res.status(200).json({
         success: true,
-        message: 'Post liked',
+        message: "Post liked",
         isLiked: true,
-        likesCount: post.likes.length
+        likesCount: post.likes.length,
       });
     }
-
   } catch (error) {
-    console.error('Error liking/unliking post:', error);
+    console.error("Error liking/unliking post:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error while processing like'
+      message: "Server error while processing like",
     });
   }
 }
 
 // Comment on post
-export async function addComment (req, res) {
+export async function addComment(req, res) {
   try {
     const postId = req.params.postId;
     const userId = req.user.id;
@@ -230,31 +244,34 @@ export async function addComment (req, res) {
     if (!text) {
       return res.status(400).json({
         success: false,
-        message: 'Comment text is required'
+        message: "Comment text is required",
       });
     }
 
-    const post = await Post.findById(postId).populate('author', 'username');
+    const post = await Post.findById(postId).populate("author", "username");
 
     if (!post) {
       return res.status(404).json({
         success: false,
-        message: 'Post not found'
+        message: "Post not found",
       });
     }
 
     const newComment = {
       user: userId,
       text,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     post.comments.push(newComment);
     await post.save();
 
     // Populate the new comment with user details
-    await post.populate('comments.user', 'username profile.name profile.profileImage');
-    
+    await post.populate(
+      "comments.user",
+      "username profile.name profile.profileImage",
+    );
+
     const addedComment = post.comments[post.comments.length - 1];
 
     // Send notification using NotificationService
@@ -265,28 +282,27 @@ export async function addComment (req, res) {
         post.author._id,
         userId,
         commenter.username,
-        postId
+        postId,
       );
     }
 
     res.status(200).json({
       success: true,
-      message: 'Comment added successfully',
+      message: "Comment added successfully",
       comment: addedComment,
-      commentsCount: post.comments.length
+      commentsCount: post.comments.length,
     });
-
   } catch (error) {
-    console.error('Error adding comment:', error);
+    console.error("Error adding comment:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error while adding comment'
+      message: "Server error while adding comment",
     });
   }
 }
 
 // Delete post
-export async function DeletePost (req, res) {
+export async function DeletePost(req, res) {
   try {
     const postId = req.params.postId;
     const userId = req.user.id;
@@ -296,7 +312,7 @@ export async function DeletePost (req, res) {
     if (!post) {
       return res.status(404).json({
         success: false,
-        message: 'Post not found'
+        message: "Post not found",
       });
     }
 
@@ -304,7 +320,7 @@ export async function DeletePost (req, res) {
     if (post.author.toString() !== userId) {
       return res.status(403).json({
         success: false,
-        message: 'You can only delete your own posts'
+        message: "You can only delete your own posts",
       });
     }
 
@@ -312,16 +328,16 @@ export async function DeletePost (req, res) {
     if (post.media.publicId) {
       try {
         await cloudinary.uploader.destroy(post.media.publicId, {
-          resource_type: post.media.type === 'video' ? 'video' : 'image'
+          resource_type: post.media.type === "video" ? "video" : "image",
         });
       } catch (cloudinaryError) {
-        console.error('Error deleting from cloudinary:', cloudinaryError);
+        console.error("Error deleting from cloudinary:", cloudinaryError);
       }
     }
 
     // Remove post from user's posts array
     await User.findByIdAndUpdate(userId, {
-      $pull: { posts: postId }
+      $pull: { posts: postId },
     });
 
     // Delete the post
@@ -329,20 +345,19 @@ export async function DeletePost (req, res) {
 
     res.status(200).json({
       success: true,
-      message: 'Post deleted successfully'
+      message: "Post deleted successfully",
     });
-
   } catch (error) {
-    console.error('Error deleting post:', error);
+    console.error("Error deleting post:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error while deleting post'
+      message: "Server error while deleting post",
     });
   }
 }
 
 // Get user's posts
-export async function getUserpost (req, res) {
+export async function getUserpost(req, res) {
   try {
     const { username } = req.params;
     const page = parseInt(req.query.page) || 1;
@@ -354,13 +369,13 @@ export async function getUserpost (req, res) {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: "User not found",
       });
     }
 
     const posts = await Post.find({ author: user._id })
-      .populate('author', 'username profile.name profile.profileImage')
-      .populate('comments.user', 'username profile.name profile.profileImage')
+      .populate("author", "username profile.name profile.profileImage")
+      .populate("comments.user", "username profile.name profile.profileImage")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -369,14 +384,13 @@ export async function getUserpost (req, res) {
       success: true,
       posts,
       currentPage: page,
-      hasMore: posts.length === limit
+      hasMore: posts.length === limit,
     });
-
   } catch (error) {
-    console.error('Error fetching user posts:', error);
+    console.error("Error fetching user posts:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error while fetching user posts'
+      message: "Server error while fetching user posts",
     });
   }
-};
+}

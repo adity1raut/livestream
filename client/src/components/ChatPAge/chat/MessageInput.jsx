@@ -1,12 +1,12 @@
-import React from 'react';
-import { Send } from 'lucide-react';
+import React from "react";
+import { Send } from "lucide-react";
 
 const MessageInput = ({
   messageInput,
   handleInputChange,
   handleKeyPress,
   handleTypingStop,
-  sendMessage
+  sendMessage,
 }) => {
   return (
     <div className="bg-gray-800/80 backdrop-blur-sm border-t border-purple-500/30 p-6">

@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const useSearch = () => {
   const [searchResults, setSearchResults] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchType, setSearchType] = useState('username');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchType, setSearchType] = useState("username");
   const [loading, setLoading] = useState(false);
 
   const searchUsers = async (query) => {
@@ -15,15 +15,15 @@ const useSearch = () => {
 
     setLoading(true);
     try {
-      const response = await axios.get('/api/chat/search', {
+      const response = await axios.get("/api/chat/search", {
         params: { query, type: searchType },
-        withCredentials: true
+        withCredentials: true,
       });
       if (response.data.success) {
         setSearchResults(response.data.users);
       }
     } catch (error) {
-      console.error('Error searching users:', error);
+      console.error("Error searching users:", error);
     }
     setLoading(false);
   };
@@ -43,7 +43,7 @@ const useSearch = () => {
     setSearchQuery,
     searchType,
     setSearchType,
-    loading
+    loading,
   };
 };
 

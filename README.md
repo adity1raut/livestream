@@ -34,6 +34,7 @@ A full-stack social media web application with real-time chat, posts, notificati
 ## Tech Stack
 
 **Backend:**
+
 - Node.js, Express.js
 - MongoDB, Mongoose
 - JWT Authentication
@@ -43,6 +44,7 @@ A full-stack social media web application with real-time chat, posts, notificati
 - Multer (file uploads)
 
 **Frontend:**
+
 - React (with Vite)
 - React Router
 - Axios
@@ -186,4 +188,3 @@ Pull requests are welcome! For major changes, please open an issue first to disc
 ISC © Aditya
 
 ---
-

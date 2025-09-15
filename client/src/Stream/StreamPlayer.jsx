@@ -1,7 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize, Settings, Loader } from 'lucide-react';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Maximize,
+  Settings,
+  Loader,
+} from "lucide-react";
 
-const StreamPlayer = ({ stream, className = '' }) => {
+const StreamPlayer = ({ stream, className = "" }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(1);
@@ -85,12 +93,12 @@ const StreamPlayer = ({ stream, className = '' }) => {
 
   const handleError = (e) => {
     setIsLoading(false);
-    setError('Failed to load stream');
-    console.error('Video error:', e);
+    setError("Failed to load stream");
+    console.error("Video error:", e);
   };
 
   return (
-    <div 
+    <div
       className={`relative bg-black rounded-lg overflow-hidden group ${className}`}
       onMouseMove={resetControlsTimeout}
       onMouseLeave={() => setShowControls(isPlaying ? false : true)}
@@ -129,7 +137,7 @@ const StreamPlayer = ({ stream, className = '' }) => {
           <div className="text-center text-white">
             <div className="text-red-500 mb-2">⚠️</div>
             <p className="mb-4">{error}</p>
-            <button 
+            <button
               onClick={() => {
                 setError(null);
                 setIsLoading(true);
@@ -152,7 +160,9 @@ const StreamPlayer = ({ stream, className = '' }) => {
             <Play size={64} className="mx-auto mb-4 opacity-50" />
             <p className="text-xl mb-2">Stream Player</p>
             <p className="text-sm opacity-70">
-              {stream.isLive ? 'Waiting for stream to start...' : 'Stream is not live'}
+              {stream.isLive
+                ? "Waiting for stream to start..."
+                : "Stream is not live"}
             </p>
             {!stream.isLive && (
               <div className="mt-4 px-4 py-2 bg-gray-800 rounded inline-block">
@@ -171,9 +181,9 @@ const StreamPlayer = ({ stream, className = '' }) => {
       )}
 
       {/* Controls Overlay */}
-      <div 
+      <div
         className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4 transition-opacity duration-300 ${
-          showControls ? 'opacity-100' : 'opacity-0'
+          showControls ? "opacity-100" : "opacity-0"
         }`}
       >
         <div className="flex items-center justify-between">
@@ -219,7 +229,7 @@ const StreamPlayer = ({ stream, className = '' }) => {
               className="text-white hover:text-blue-400 transition-colors"
               onClick={() => {
                 // Handle quality/settings menu
-                console.log('Open settings');
+                console.log("Open settings");
               }}
             >
               <Settings size={20} />

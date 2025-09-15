@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Search, ChevronLeft, ChevronRight, Store } from 'lucide-react';
-import { useStore } from '../../context/StoreContext';
-import StoreCard from './StoreCard';
-import StoreDetail from './StoreDetail';
+import React, { useState, useEffect } from "react";
+import { Search, ChevronLeft, ChevronRight, Store } from "lucide-react";
+import { useStore } from "../../context/StoreContext";
+import StoreCard from "./StoreCard";
+import StoreDetail from "./StoreDetail";
 
 function AllStores() {
   const { stores, loading, getAllStores } = useStore();
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedStore, setSelectedStore] = useState(null);
@@ -20,7 +20,7 @@ function AllStores() {
     const result = await getAllStores({
       page: currentPage,
       limit: 12,
-      search: search || undefined
+      search: search || undefined,
     });
     if (result) {
       setTotalPages(result.totalPages || 1);
@@ -70,11 +70,15 @@ function AllStores() {
             <div className="bg-gradient-to-r from-purple-800 to-purple-900 px-8 py-6 border-b border-gray-700">
               <div className="flex items-center justify-center mb-2">
                 <Store className="w-6 h-6 text-purple-400 mr-2" />
-                <h1 className="text-3xl font-bold text-white text-center">GAME STORES</h1>
+                <h1 className="text-3xl font-bold text-white text-center">
+                  GAME STORES
+                </h1>
               </div>
-              <p className="text-purple-300 text-center mt-2 text-sm">Discover amazing gaming stores</p>
+              <p className="text-purple-300 text-center mt-2 text-sm">
+                Discover amazing gaming stores
+              </p>
             </div>
-            
+
             <div className="px-8 py-6">
               <div className="relative max-w-md mx-auto">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -96,7 +100,10 @@ function AllStores() {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="bg-gray-800 border border-gray-700 rounded-xl h-64 animate-pulse"></div>
+              <div
+                key={i}
+                className="bg-gray-800 border border-gray-700 rounded-xl h-64 animate-pulse"
+              ></div>
             ))}
           </div>
         ) : (
@@ -117,11 +124,13 @@ function AllStores() {
                 <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-xl p-8 max-w-md mx-auto">
                   <Store className="w-16 h-16 text-gray-600 mx-auto mb-4" />
                   <p className="text-gray-400 text-lg">
-                    {search ? 'No stores found matching your search.' : 'No stores available yet.'}
+                    {search
+                      ? "No stores found matching your search."
+                      : "No stores available yet."}
                   </p>
                   {search && (
                     <button
-                      onClick={() => setSearch('')}
+                      onClick={() => setSearch("")}
                       className="mt-4 text-purple-400 hover:text-purple-300 text-sm underline"
                     >
                       Clear search
@@ -142,13 +151,13 @@ function AllStores() {
                   <ChevronLeft className="h-4 w-4" />
                   <span>Previous</span>
                 </button>
-                
+
                 <div className="px-6 py-3 bg-gradient-to-r from-purple-800 to-purple-900 rounded-lg border border-gray-700">
                   <span className="text-sm text-white font-medium">
                     Page {currentPage} of {totalPages}
                   </span>
                 </div>
-                
+
                 <button
                   onClick={handleNextPage}
                   disabled={currentPage === totalPages}

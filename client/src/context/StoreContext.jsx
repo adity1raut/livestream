@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
-import { useAuth } from './AuthContext';
+import { useAuth } from "./AuthContext";
 
 const StoreContext = createContext();
 
@@ -25,12 +25,12 @@ export function StoreProvider({ children }) {
   const getAllStores = async (params = {}) => {
     setLoading(true);
     try {
-      const res = await axios.get('/api/stores', { params });
+      const res = await axios.get("/api/stores", { params });
       setStores(res.data.stores || []);
       return res.data;
     } catch (error) {
-      console.error('Error fetching stores:', error);
-      setError(error.response?.data?.error || 'Error fetching stores');
+      console.error("Error fetching stores:", error);
+      setError(error.response?.data?.error || "Error fetching stores");
       return null;
     } finally {
       setLoading(false);
@@ -42,8 +42,8 @@ export function StoreProvider({ children }) {
       const res = await axios.get(`/api/stores/${id}`);
       return res.data;
     } catch (error) {
-      console.error('Error fetching store:', error);
-      setError(error.response?.data?.error || 'Error fetching store');
+      console.error("Error fetching store:", error);
+      setError(error.response?.data?.error || "Error fetching store");
       return null;
     }
   };
@@ -54,19 +54,19 @@ export function StoreProvider({ children }) {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
+      reader.onerror = (error) => reject(error);
     });
   };
 
   const createStore = async (storeData) => {
     try {
       setLoading(true);
-      console.log('Creating store with data:', storeData);
+      console.log("Creating store with data:", storeData);
 
       // Prepare data for API
       const apiData = {
         name: storeData.name,
-        description: storeData.description || ''
+        description: storeData.description || "",
       };
 
       // Convert logo to base64 if provided
@@ -74,16 +74,19 @@ export function StoreProvider({ children }) {
         apiData.logoBase64 = await convertImageToBase64(storeData.logo);
       }
 
-      const res = await axios.post('/api/stores', apiData, {
+      const res = await axios.post("/api/stores", apiData, {
         withCredentials: true,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       });
 
       setUserStore(res.data);
       return { success: true, data: res.data };
     } catch (error) {
-      console.error('Create store error:', error);
-      const message = error.response?.data?.error || error.message || 'Failed to create store';
+      console.error("Create store error:", error);
+      const message =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to create store";
       setError(message);
       return { success: false, message };
     } finally {
@@ -94,12 +97,12 @@ export function StoreProvider({ children }) {
   const updateStore = async (id, storeData) => {
     try {
       setLoading(true);
-      console.log('Updating store with data:', storeData);
+      console.log("Updating store with data:", storeData);
 
       // Prepare data for API
       const apiData = {
         name: storeData.name,
-        description: storeData.description
+        description: storeData.description,
       };
 
       // Convert logo to base64 if provided
@@ -109,14 +112,17 @@ export function StoreProvider({ children }) {
 
       const res = await axios.put(`/api/stores/${id}`, apiData, {
         withCredentials: true,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       });
 
       setUserStore(res.data);
       return { success: true, data: res.data };
     } catch (error) {
-      console.error('Update store error:', error);
-      const message = error.response?.data?.error || error.message || 'Failed to update store';
+      console.error("Update store error:", error);
+      const message =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to update store";
       setError(message);
       return { success: false, message };
     } finally {
@@ -131,8 +137,11 @@ export function StoreProvider({ children }) {
       setUserStore(null);
       return { success: true };
     } catch (error) {
-      console.error('Delete store error:', error);
-      const message = error.response?.data?.error || error.message || 'Failed to delete store';
+      console.error("Delete store error:", error);
+      const message =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to delete store";
       setError(message);
       return { success: false, message };
     } finally {
@@ -142,13 +151,15 @@ export function StoreProvider({ children }) {
 
   const getCurrentUserStore = async () => {
     try {
-      const res = await axios.get('/api/stores/my/store', { withCredentials: true });
+      const res = await axios.get("/api/stores/my/store", {
+        withCredentials: true,
+      });
       setUserStore(res.data);
       return res.data;
     } catch (error) {
-      console.error('Error fetching user store:', error);
+      console.error("Error fetching user store:", error);
       if (error.response?.status !== 404) {
-        setError(error.response?.data?.error || 'Error fetching user store');
+        setError(error.response?.data?.error || "Error fetching user store");
       }
       setUserStore(null);
       return null;
@@ -160,8 +171,8 @@ export function StoreProvider({ children }) {
       const res = await axios.get(`/api/stores/user/${userId}`);
       return { success: true, data: res.data };
     } catch (error) {
-      console.error('Error fetching user store:', error);
-      setError(error.response?.data?.error || 'Error fetching user store');
+      console.error("Error fetching user store:", error);
+      setError(error.response?.data?.error || "Error fetching user store");
       return { success: false, message: error.response?.data?.error };
     }
   };
@@ -171,8 +182,8 @@ export function StoreProvider({ children }) {
       const res = await axios.get(`/api/stores/${id}/products`, { params });
       return { success: true, data: res.data };
     } catch (error) {
-      console.error('Error fetching store products:', error);
-      setError(error.response?.data?.error || 'Error fetching store products');
+      console.error("Error fetching store products:", error);
+      setError(error.response?.data?.error || "Error fetching store products");
       return { success: false, message: error.response?.data?.error };
     }
   };
@@ -180,17 +191,17 @@ export function StoreProvider({ children }) {
   // Store Analytics
   const getStoreAnalytics = async (storeId) => {
     if (!isAuthenticated) {
-      return { success: false, message: 'Authentication required' };
+      return { success: false, message: "Authentication required" };
     }
     setLoading(true);
     try {
       const res = await axios.get(`/api/stores/${storeId}/analytics`, {
-        withCredentials: true
+        withCredentials: true,
       });
       return { success: true, data: res.data };
     } catch (error) {
-      console.error('Error fetching analytics:', error);
-      setError(error.response?.data?.error || 'Failed to fetch analytics');
+      console.error("Error fetching analytics:", error);
+      setError(error.response?.data?.error || "Failed to fetch analytics");
       return { success: false, message: error.response?.data?.error };
     } finally {
       setLoading(false);
@@ -200,21 +211,27 @@ export function StoreProvider({ children }) {
   // Store Social Features
   const followStore = async (storeId) => {
     if (!isAuthenticated) {
-      return { success: false, message: 'Authentication required' };
+      return { success: false, message: "Authentication required" };
     }
     try {
-      const res = await axios.post(`/api/stores/${storeId}/follow`, {}, {
-        withCredentials: true
-      });
+      const res = await axios.post(
+        `/api/stores/${storeId}/follow`,
+        {},
+        {
+          withCredentials: true,
+        },
+      );
       if (res.data.following) {
-        setFollowedStores(prev => [...prev, storeId]);
+        setFollowedStores((prev) => [...prev, storeId]);
       } else {
-        setFollowedStores(prev => prev.filter(id => id !== storeId));
+        setFollowedStores((prev) => prev.filter((id) => id !== storeId));
       }
       return { success: true, data: res.data };
     } catch (error) {
-      console.error('Error following store:', error);
-      setError(error.response?.data?.error || 'Failed to follow/unfollow store');
+      console.error("Error following store:", error);
+      setError(
+        error.response?.data?.error || "Failed to follow/unfollow store",
+      );
       return { success: false, message: error.response?.data?.error };
     }
   };
@@ -223,12 +240,12 @@ export function StoreProvider({ children }) {
     if (!isAuthenticated) return { following: false };
     try {
       const res = await axios.get(`/api/stores/${storeId}/follow-status`, {
-        withCredentials: true
+        withCredentials: true,
       });
       return { success: true, data: res.data };
     } catch (error) {
-      console.error('Error getting follow status:', error);
-      setError(error.response?.data?.error || 'Failed to get follow status');
+      console.error("Error getting follow status:", error);
+      setError(error.response?.data?.error || "Failed to get follow status");
       return { success: false, message: error.response?.data?.error };
     }
   };
@@ -236,14 +253,16 @@ export function StoreProvider({ children }) {
   const getFollowingStores = async () => {
     if (!isAuthenticated) return { success: true, data: [] };
     try {
-      const res = await axios.get('/api/stores/following/stores', {
-        withCredentials: true
+      const res = await axios.get("/api/stores/following/stores", {
+        withCredentials: true,
       });
-      setFollowedStores(res.data.map(store => store._id));
+      setFollowedStores(res.data.map((store) => store._id));
       return { success: true, data: res.data };
     } catch (error) {
-      console.error('Error fetching following stores:', error);
-      setError(error.response?.data?.error || 'Failed to fetch following stores');
+      console.error("Error fetching following stores:", error);
+      setError(
+        error.response?.data?.error || "Failed to fetch following stores",
+      );
       return { success: false, message: error.response?.data?.error };
     }
   };
@@ -251,22 +270,24 @@ export function StoreProvider({ children }) {
   // Search Functions
   const searchProducts = async (params = {}) => {
     try {
-      const res = await axios.get('/api/stores/search/products', { params });
+      const res = await axios.get("/api/stores/search/products", { params });
       return { success: true, data: res.data };
     } catch (error) {
-      console.error('Error searching products:', error);
-      setError(error.response?.data?.error || 'Error searching products');
+      console.error("Error searching products:", error);
+      setError(error.response?.data?.error || "Error searching products");
       return { success: false, message: error.response?.data?.error };
     }
   };
 
   const getTrendingProducts = async (params = {}) => {
     try {
-      const res = await axios.get('/api/stores/trending/products', { params });
+      const res = await axios.get("/api/stores/trending/products", { params });
       return { success: true, data: res.data };
     } catch (error) {
-      console.error('Error fetching trending products:', error);
-      setError(error.response?.data?.error || 'Error fetching trending products');
+      console.error("Error fetching trending products:", error);
+      setError(
+        error.response?.data?.error || "Error fetching trending products",
+      );
       return { success: false, message: error.response?.data?.error };
     }
   };
@@ -275,43 +296,45 @@ export function StoreProvider({ children }) {
   const clearError = () => setError(null);
 
   return (
-    <StoreContext.Provider value={{
-      // State
-      stores,
-      userStore,
-      loading,
-      error,
-      followedStores,
+    <StoreContext.Provider
+      value={{
+        // State
+        stores,
+        userStore,
+        loading,
+        error,
+        followedStores,
 
-      // Store Management
-      getAllStores,
-      getStoreById,
-      createStore,
-      updateStore,
-      deleteStore,
-      getCurrentUserStore,
-      getUserStore,
-      getStoreProducts,
+        // Store Management
+        getAllStores,
+        getStoreById,
+        createStore,
+        updateStore,
+        deleteStore,
+        getCurrentUserStore,
+        getUserStore,
+        getStoreProducts,
 
-      // Store Analytics
-      getStoreAnalytics,
+        // Store Analytics
+        getStoreAnalytics,
 
-      // Store Social Features
-      followStore,
-      getFollowStatus,
-      getFollowingStores,
+        // Store Social Features
+        followStore,
+        getFollowStatus,
+        getFollowingStores,
 
-      // Search Functions
-      searchProducts,
-      getTrendingProducts,
+        // Search Functions
+        searchProducts,
+        getTrendingProducts,
 
-      // Error Management
-      clearError,
+        // Error Management
+        clearError,
 
-      // State Setters
-      setStores,
-      setUserStore
-    }}>
+        // State Setters
+        setStores,
+        setUserStore,
+      }}
+    >
       {children}
     </StoreContext.Provider>
   );
@@ -320,7 +343,7 @@ export function StoreProvider({ children }) {
 export const useStore = () => {
   const context = useContext(StoreContext);
   if (!context) {
-    throw new Error('useStore must be used within a StoreProvider');
+    throw new Error("useStore must be used within a StoreProvider");
   }
   return context;
 };

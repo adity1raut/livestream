@@ -1,45 +1,64 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { useProduct } from '../../context/ProductContext';
-import { useStore } from '../../context/StoreContext';
-import { useNavigate } from 'react-router-dom';
-import { Star, ArrowLeft, ShoppingCart, Store, MessageCircle, Heart, Edit, Save, X, Plus, Trash2 } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { useProduct } from "../../context/ProductContext";
+import { useStore } from "../../context/StoreContext";
+import { useNavigate } from "react-router-dom";
+import {
+  Star,
+  ArrowLeft,
+  ShoppingCart,
+  Store,
+  MessageCircle,
+  Heart,
+  Edit,
+  Save,
+  X,
+  Plus,
+  Trash2,
+} from "lucide-react";
 
 export default function ProductDetail() {
   const { productId } = useParams();
   const { user, isAuthenticated } = useAuth();
-  const { getProductById, addProductRating, addToCart, toggleWishlist, updateProduct } = useProduct();
+  const {
+    getProductById,
+    addProductRating,
+    addToCart,
+    toggleWishlist,
+    updateProduct,
+  } = useProduct();
   const { userStore } = useStore();
   const navigate = useNavigate();
-  
+
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const [rating, setRating] = useState(5);
-  const [review, setReview] = useState('');
+  const [review, setReview] = useState("");
   const [submittingRating, setSubmittingRating] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [addingToCart, setAddingToCart] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  
+
   // Edit mode states
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    stock: ''
+    name: "",
+    description: "",
+    price: "",
+    stock: "",
   });
   const [newImages, setNewImages] = useState([]);
   const [imagesToRemove, setImagesToRemove] = useState([]);
   const [updating, setUpdating] = useState(false);
 
   // Check if current user owns this product
-  const isProductOwner = isAuthenticated && 
-    userStore && 
-    product && 
+  const isProductOwner =
+    isAuthenticated &&
+    userStore &&
+    product &&
     product.store._id === userStore._id;
 
   useEffect(() => {
@@ -51,28 +70,28 @@ export default function ProductDetail() {
   useEffect(() => {
     if (product && isEditing) {
       setEditData({
-        name: product.name || '',
-        description: product.description || '',
-        price: product.price?.toString() || '',
-        stock: product.stock?.toString() || ''
+        name: product.name || "",
+        description: product.description || "",
+        price: product.price?.toString() || "",
+        stock: product.stock?.toString() || "",
       });
     }
   }, [product, isEditing]);
 
   const fetchProduct = async () => {
     setLoading(true);
-    setError('');
+    setError("");
     try {
       const productData = await getProductById(productId);
       if (productData) {
         setProduct(productData);
-        setError('');
+        setError("");
       } else {
-        setError('Product not found');
+        setError("Product not found");
       }
     } catch (error) {
-      console.error('Error fetching product:', error);
-      setError('Error fetching product details');
+      console.error("Error fetching product:", error);
+      setError("Error fetching product details");
     } finally {
       setLoading(false);
     }
@@ -82,10 +101,10 @@ export default function ProductDetail() {
     if (isEditing) {
       // Cancel editing - reset states
       setEditData({
-        name: product.name || '',
-        description: product.description || '',
-        price: product.price?.toString() || '',
-        stock: product.stock?.toString() || ''
+        name: product.name || "",
+        description: product.description || "",
+        price: product.price?.toString() || "",
+        stock: product.stock?.toString() || "",
       });
       setNewImages([]);
       setImagesToRemove([]);
@@ -94,50 +113,50 @@ export default function ProductDetail() {
   };
 
   const handleInputChange = (field, value) => {
-    setEditData(prev => ({
+    setEditData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleImageAdd = (e) => {
     const files = Array.from(e.target.files);
-    setNewImages(prev => [...prev, ...files]);
+    setNewImages((prev) => [...prev, ...files]);
   };
 
   const handleImageRemove = (imageUrl) => {
-    setImagesToRemove(prev => [...prev, imageUrl]);
+    setImagesToRemove((prev) => [...prev, imageUrl]);
   };
 
   const handleNewImageRemove = (index) => {
-    setNewImages(prev => prev.filter((_, i) => i !== index));
+    setNewImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleUpdateProduct = async () => {
     if (!editData.name.trim() || !editData.price || !editData.stock) {
-      setError('Please fill in all required fields');
+      setError("Please fill in all required fields");
       return;
     }
 
     setUpdating(true);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     try {
       const formData = new FormData();
-      formData.append('name', editData.name.trim());
-      formData.append('description', editData.description.trim());
-      formData.append('price', parseFloat(editData.price));
-      formData.append('stock', parseInt(editData.stock));
+      formData.append("name", editData.name.trim());
+      formData.append("description", editData.description.trim());
+      formData.append("price", parseFloat(editData.price));
+      formData.append("stock", parseInt(editData.stock));
 
       // Add new images
-      newImages.forEach(image => {
-        formData.append('images', image);
+      newImages.forEach((image) => {
+        formData.append("images", image);
       });
 
       // Add images to remove
       if (imagesToRemove.length > 0) {
-        formData.append('removeImages', JSON.stringify(imagesToRemove));
+        formData.append("removeImages", JSON.stringify(imagesToRemove));
       }
 
       const result = await updateProduct(userStore._id, productId, formData);
@@ -147,15 +166,15 @@ export default function ProductDetail() {
         setIsEditing(false);
         setNewImages([]);
         setImagesToRemove([]);
-        setSuccess('Product updated successfully!');
-        setTimeout(() => setSuccess(''), 3000);
+        setSuccess("Product updated successfully!");
+        setTimeout(() => setSuccess(""), 3000);
       } else {
-        setError(result.message || 'Failed to update product');
-        setTimeout(() => setError(''), 3000);
+        setError(result.message || "Failed to update product");
+        setTimeout(() => setError(""), 3000);
       }
     } catch (error) {
-      setError('Error updating product');
-      setTimeout(() => setError(''), 3000);
+      setError("Error updating product");
+      setTimeout(() => setError(""), 3000);
     } finally {
       setUpdating(false);
     }
@@ -164,30 +183,30 @@ export default function ProductDetail() {
   const handleSubmitRating = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      setError('Please login to add a rating');
+      setError("Please login to add a rating");
       return;
     }
 
     setSubmittingRating(true);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     try {
       const result = await addProductRating(productId, rating, review);
-      
+
       if (result.success) {
         setProduct(result.data);
-        setReview('');
+        setReview("");
         setRating(5);
-        setSuccess('Rating submitted successfully!');
-        setTimeout(() => setSuccess(''), 3000);
+        setSuccess("Rating submitted successfully!");
+        setTimeout(() => setSuccess(""), 3000);
       } else {
-        setError(result.message || 'Error submitting rating');
-        setTimeout(() => setError(''), 3000);
+        setError(result.message || "Error submitting rating");
+        setTimeout(() => setError(""), 3000);
       }
     } catch (error) {
-      setError('Error submitting rating');
-      setTimeout(() => setError(''), 3000);
+      setError("Error submitting rating");
+      setTimeout(() => setError(""), 3000);
     } finally {
       setSubmittingRating(false);
     }
@@ -195,44 +214,47 @@ export default function ProductDetail() {
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
-    
+
     if (addingToCart) return;
 
     // Check if product has sufficient stock
     if (quantity > product.stock) {
       setError(`Only ${product.stock} items available in stock`);
-      setTimeout(() => setError(''), 3000);
+      setTimeout(() => setError(""), 3000);
       return;
     }
 
     setAddingToCart(true);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     try {
       // Pass the storeId which is required by your backend
       const result = await addToCart(product._id, quantity, product.store._id);
-      
+
       if (result.success) {
         setSuccess(`${quantity} item(s) added to cart successfully!`);
-        setTimeout(() => setSuccess(''), 3000);
-        
+        setTimeout(() => setSuccess(""), 3000);
+
         // Update cart icon count if the function exists
         if (window.updateCartCount && result.data?.items) {
-          const totalItems = result.data.items.reduce((sum, item) => sum + item.quantity, 0);
+          const totalItems = result.data.items.reduce(
+            (sum, item) => sum + item.quantity,
+            0,
+          );
           window.updateCartCount(totalItems);
         }
       } else {
-        setError(result.message || 'Failed to add product to cart');
-        setTimeout(() => setError(''), 3000);
+        setError(result.message || "Failed to add product to cart");
+        setTimeout(() => setError(""), 3000);
       }
     } catch (err) {
-      console.error('Error adding to cart:', err);
-      setError('Failed to add product to cart');
-      setTimeout(() => setError(''), 3000);
+      console.error("Error adding to cart:", err);
+      setError("Failed to add product to cart");
+      setTimeout(() => setError(""), 3000);
     } finally {
       setAddingToCart(false);
     }
@@ -240,22 +262,24 @@ export default function ProductDetail() {
 
   const handleWishlistToggle = async () => {
     if (!isAuthenticated) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
 
     try {
       const result = await toggleWishlist(product._id);
       if (result.success) {
-        setSuccess(result.inWishlist ? 'Added to wishlist!' : 'Removed from wishlist!');
-        setTimeout(() => setSuccess(''), 3000);
+        setSuccess(
+          result.inWishlist ? "Added to wishlist!" : "Removed from wishlist!",
+        );
+        setTimeout(() => setSuccess(""), 3000);
       } else {
-        setError(result.message || 'Error updating wishlist');
-        setTimeout(() => setError(''), 3000);
+        setError(result.message || "Error updating wishlist");
+        setTimeout(() => setError(""), 3000);
       }
     } catch (error) {
-      setError('Error updating wishlist');
-      setTimeout(() => setError(''), 3000);
+      setError("Error updating wishlist");
+      setTimeout(() => setError(""), 3000);
     }
   };
 
@@ -270,14 +294,16 @@ export default function ProductDetail() {
       <Star
         key={i}
         size={size}
-        className={i < rating ? 'text-yellow-400 fill-current' : 'text-gray-600'}
+        className={
+          i < rating ? "text-yellow-400 fill-current" : "text-gray-600"
+        }
       />
     ));
   };
 
   const getDisplayImages = () => {
     if (!product?.images) return [];
-    return product.images.filter(img => !imagesToRemove.includes(img));
+    return product.images.filter((img) => !imagesToRemove.includes(img));
   };
 
   if (loading) {
@@ -295,7 +321,9 @@ export default function ProductDetail() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 flex items-center justify-center p-4">
         <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-xl p-8 max-w-md mx-auto text-center">
-          <h1 className="text-2xl font-bold text-red-400 mb-4">Product Not Found</h1>
+          <h1 className="text-2xl font-bold text-red-400 mb-4">
+            Product Not Found
+          </h1>
           <p className="text-gray-400 mb-4">{error}</p>
           <button
             onClick={() => window.history.back()}
@@ -332,7 +360,7 @@ export default function ProductDetail() {
                     className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50"
                   >
                     <Save size={16} />
-                    {updating ? 'Saving...' : 'Save Changes'}
+                    {updating ? "Saving..." : "Save Changes"}
                   </button>
                   <button
                     onClick={handleEditToggle}
@@ -369,7 +397,11 @@ export default function ProductDetail() {
                     />
                     {isEditing && (
                       <button
-                        onClick={() => handleImageRemove(displayImages[selectedImage] || displayImages[0])}
+                        onClick={() =>
+                          handleImageRemove(
+                            displayImages[selectedImage] || displayImages[0],
+                          )
+                        }
                         className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full hover:bg-red-700"
                       >
                         <Trash2 size={16} />
@@ -378,11 +410,13 @@ export default function ProductDetail() {
                   </div>
                 ) : (
                   <div className="w-full h-96 bg-gray-700 rounded-lg flex items-center justify-center">
-                    <span className="text-gray-500 text-lg">No Image Available</span>
+                    <span className="text-gray-500 text-lg">
+                      No Image Available
+                    </span>
                   </div>
                 )}
               </div>
-              
+
               {/* Image thumbnails */}
               {displayImages.length > 1 && (
                 <div className="flex gap-2 overflow-x-auto mb-4">
@@ -391,7 +425,9 @@ export default function ProductDetail() {
                       key={index}
                       onClick={() => setSelectedImage(index)}
                       className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
-                        selectedImage === index ? 'border-purple-500' : 'border-gray-600'
+                        selectedImage === index
+                          ? "border-purple-500"
+                          : "border-gray-600"
                       }`}
                     >
                       <img
@@ -409,10 +445,15 @@ export default function ProductDetail() {
                 <>
                   {newImages.length > 0 && (
                     <div className="mb-4">
-                      <h4 className="text-sm font-medium text-gray-300 mb-2">New Images:</h4>
+                      <h4 className="text-sm font-medium text-gray-300 mb-2">
+                        New Images:
+                      </h4>
                       <div className="flex gap-2 overflow-x-auto">
                         {newImages.map((image, index) => (
-                          <div key={index} className="relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 border-green-500">
+                          <div
+                            key={index}
+                            className="relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 border-green-500"
+                          >
                             <img
                               src={URL.createObjectURL(image)}
                               alt={`New ${index + 1}`}
@@ -453,11 +494,15 @@ export default function ProductDetail() {
                 // Edit mode
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">Product Name *</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                      Product Name *
+                    </label>
                     <input
                       type="text"
                       value={editData.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("name", e.target.value)
+                      }
                       className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
                       placeholder="Enter product name"
                     />
@@ -465,22 +510,30 @@ export default function ProductDetail() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-1">Price *</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                        Price *
+                      </label>
                       <input
                         type="number"
                         step="0.01"
                         value={editData.price}
-                        onChange={(e) => handleInputChange('price', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("price", e.target.value)
+                        }
                         className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
                         placeholder="0.00"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-1">Stock *</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                        Stock *
+                      </label>
                       <input
                         type="number"
                         value={editData.stock}
-                        onChange={(e) => handleInputChange('stock', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("stock", e.target.value)
+                        }
                         className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
                         placeholder="0"
                       />
@@ -488,10 +541,14 @@ export default function ProductDetail() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">Description</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                      Description
+                    </label>
                     <textarea
                       value={editData.description}
-                      onChange={(e) => handleInputChange('description', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("description", e.target.value)
+                      }
                       rows="4"
                       className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
                       placeholder="Enter product description"
@@ -501,16 +558,24 @@ export default function ProductDetail() {
               ) : (
                 // View mode
                 <>
-                  <h1 className="text-3xl font-bold text-white mb-4">{product?.name}</h1>
-                  
+                  <h1 className="text-3xl font-bold text-white mb-4">
+                    {product?.name}
+                  </h1>
+
                   <div className="flex items-center gap-4 mb-4">
-                    <span className="text-3xl font-bold text-purple-400">${product?.price}</span>
-                    <span className={`px-3 py-1 rounded-full text-sm ${
-                      product?.stock > 0 
-                        ? 'bg-green-900/40 text-green-400 border border-green-700/50' 
-                        : 'bg-red-900/40 text-red-400 border border-red-700/50'
-                    }`}>
-                      {product?.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
+                    <span className="text-3xl font-bold text-purple-400">
+                      ${product?.price}
+                    </span>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm ${
+                        product?.stock > 0
+                          ? "bg-green-900/40 text-green-400 border border-green-700/50"
+                          : "bg-red-900/40 text-red-400 border border-red-700/50"
+                      }`}
+                    >
+                      {product?.stock > 0
+                        ? `${product.stock} in stock`
+                        : "Out of stock"}
                     </span>
                   </div>
 
@@ -519,21 +584,26 @@ export default function ProductDetail() {
                       {renderStars(Math.round(calculateAverageRating()))}
                     </div>
                     <span className="text-gray-400">
-                      {calculateAverageRating()} ({product?.ratings?.length || 0} reviews)
+                      {calculateAverageRating()} (
+                      {product?.ratings?.length || 0} reviews)
                     </span>
                   </div>
 
                   <div className="mb-6">
-                    <h3 className="text-lg font-semibold mb-2 text-white">Description</h3>
+                    <h3 className="text-lg font-semibold mb-2 text-white">
+                      Description
+                    </h3>
                     <p className="text-gray-400 leading-relaxed">
-                      {product?.description || 'No description available.'}
+                      {product?.description || "No description available."}
                     </p>
                   </div>
 
                   <div className="flex items-center gap-3 mb-6 p-4 bg-gray-700/50 rounded-lg border border-gray-600/50">
                     <Store size={24} className="text-purple-400" />
                     <div>
-                      <p className="font-semibold text-white">{product?.store?.name}</p>
+                      <p className="font-semibold text-white">
+                        {product?.store?.name}
+                      </p>
                       <p className="text-sm text-gray-400">Store Owner</p>
                     </div>
                   </div>
@@ -556,7 +626,9 @@ export default function ProductDetail() {
                           {quantity}
                         </span>
                         <button
-                          onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                          onClick={() =>
+                            setQuantity(Math.min(product.stock, quantity + 1))
+                          }
                           className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 transition-colors text-white"
                           disabled={quantity >= product.stock}
                         >
@@ -574,17 +646,25 @@ export default function ProductDetail() {
                     <div className="flex gap-4 mb-8">
                       <button
                         onClick={handleAddToCart}
-                        disabled={product?.stock === 0 || addingToCart || quantity > product?.stock}
+                        disabled={
+                          product?.stock === 0 ||
+                          addingToCart ||
+                          quantity > product?.stock
+                        }
                         className="flex-1 bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                       >
                         <ShoppingCart size={20} />
-                        {addingToCart ? 'Adding to Cart...' :
-                         !isAuthenticated ? 'Login to Add to Cart' : 
-                         product?.stock === 0 ? 'Out of Stock' :
-                         quantity > product?.stock ? 'Insufficient Stock' :
-                         'Add to Cart'}
+                        {addingToCart
+                          ? "Adding to Cart..."
+                          : !isAuthenticated
+                            ? "Login to Add to Cart"
+                            : product?.stock === 0
+                              ? "Out of Stock"
+                              : quantity > product?.stock
+                                ? "Insufficient Stock"
+                                : "Add to Cart"}
                       </button>
-                      
+
                       {isAuthenticated && (
                         <button
                           onClick={handleWishlistToggle}
@@ -599,24 +679,26 @@ export default function ProductDetail() {
                   {/* Additional product info */}
                   {!isProductOwner && (
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <h4 className="font-semibold text-blue-900 mb-2">Quick Actions</h4>
+                      <h4 className="font-semibold text-blue-900 mb-2">
+                        Quick Actions
+                      </h4>
                       <div className="flex gap-2 text-sm">
                         <button
-                          onClick={() => navigate('/cart')}
+                          onClick={() => navigate("/cart")}
                           className="text-blue-600 hover:text-blue-800 underline"
                         >
                           View Cart
                         </button>
                         <span className="text-gray-400">•</span>
                         <button
-                          onClick={() => navigate('/wishlist')}
+                          onClick={() => navigate("/wishlist")}
                           className="text-blue-600 hover:text-blue-800 underline"
                         >
                           View Wishlist
                         </button>
                         <span className="text-gray-400">•</span>
                         <button
-                          onClick={() => navigate('/products')}
+                          onClick={() => navigate("/products")}
                           className="text-blue-600 hover:text-blue-800 underline"
                         >
                           Continue Shopping
@@ -626,11 +708,15 @@ export default function ProductDetail() {
                   )}
                 </>
               )}
-              
+
               {(error || success) && (
-                <div className={`p-4 rounded-lg mb-4 ${
-                  error ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
-                }`}>
+                <div
+                  className={`p-4 rounded-lg mb-4 ${
+                    error
+                      ? "bg-red-100 text-red-700"
+                      : "bg-green-100 text-green-700"
+                  }`}
+                >
                   {error || success}
                 </div>
               )}

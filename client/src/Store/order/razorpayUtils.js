@@ -11,8 +11,8 @@ export const loadRazorpayScript = () => {
       return;
     }
 
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.onload = () => {
       resolve(true);
     };
@@ -32,9 +32,9 @@ export const loadRazorpayScript = () => {
 export const initiatePayment = async (options, onSuccess, onError) => {
   try {
     const isLoaded = await loadRazorpayScript();
-    
+
     if (!isLoaded) {
-      throw new Error('Razorpay SDK failed to load');
+      throw new Error("Razorpay SDK failed to load");
     }
 
     const razorpayOptions = {
@@ -44,18 +44,18 @@ export const initiatePayment = async (options, onSuccess, onError) => {
       },
       modal: {
         ondismiss: () => {
-          console.log('Payment modal closed');
+          console.log("Payment modal closed");
           if (onError) {
-            onError('Payment cancelled by user');
+            onError("Payment cancelled by user");
           }
-        }
-      }
+        },
+      },
     };
 
     const rzp = new window.Razorpay(razorpayOptions);
     rzp.open();
   } catch (error) {
-    console.error('Payment initiation error:', error);
+    console.error("Payment initiation error:", error);
     if (onError) {
       onError(error.message);
     }
@@ -68,9 +68,9 @@ export const initiatePayment = async (options, onSuccess, onError) => {
  * @returns {string} Formatted amount
  */
 export const formatAmount = (amount) => {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
   }).format(amount);
 };
 
@@ -104,13 +104,13 @@ export const useRazorpay = () => {
           if (validatePaymentResponse(response)) {
             onSuccess(response);
           } else {
-            setError('Invalid payment response');
+            setError("Invalid payment response");
           }
         },
         (error) => {
           setIsLoading(false);
           setError(error);
-        }
+        },
       );
     } catch (err) {
       setIsLoading(false);
@@ -122,6 +122,6 @@ export const useRazorpay = () => {
     makePayment,
     isLoading,
     error,
-    clearError: () => setError(null)
+    clearError: () => setError(null),
   };
 };

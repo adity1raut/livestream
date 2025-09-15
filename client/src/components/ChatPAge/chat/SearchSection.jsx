@@ -1,5 +1,5 @@
-import React from 'react';
-import { Search, Sword, Crown } from 'lucide-react';
+import React from "react";
+import { Search, Sword, Crown } from "lucide-react";
 
 const SearchSection = ({
   searchQuery,
@@ -8,7 +8,7 @@ const SearchSection = ({
   setSearchType,
   searchResults,
   loading,
-  startConversation
+  startConversation,
 }) => {
   const getRandomLevel = () => Math.floor(Math.random() * 100) + 1;
 
@@ -28,21 +28,21 @@ const SearchSection = ({
         </div>
         <div className="flex gap-3 mt-3">
           <button
-            onClick={() => setSearchType('username')}
+            onClick={() => setSearchType("username")}
             className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-300 ${
-              searchType === 'username'
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
-                : 'bg-gray-600/60 text-gray-300 hover:bg-gray-500/60'
+              searchType === "username"
+                ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg"
+                : "bg-gray-600/60 text-gray-300 hover:bg-gray-500/60"
             }`}
           >
             Username
           </button>
           <button
-            onClick={() => setSearchType('name')}
+            onClick={() => setSearchType("name")}
             className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-300 ${
-              searchType === 'name'
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
-                : 'bg-gray-600/60 text-gray-300 hover:bg-gray-500/60'
+              searchType === "name"
+                ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg"
+                : "bg-gray-600/60 text-gray-300 hover:bg-gray-500/60"
             }`}
           >
             Name
@@ -66,8 +66,7 @@ const SearchSection = ({
               <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold mr-4 shadow-lg group-hover:shadow-purple-500/50">
                 {user.profile?.name
                   ? user.profile.name.charAt(0).toUpperCase()
-                  : user.username.charAt(0).toUpperCase()
-                }
+                  : user.username.charAt(0).toUpperCase()}
               </div>
               <div className="absolute bottom-0 right-2 w-4 h-4 bg-green-500 border-2 border-gray-800 rounded-full shadow-lg"></div>
             </div>

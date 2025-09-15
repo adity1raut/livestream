@@ -1,6 +1,6 @@
 # Livestream Social Platform
 
-A full-stack social media web application with real-time chat, posts, notifications, and a gaming-inspired dark theme.
+A full-stack social media and e-commerce platform inspired by gaming communities. Livestream enables users to share posts, chat in real time, join live streams, manage stores and products, and make secure payments—all in a modern, dark-themed UI.
 
 ---
 
@@ -24,33 +24,38 @@ A full-stack social media web application with real-time chat, posts, notificati
 - User profiles with followers/following
 - Create, like, comment, and delete posts (with image/video upload)
 - Real-time chat and notifications (Socket.io)
-- Gaming-inspired dark theme UI
-- Responsive design
-- Store and product management (basic)
-- Notification system for likes, comments, and follows
+- Real-time live stream sharing and viewing with chat
+- Arena events and matchmaking
+- Gaming-inspired dark theme (Tailwind CSS)
+- Responsive design for all devices
+- Store and product management (add/edit/delete products, analytics)
+- Wishlist, cart, and order management
+- Payment integration (Razorpay/Stripe)
+- Notification system for likes, comments, follows, purchases, and arena invites
+- Lucide React icons for a modern, consistent UI
 
 ---
 
 ## Tech Stack
 
-**Backend:**
+**Backend:**  
+- Node.js, Express.js  
+- MongoDB, Mongoose  
+- JWT authentication  
+- Socket.io (real-time chat, notifications, live stream events)  
+- Cloudinary (media uploads)  
+- Nodemailer (email)  
+- Multer (file uploads)  
+- Razorpay/Stripe (payments)
 
-- Node.js, Express.js
-- MongoDB, Mongoose
-- JWT Authentication
-- Socket.io (real-time)
-- Cloudinary (media uploads)
-- Nodemailer (email)
-- Multer (file uploads)
-
-**Frontend:**
-
-- React (with Vite)
-- React Router
-- Axios
-- Tailwind CSS (gaming/dark theme)
-- Lucide-react (icons)
-- React Toastify (notifications)
+**Frontend:**  
+- React (Vite)  
+- React Router  
+- Axios  
+- Tailwind CSS  
+- Lucide-react (icons)  
+- React Toastify  
+- Context API for state management
 
 ---
 
@@ -58,34 +63,33 @@ A full-stack social media web application with real-time chat, posts, notificati
 
 ```
 livestream/
-│
-├── backend/
-│   ├── config/           # Cloudinary, multer, nodemailer configs
-│   ├── controllers/      # Route controllers (Post, User, Chat, etc.)
-│   ├── db/               # MongoDB connection
-│   ├── mainRouter/       # Main API router
-│   ├── middleware/       # Auth middleware
-│   ├── models/           # Mongoose models (User, Post, etc.)
-│   ├── route/            # Route definitions
-│   ├── services/         # Notification service
-│   ├── socket/           # Socket.io handlers
-│   ├── uploads/          # Uploaded files
-│   ├── utils/            # Utility functions
-│   └── server.js         # Express server entry
-│
-├── client/
-│   ├── public/           # Static assets
+├── backend/      # Express API, MongoDB, Socket.io, Cloudinary, Payments, etc.
+│   ├── config/   # Service configs (Cloudinary, Multer, Email, Payments)
+│   ├── controllers/ # Route controllers (Chat, Notification, Post, Profile, Store, Stream, User)
+│   ├── db/       # Database connection
+│   ├── mainRouter/ # Main router
+│   ├── middleware/ # Auth and store verification
+│   ├── models/   # Mongoose models (User, Post, Store, Product, Order, etc.)
+│   ├── route/    # Route definitions
+│   ├── services/ # Notification and other services
+│   ├── socket/   # Socket.io handlers
+│   ├── uploads/  # Uploaded files
+│   └── server.js # Entry point
+├── client/       # React app, Tailwind CSS, context, components
+│   ├── public/   # Static assets
 │   ├── src/
-│   │   ├── components/   # React components (Post, Profile, Chat, etc.)
-│   │   ├── context/      # React context providers (Auth, Notification)
-│   │   ├── assets/       # Images, icons
-│   │   ├── App.jsx       # Main app and routes
-│   │   └── main.jsx      # React entry
-│   ├── index.html
-│   ├── vite.config.js    # Vite + proxy config
-│   └── package.json
-│
-└── README.md             # Project documentation
+│   │   ├── assets/      # Images and icons
+│   │   ├── components/  # UI components (Posts, Chat, Store, Stream, etc.)
+│   │   ├── context/     # Context providers (Auth, Store, Notification, Socket)
+│   │   ├── Store/       # Store, product, cart, order, analytics, wishlist
+│   │   ├── Stream/      # Live stream components
+│   │   └── styles.css   # Custom styles
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── index.css
+├── server/       # Streaming server config (e.g., NGINX RTMP)
+│   └── stream.conf
+└── README.md     # Project documentation
 ```
 
 ---
@@ -93,11 +97,12 @@ livestream/
 ## Backend Overview
 
 - **Express.js** REST API with JWT authentication.
-- **MongoDB** for data storage (users, posts, messages, notifications).
-- **Socket.io** for real-time chat and notifications.
+- **MongoDB** for data storage (users, posts, messages, notifications, stores, products, orders, streams, arenas).
+- **Socket.io** for real-time chat, notifications, live stream, and arena events.
 - **Cloudinary** for image/video uploads.
-- **Mongoose models:** User, Post, Message, Notification, Store, etc.
-- **API routes:** `/api/auth`, `/api/posts`, `/api/chat`, `/api/notifications`.
+- **Payment Integration** (Razorpay/Stripe) for secure store transactions.
+- **Mongoose models:** User, Post, Message, Notification, Store, Product, Order, Stream, Arena, etc.
+- **API routes:** `/api/auth`, `/api/posts`, `/api/chat`, `/api/notifications`, `/api/stores`, `/api/products`, `/api/payments`, `/api/livestream`, `/api/arena`.
 
 ---
 
@@ -105,8 +110,12 @@ livestream/
 
 - **React** SPA with protected/public routes.
 - **Tailwind CSS** for a modern, gaming-inspired dark UI.
-- **React Context** for authentication and notifications.
-- **Post, Profile, Chat, Notification, Store** components.
+- **React Context** for authentication, notifications, store, and arena management.
+- **Post, Profile, Chat, Notification, Store, Product, Payment, Livestream, Arena** components.
+- **Real-time chat** and **live stream sharing** using Socket.io.
+- **Storefront** with product browsing, like, add to cart, checkout, wishlist, and order history.
+- **Arena** for live events, matchmaking, and challenges.
+- **Lucide React** for a consistent icon set across the UI.
 - **Vite** for fast development and proxying API requests.
 
 ---
@@ -115,9 +124,10 @@ livestream/
 
 ### Prerequisites
 
-- Node.js (v18+ recommended)
-- MongoDB instance (local or Atlas)
-- Cloudinary account (for media uploads)
+- Node.js (v18+)
+- MongoDB (local or Atlas)
+- Cloudinary account
+- Razorpay or Stripe account for payments
 
 ### 1. Clone the repository
 
@@ -131,7 +141,7 @@ cd livestream
 ```bash
 cd backend
 npm install
-# Create a .env file with your MongoDB URI, JWT secret, Cloudinary, and email configs
+# Configure .env with MongoDB URI, JWT secret, Cloudinary, Razorpay/Stripe, email configs
 npm start
 ```
 
@@ -143,43 +153,25 @@ npm install
 npm run dev
 ```
 
-- The frontend will run on `http://localhost:5173` and proxy API requests to the backend.
+Frontend runs at `http://localhost:5173` and proxies API requests to the backend.
 
 ---
 
 ## API Endpoints
 
-### Auth & User
-
-- `POST /api/auth/signup` - Register
-- `POST /api/auth/login` - Login
-- `POST /api/auth/forgot-password` - Password reset
-- `GET /api/auth/profile/:username` - Get user profile
-- `POST /api/auth/profile/:username/follow` - Follow/unfollow user
-- `GET /api/auth/profile/:username/followers` - List followers
-- `GET /api/auth/profile/:username/following` - List following
-- `GET /api/auth/profile/:username/posts` - User's posts
-- `GET /api/auth/profile/me/posts` - Authenticated user's posts
-
-### Posts
-
-- `POST /api/posts/create` - Create post (image/video)
-- `GET /api/posts/feed` - Get feed (paginated)
-- `GET /api/posts/:postId` - Get single post
-- `DELETE /api/posts/:postId` - Delete post
-- `POST /api/posts/:postId/like` - Like/unlike post
-- `POST /api/posts/:postId/comment` - Add comment
-
-### Chat & Notifications
-
-- `GET /api/chat/...` - Chat endpoints
-- `GET /api/notifications/...` - Notification endpoints
+- **Auth & User:** Signup, login, profile, follow, followers, following, user posts
+- **Posts:** Create, feed, single post, like, comment, delete
+- **Chat & Notifications:** Real-time chat and notification endpoints
+- **Stores & Products:** Store listing, product management, like, add to cart, checkout, wishlist, order history
+- **Payments:** Secure payment processing (Razorpay/Stripe)
+- **Livestream:** Start, join, and share real-time live streams with chat
+- **Arena:** Create/join arena events, matchmaking, challenges
 
 ---
 
 ## Contributing
 
-Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+Pull requests are welcome! For major changes, open an issue to discuss your ideas.
 
 ---
 

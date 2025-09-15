@@ -269,7 +269,7 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Header */}
       <div className="bg-white/10 backdrop-blur-md shadow-xl border-b border-white/20 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 py-4">

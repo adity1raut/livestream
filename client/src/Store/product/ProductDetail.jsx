@@ -339,7 +339,7 @@ export default function ProductDetail() {
   const displayImages = getDisplayImages();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 p-4 pt-32">
+    <div className="bg-gradient-to-br from-gray-900 via-black to-purple-900 p-4 pt-32">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="flex items-center justify-between mb-6">
           <button
@@ -724,7 +724,92 @@ export default function ProductDetail() {
           </div>
 
           {/* Rating and Reviews Section - existing code */}
-          {/* ...existing rating and reviews code... */}
+          <div className="bg-gray-900 border-t border-gray-700 px-8 py-10">
+            <h2 className="text-2xl font-bold text-white mb-6">Ratings & Reviews</h2>
+            
+            {/* Submit Rating Form */}
+            {isAuthenticated && !isProductOwner && (
+              <form
+                onSubmit={handleSubmitRating}
+                className="mb-8 bg-gray-800 rounded-lg p-6 border border-gray-700"
+              >
+                <h3 className="text-lg font-semibold text-white mb-2">Leave a Rating</h3>
+                <div className="flex items-center gap-2 mb-4">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      type="button"
+                      key={star}
+                      onClick={() => setRating(star)}
+                      className="focus:outline-none"
+                    >
+                      <Star
+                        size={28}
+                        className={
+                          star <= rating
+                            ? "text-yellow-400 fill-current"
+                            : "text-gray-600"
+                        }
+                      />
+                    </button>
+                  ))}
+                  <span className="ml-2 text-gray-400">{rating} / 5</span>
+                </div>
+                <textarea
+                  value={review}
+                  onChange={(e) => setReview(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 mb-4"
+                  placeholder="Write your review (optional)"
+                />
+                <button
+                  type="submit"
+                  disabled={submittingRating}
+                  className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 disabled:opacity-50"
+                >
+                  {submittingRating ? "Submitting..." : "Submit Rating"}
+                </button>
+              </form>
+            )}
+
+            {/* List of Reviews */}
+            <div>
+              {product?.ratings && product.ratings.length > 0 ? (
+                <div className="space-y-6">
+                  {product.ratings
+                    .slice()
+                    .reverse()
+                    .map((r, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-gray-800 rounded-lg p-5 border border-gray-700"
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          {renderStars(r.rating, 18)}
+                          <span className="text-gray-400 text-sm ml-2">
+                            {r.rating} / 5
+                          </span>
+                        </div>
+                        <p className="text-gray-300 mb-2">{r.review || <span className="italic text-gray-500">No comment</span>}</p>
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <MessageCircle size={14} />
+                          <span>
+                            {r.user?.name || "Anonymous"}
+                          </span>
+                          <span>•</span>
+                          <span>
+                            {r.createdAt
+                              ? new Date(r.createdAt).toLocaleDateString()
+                              : ""}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <div className="text-gray-400 italic">No ratings yet. Be the first to rate this product!</div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

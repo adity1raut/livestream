@@ -105,7 +105,7 @@ export default function AddProduct() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 p-4 pt-32">
+    <div className="bg-gradient-to-br from-gray-900 via-black to-purple-900 p-4 pt-32">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
           <button

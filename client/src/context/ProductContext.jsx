@@ -9,10 +9,13 @@ export function ProductProvider({ children }) {
   const [products, setProducts] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [cart, setCart] = useState({ items: [], totalAmount: 0 });
+  const [orders, setOrders] = useState([]);
+  const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
   const [orderLoading, setOrderLoading] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
+  const [addressLoading, setAddressLoading] = useState(false);
 
   // Product Management
   const getAllProducts = async (params = {}) => {
@@ -191,20 +194,154 @@ export function ProductProvider({ children }) {
     }
   };
 
-  // Order Management
-  const createOrder = async (addressId) => {
+  // Address Management
+  const getUserAddresses = async () => {
+    if (!isAuthenticated) {
+      setAddresses([]);
+      return { success: false, message: "Please login to view addresses" };
+    }
+
+    setAddressLoading(true);
+    try {
+      const res = await axios.get("/api/stores/order/addresses", {
+        withCredentials: true,
+      });
+      
+      setAddresses(res.data.data.addresses || []);
+      return {
+        success: true,
+        data: res.data.data,
+      };
+    } catch (error) {
+      console.error("Error fetching addresses:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to fetch addresses",
+      };
+    } finally {
+      setAddressLoading(false);
+    }
+  };
+
+  const addDeliveryAddress = async (addressData) => {
+    if (!isAuthenticated) {
+      return { success: false, message: "Please login to add address" };
+    }
+
+    setAddressLoading(true);
+    try {
+      const res = await axios.post("/api/stores/order/addresses", addressData, {
+        withCredentials: true,
+      });
+
+      // Update local addresses state
+      await getUserAddresses();
+
+      return {
+        success: true,
+        data: res.data.data,
+        message: res.data.message,
+      };
+    } catch (error) {
+      console.error("Error adding address:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to add address",
+      };
+    } finally {
+      setAddressLoading(false);
+    }
+  };
+
+  const updateAddress = async (addressId, addressData) => {
+    if (!isAuthenticated) {
+      return { success: false, message: "Please login to update address" };
+    }
+
+    setAddressLoading(true);
+    try {
+      const res = await axios.put(
+        `/api/stores/order/addresses/${addressId}`,
+        addressData,
+        { withCredentials: true }
+      );
+
+      // Update local addresses state
+      await getUserAddresses();
+
+      return {
+        success: true,
+        data: res.data.data,
+        message: res.data.message,
+      };
+    } catch (error) {
+      console.error("Error updating address:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to update address",
+      };
+    } finally {
+      setAddressLoading(false);
+    }
+  };
+
+  const deleteAddress = async (addressId) => {
+    if (!isAuthenticated) {
+      return { success: false, message: "Please login to delete address" };
+    }
+
+    setAddressLoading(true);
+    try {
+      const res = await axios.delete(`/api/stores/order/addresses/${addressId}`, {
+        withCredentials: true,
+      });
+
+      // Update local addresses state
+      setAddresses(res.data.data.remainingAddresses || []);
+
+      return {
+        success: true,
+        data: res.data.data,
+        message: res.data.message,
+      };
+    } catch (error) {
+      console.error("Error deleting address:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to delete address",
+      };
+    } finally {
+      setAddressLoading(false);
+    }
+  };
+
+  // Order Management (Updated)
+  const createOrder = async (addressId, newAddress = null) => {
+    if (!isAuthenticated) {
+      return { success: false, message: "Please login to create order" };
+    }
+
     setOrderLoading(true);
     try {
-      const res = await axios.post(
-        "/api/stores/order/create",
-        { addressId },
-        { withCredentials: true },
-      );
-      return { success: true, data: res.data };
+      const payload = {};
+      
+      if (addressId) {
+        payload.addressId = addressId;
+      }
+      
+      if (newAddress) {
+        payload.newAddress = newAddress;
+      }
+
+      const res = await axios.post("/api/stores/order/create", payload, {
+        withCredentials: true,
+      });
+
+      return { success: true, data: res.data.data };
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.error || error.message,
+        message: error.response?.data?.message || "Failed to create order",
       };
     } finally {
       setOrderLoading(false);
@@ -217,14 +354,87 @@ export function ProductProvider({ children }) {
       const res = await axios.post("/api/stores/order/verify", paymentData, {
         withCredentials: true,
       });
-      return { success: true, data: res.data };
+
+      // Refresh cart after successful order
+      await fetchCart();
+      
+      return { success: true, data: res.data.data };
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.error || error.message,
+        message: error.response?.data?.message || "Payment verification failed",
       };
     } finally {
       setOrderLoading(false);
+    }
+  };
+
+  // Save delivery location after payment
+  const saveOrderLocation = async (orderId, locationData) => {
+    try {
+      const res = await axios.post(
+        `/api/stores/order/${orderId}/location`,
+        locationData,
+        { withCredentials: true }
+      );
+      return {
+        success: true,
+        data: res.data.data,
+        message: res.data.message
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to save location"
+      };
+    }
+  };
+
+  // Get order details
+  const getOrderDetails = async (orderId) => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`/api/stores/order/${orderId}`, {
+        withCredentials: true,
+      });
+      return {
+        success: true,
+        data: res.data.data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to fetch order details"
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Get user's orders
+  const getUserOrders = async (params = {}) => {
+    setLoading(true);
+    try {
+      const { page = 1, limit = 10, status } = params;
+      const res = await axios.get("/api/stores/orders", {
+        params: { page, limit, status },
+        withCredentials: true,
+      });
+      
+      const ordersData = res.data.data;
+      setOrders(ordersData.orders || []);
+      
+      return {
+        success: true,
+        data: ordersData
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to fetch orders"
+      };
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -539,8 +749,9 @@ export function ProductProvider({ children }) {
   useEffect(() => {
     if (isAuthenticated) {
       fetchCart();
+      getUserAddresses();
     }
-  }, []);
+  }, [isAuthenticated]);
 
   return (
     <ProductContext.Provider
@@ -549,10 +760,13 @@ export function ProductProvider({ children }) {
         products,
         wishlist,
         cart,
+        orders,
+        addresses,
         loading,
         searchLoading,
         orderLoading,
         cartLoading,
+        addressLoading,
 
         // Product Management
         getAllProducts,
@@ -571,6 +785,12 @@ export function ProductProvider({ children }) {
         toggleWishlist,
         getUserWishlist,
 
+        // Address Management
+        getUserAddresses,
+        addDeliveryAddress,
+        updateAddress,
+        deleteAddress,
+
         // Cart Management
         fetchCart,
         addToCart,
@@ -582,13 +802,22 @@ export function ProductProvider({ children }) {
         getCartItemQuantity,
         validateCartData,
 
+        // Order Management
         createOrder,
         verifyPayment,
+        saveOrderLocation,
+        getOrderDetails,
+        getUserOrders,
+
+        // Analytics
         getStoreAnalytics,
 
+        // State Setters
         setProducts,
         setWishlist,
         setCart,
+        setOrders,
+        setAddresses,
       }}
     >
       {children}

@@ -32,8 +32,15 @@ import {
   updateProduct,
 } from "../controllers/Store/product.routes.js";
 import {
-  createOrder,
-  verifyPayment,
+   createOrder, 
+  verifyPayment, 
+  saveOrderLocation, 
+  getOrderDetails, 
+  getUserOrders,
+  getUserAddresses,
+  addDeliveryAddress,
+  updateAddress,
+  deleteAddress
 } from "../controllers/Store/order.routes.js";
 import {
   addToCart,
@@ -65,8 +72,18 @@ router.post("/wishlist/add/:productId", authenticateToken, addToWishlist);
 router.get("/wishlist", authenticateToken, getUserWishlist);
 
 // Order routes - must come before /:id routes
+router.get("/order/addresses", authenticateToken, getUserAddresses);
+router.post("/order/addresses", authenticateToken, addDeliveryAddress);
+router.put("/order/addresses/:addressId", authenticateToken, updateAddress);
+router.delete("/order/addresses/:addressId", authenticateToken, deleteAddress);
+
+// Order routes
 router.post("/order/create", authenticateToken, createOrder);
 router.post("/order/verify", authenticateToken, verifyPayment);
+router.post("/order/:orderId/location", authenticateToken, saveOrderLocation);
+router.get("/order/:orderId", authenticateToken, getOrderDetails);
+router.get("/orders", authenticateToken, getUserOrders);
+// ...existing code...
 
 // Social routes that don't need storeId - must come before /:id routes
 router.get("/following/stores", authenticateToken, getFollowingStores);

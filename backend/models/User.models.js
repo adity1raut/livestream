@@ -45,13 +45,20 @@ const UserSchema = new mongoose.Schema({
 
   addresses: [
     {
-      fullName: { type: String },
+      name: { type: String },
       phone: { type: String },
       street: { type: String },
       city: { type: String },
       state: { type: String },
-      postalCode: { type: String },
+      zipCode: { type: String }, 
       country: { type: String, default: "India" },
+    },
+  ],
+
+  wishlist: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
     },
   ],
 

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useProduct } from "../../context/ProductContext";
 import { useStore } from "../../context/StoreContext";
-import { useNavigate } from "react-router-dom";
 import {
   Star,
   ArrowLeft,
@@ -17,6 +16,8 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function ProductDetail() {
   const { productId } = useParams();
@@ -61,6 +62,15 @@ export default function ProductDetail() {
     product &&
     product.store._id === userStore._id;
 
+  const [inWishlist, setInWishlist] = useState(false);
+
+  // Update inWishlist state when product changes
+  useEffect(() => {
+    if (product && product.inWishlist !== undefined) {
+      setInWishlist(product.inWishlist);
+    }
+  }, [product]);
+
   useEffect(() => {
     if (productId) {
       fetchProduct();
@@ -87,10 +97,12 @@ export default function ProductDetail() {
         setProduct(productData);
         setError("");
       } else {
+        toast.error("Product not found");
         setError("Product not found");
       }
     } catch (error) {
       console.error("Error fetching product:", error);
+      toast.error("Error fetching product details");
       setError("Error fetching product details");
     } finally {
       setLoading(false);
@@ -134,6 +146,7 @@ export default function ProductDetail() {
 
   const handleUpdateProduct = async () => {
     if (!editData.name.trim() || !editData.price || !editData.stock) {
+      toast.error("Please fill in all required fields");
       setError("Please fill in all required fields");
       return;
     }
@@ -166,15 +179,15 @@ export default function ProductDetail() {
         setIsEditing(false);
         setNewImages([]);
         setImagesToRemove([]);
+        toast.success("Product updated successfully!");
         setSuccess("Product updated successfully!");
-        setTimeout(() => setSuccess(""), 3000);
       } else {
+        toast.error(result.message || "Failed to update product");
         setError(result.message || "Failed to update product");
-        setTimeout(() => setError(""), 3000);
       }
     } catch (error) {
+      toast.error("Error updating product");
       setError("Error updating product");
-      setTimeout(() => setError(""), 3000);
     } finally {
       setUpdating(false);
     }
@@ -183,6 +196,7 @@ export default function ProductDetail() {
   const handleSubmitRating = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
+      toast.error("Please login to add a rating");
       setError("Please login to add a rating");
       return;
     }
@@ -198,15 +212,15 @@ export default function ProductDetail() {
         setProduct(result.data);
         setReview("");
         setRating(5);
+        toast.success("Rating submitted successfully!");
         setSuccess("Rating submitted successfully!");
-        setTimeout(() => setSuccess(""), 3000);
       } else {
+        toast.error(result.message || "Error submitting rating");
         setError(result.message || "Error submitting rating");
-        setTimeout(() => setError(""), 3000);
       }
     } catch (error) {
+      toast.error("Error submitting rating");
       setError("Error submitting rating");
-      setTimeout(() => setError(""), 3000);
     } finally {
       setSubmittingRating(false);
     }
@@ -220,10 +234,9 @@ export default function ProductDetail() {
 
     if (addingToCart) return;
 
-    // Check if product has sufficient stock
     if (quantity > product.stock) {
+      toast.error(`Only ${product.stock} items available in stock`);
       setError(`Only ${product.stock} items available in stock`);
-      setTimeout(() => setError(""), 3000);
       return;
     }
 
@@ -232,13 +245,11 @@ export default function ProductDetail() {
     setSuccess("");
 
     try {
-      // Pass the storeId which is required by your backend
       const result = await addToCart(product._id, quantity, product.store._id);
 
       if (result.success) {
+        toast.success(`${quantity} item(s) added to cart successfully!`);
         setSuccess(`${quantity} item(s) added to cart successfully!`);
-        setTimeout(() => setSuccess(""), 3000);
-
         // Update cart icon count if the function exists
         if (window.updateCartCount && result.data?.items) {
           const totalItems = result.data.items.reduce(
@@ -248,13 +259,13 @@ export default function ProductDetail() {
           window.updateCartCount(totalItems);
         }
       } else {
+        toast.error(result.message || "Failed to add product to cart");
         setError(result.message || "Failed to add product to cart");
-        setTimeout(() => setError(""), 3000);
       }
     } catch (err) {
       console.error("Error adding to cart:", err);
+      toast.error("Failed to add product to cart");
       setError("Failed to add product to cart");
-      setTimeout(() => setError(""), 3000);
     } finally {
       setAddingToCart(false);
     }
@@ -269,17 +280,15 @@ export default function ProductDetail() {
     try {
       const result = await toggleWishlist(product._id);
       if (result.success) {
-        setSuccess(
-          result.inWishlist ? "Added to wishlist!" : "Removed from wishlist!",
+        setInWishlist(result.inWishlist);
+        toast.success(
+          result.inWishlist ? "Added to wishlist!" : "Removed from wishlist!"
         );
-        setTimeout(() => setSuccess(""), 3000);
       } else {
-        setError(result.message || "Error updating wishlist");
-        setTimeout(() => setError(""), 3000);
+        toast.error(result.message || "Error updating wishlist");
       }
     } catch (error) {
-      setError("Error updating wishlist");
-      setTimeout(() => setError(""), 3000);
+      toast.error("Error updating wishlist");
     }
   };
 
@@ -306,17 +315,6 @@ export default function ProductDetail() {
     return product.images.filter((img) => !imagesToRemove.includes(img));
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4"></div>
-          <p className="text-white">Loading product...</p>
-        </div>
-      </div>
-    );
-  }
-
   if (error && !product) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 flex items-center justify-center p-4">
@@ -340,15 +338,32 @@ export default function ProductDetail() {
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-black to-purple-900 p-4 pt-32">
+      <ToastContainer position="top-right" autoClose={3000} />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={() => window.history.back()}
-            className="flex items-center gap-2 text-gray-400 hover:text-white bg-gray-800 px-4 py-2 rounded-lg border border-gray-700 transition-colors"
-          >
-            <ArrowLeft size={20} />
-            Back
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => window.history.back()}
+              className="group relative px-4 py-2 bg-gradient-to-r from-gray-700 to-gray-800 text-gray-300 rounded-lg transition-all duration-300 shadow-md hover:shadow-purple-700/30 hover:translate-y-[-1px] overflow-hidden border border-gray-600 hover:border-purple-500"
+            >
+              <span className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-purple-800/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+              <span className="relative flex items-center gap-2">
+                <ArrowLeft size={20} className="text-purple-400 group-hover:text-purple-300 transition-colors" />
+                <span className="font-medium group-hover:text-white transition-colors">Back</span>
+              </span>
+            </button>
+
+            <button
+              onClick={() => navigate("/my-store")}
+              className="group relative px-4 py-2 bg-gradient-to-r from-purple-700 to-purple-800 text-purple-300 rounded-lg transition-all duration-300 shadow-md hover:shadow-purple-500/30 hover:translate-y-[-1px] overflow-hidden border border-purple-600 hover:border-purple-400"
+            >
+              <span className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-purple-700/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+              <span className="relative flex items-center gap-2">
+                <Store size={20} className="text-purple-400 group-hover:text-purple-200 transition-colors" />
+                <span className="font-medium group-hover:text-white transition-colors">My Store</span>
+              </span>
+            </button>
+          </div>
 
           {isProductOwner && (
             <div className="flex gap-2">
@@ -488,7 +503,6 @@ export default function ProductDetail() {
               )}
             </div>
 
-            {/* Product Details */}
             <div>
               {isEditing ? (
                 // Edit mode
@@ -556,7 +570,7 @@ export default function ProductDetail() {
                   </div>
                 </div>
               ) : (
-                // View mode
+              
                 <>
                   <h1 className="text-3xl font-bold text-white mb-4">
                     {product?.name}
@@ -668,7 +682,11 @@ export default function ProductDetail() {
                       {isAuthenticated && (
                         <button
                           onClick={handleWishlistToggle}
-                          className="px-4 py-3 border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
+                          className={`px-4 py-3 border rounded-lg transition-colors ${
+                            inWishlist
+                              ? "border-red-600 bg-red-600 text-white"
+                              : "border-gray-600 bg-white text-gray-800 hover:bg-gray-700 hover:text-white"
+                          }`}
                         >
                           <Heart size={20} />
                         </button>
@@ -678,47 +696,47 @@ export default function ProductDetail() {
 
                   {/* Additional product info */}
                   {!isProductOwner && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <h4 className="font-semibold text-blue-900 mb-2">
+                    <div className="bg-gradient-to-b from-gray-800 to-gray-900 border border-gray-700 rounded-xl p-5 shadow-lg">
+                      <h4 className="font-semibold text-white mb-4 text-center">
                         Quick Actions
                       </h4>
-                      <div className="flex gap-2 text-sm">
+                      <div className="flex flex-wrap justify-center gap-3">
                         <button
                           onClick={() => navigate("/cart")}
-                          className="text-blue-600 hover:text-blue-800 underline"
+                          className="group relative px-5 py-2.5 bg-gradient-to-r from-purple-900/70 to-indigo-900/70 text-purple-100 rounded-lg transition-all duration-300 shadow-md hover:shadow-purple-700/30 hover:translate-y-[-2px] overflow-hidden"
                         >
-                          View Cart
+                          <span className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-purple-800/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                          <span className="relative flex items-center gap-2">
+                            <ShoppingCart size={16} className="text-purple-300" />
+                            <span>View Cart</span>
+                          </span>
                         </button>
-                        <span className="text-gray-400">•</span>
+                        
                         <button
                           onClick={() => navigate("/wishlist")}
-                          className="text-blue-600 hover:text-blue-800 underline"
+                          className="group relative px-5 py-2.5 bg-gradient-to-r from-pink-900/70 to-purple-900/70 text-pink-100 rounded-lg transition-all duration-300 shadow-md hover:shadow-pink-700/30 hover:translate-y-[-2px] overflow-hidden"
                         >
-                          View Wishlist
+                          <span className="absolute inset-0 bg-gradient-to-r from-pink-600/20 to-pink-800/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                          <span className="relative flex items-center gap-2">
+                            <Heart size={16} className="text-pink-300" />
+                            <span>View Wishlist</span>
+                          </span>
                         </button>
-                        <span className="text-gray-400">•</span>
+                        
                         <button
                           onClick={() => navigate("/products")}
-                          className="text-blue-600 hover:text-blue-800 underline"
+                          className="group relative px-5 py-2.5 bg-gradient-to-r from-blue-900/70 to-indigo-900/70 text-blue-100 rounded-lg transition-all duration-300 shadow-md hover:shadow-blue-700/30 hover:translate-y-[-2px] overflow-hidden"
                         >
-                          Continue Shopping
+                          <span className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-blue-800/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                          <span className="relative flex items-center gap-2">
+                            <ArrowLeft size={16} className="text-blue-300" />
+                            <span>Continue Shopping</span>
+                          </span>
                         </button>
                       </div>
                     </div>
                   )}
                 </>
-              )}
-
-              {(error || success) && (
-                <div
-                  className={`p-4 rounded-lg mb-4 ${
-                    error
-                      ? "bg-red-100 text-red-700"
-                      : "bg-green-100 text-green-700"
-                  }`}
-                >
-                  {error || success}
-                </div>
               )}
             </div>
           </div>

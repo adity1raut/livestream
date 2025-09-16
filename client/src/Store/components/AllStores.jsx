@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Search, ChevronLeft, ChevronRight, Store } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Store, Heart, User , ShoppingCart} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useStore } from "../../context/StoreContext";
+import { useAuth } from "../../context/AuthContext";
 import StoreCard from "./StoreCard";
 import StoreDetail from "./StoreDetail";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function AllStores() {
+  const navigate = useNavigate();
   const { stores, loading, getAllStores } = useStore();
+  const { isAuthenticated, user } = useAuth();
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -17,13 +23,17 @@ function AllStores() {
   }, [currentPage, search]);
 
   const fetchStores = async () => {
-    const result = await getAllStores({
-      page: currentPage,
-      limit: 12,
-      search: search || undefined,
-    });
-    if (result) {
-      setTotalPages(result.totalPages || 1);
+    try {
+      const result = await getAllStores({
+        page: currentPage,
+        limit: 12,
+        search: search || undefined,
+      });
+      if (result) {
+        setTotalPages(result.totalPages || 1);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch stores");
     }
   };
 
@@ -49,6 +59,32 @@ function AllStores() {
     }
   };
 
+  const handleMyStoreClick = () => {
+    if (!isAuthenticated) {
+      toast.error("Please login to view your store");
+      navigate("/login");
+      return;
+    }
+    navigate("/my-store");
+  };
+  const handleMyCartClick = () => {
+    if (!isAuthenticated) {
+      toast.error("Please login to view your store");
+      navigate("/login");
+      return;
+    }
+    navigate("/cart");
+  };
+
+  const handleWishlistClick = () => {
+    if (!isAuthenticated) {
+      toast.error("Please login to view your wishlist");
+      navigate("/login");
+      return;
+    }
+    navigate("/wishlist");
+  };
+
   if (showDetail && selectedStore) {
     return (
       <StoreDetail
@@ -63,6 +99,7 @@ function AllStores() {
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-black to-purple-900 p-4 pt-32">
+      <ToastContainer position="top-right" autoClose={3000} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Header */}
         <div className="mb-8">
@@ -80,17 +117,56 @@ function AllStores() {
             </div>
 
             <div className="px-8 py-6">
-              <div className="relative max-w-md mx-auto">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-gray-500" />
+              {/* Search Bar with Side Buttons */}
+              <div className="flex items-center gap-4 max-w-4xl mx-auto">
+                {/* Left Button - View Wishlist */}
+                <button
+                  onClick={handleWishlistClick}
+                  className="group relative px-5 py-2.5 bg-gradient-to-r from-pink-900/70 to-purple-900/70 text-pink-100 rounded-lg transition-all duration-300 shadow-md hover:shadow-pink-700/30 hover:translate-y-[-2px] overflow-hidden"
+                >
+                  <span className="absolute inset-0 bg-gradient-to-r from-pink-600/20 to-pink-800/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  <span className="relative flex items-center gap-2">
+                    <Heart size={16} className="text-pink-300" />
+                    <span>View Wishlist</span>
+                  </span>
+                </button>
+
+                {/* Search Bar */}
+                <div className="relative flex-1 max-w-md">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Search className="h-5 w-5 text-gray-500" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search stores..."
+                    value={search}
+                    onChange={handleSearch}
+                    className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors text-white placeholder-gray-500"
+                  />
                 </div>
-                <input
-                  type="text"
-                  placeholder="Search stores..."
-                  value={search}
-                  onChange={handleSearch}
-                  className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors text-white placeholder-gray-500"
-                />
+
+                {/* Right Button - My Store */}
+                <button
+                  onClick={handleMyStoreClick}
+                  className="group relative px-5 py-2.5 bg-gradient-to-r from-blue-900/70 to-indigo-900/70 text-blue-100 rounded-lg transition-all duration-300 shadow-md hover:shadow-blue-700/30 hover:translate-y-[-2px] overflow-hidden"
+                >
+                  <span className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-blue-800/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  <span className="relative flex items-center gap-2">
+                    <User size={16} className="text-blue-300" />
+                    <span>My Store</span>
+                  </span>
+                </button>
+
+                 <button
+                  onClick={handleMyCartClick}
+                  className="group relative px-5 py-2.5 bg-gradient-to-r from-blue-900/70 to-indigo-900/70 text-blue-100 rounded-lg transition-all duration-300 shadow-md hover:shadow-blue-700/30 hover:translate-y-[-2px] overflow-hidden"
+                >
+                  <span className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-blue-800/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  <span className="relative flex items-center gap-2">
+                    <ShoppingCart size={16} className="text-blue-300" />
+                    <span> My Card </span>
+                  </span>
+                </button>
               </div>
             </div>
           </div>

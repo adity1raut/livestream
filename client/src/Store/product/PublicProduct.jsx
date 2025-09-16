@@ -4,13 +4,11 @@ import axios from "axios";
 import {
   Search,
   Filter,
-  Star,
-  Eye,
-  ShoppingCart,
   Grid,
   List,
   Package,
 } from "lucide-react";
+import ProductCard from "../search/ProductCard"; //
 
 export default function PublicProducts() {
   const { stores } = useStore();
@@ -128,177 +126,8 @@ export default function PublicProducts() {
     }
   };
 
-  const calculateAverageRating = (ratings) => {
-    if (!ratings || ratings.length === 0) return 0;
-    const sum = ratings.reduce((acc, r) => acc + r.rating, 0);
-    return sum / ratings.length;
-  };
-
-  const renderStars = (rating, size = 16) => {
-    return [...Array(5)].map((_, i) => (
-      <Star
-        key={i}
-        size={size}
-        className={
-          i < Math.round(rating)
-            ? "text-yellow-400 fill-current"
-            : "text-gray-600"
-        }
-      />
-    ));
-  };
-
-  const ProductCard = ({ product }) => (
-    <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden hover:shadow-2xl hover:border-purple-500/50 hover:bg-gray-700 transition-all duration-300 shadow-xl group">
-      <div className="relative h-48">
-        {product.images && product.images.length > 0 ? (
-          <img
-            src={product.images[0]}
-            alt={product.name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full bg-gray-700 flex items-center justify-center">
-            <Package className="h-12 w-12 text-gray-500" />
-          </div>
-        )}
-        <div className="absolute top-2 right-2 bg-gray-800/80 backdrop-blur-sm rounded-lg px-3 py-1 text-xs text-purple-400 border border-gray-700/50">
-          {product.store?.name}
-        </div>
-      </div>
-
-      <div className="p-4">
-        <h3 className="font-semibold text-lg mb-2 line-clamp-1 text-white group-hover:text-purple-300 transition-colors">
-          {product.name}
-        </h3>
-        <p className="text-gray-400 text-sm mb-3 line-clamp-2">
-          {product.description || "No description available"}
-        </p>
-
-        <div className="flex items-center gap-2 mb-3">
-          <div className="flex items-center">
-            {renderStars(calculateAverageRating(product.ratings))}
-          </div>
-          <span className="text-sm text-gray-500">
-            ({product.ratings?.length || 0})
-          </span>
-        </div>
-
-        <div className="flex justify-between items-center mb-3">
-          <span className="text-xl font-bold text-purple-400">
-            ${product.price}
-          </span>
-          <span
-            className={`px-2 py-1 rounded text-sm ${
-              product.stock > 0
-                ? "bg-green-900/40 text-green-400 border border-green-700/50"
-                : "bg-red-900/40 text-red-400 border border-red-700/50"
-            }`}
-          >
-            {product.stock > 0 ? "In Stock" : "Out of Stock"}
-          </span>
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            onClick={() => (window.location.href = `/products/${product._id}`)}
-            className="flex-1 bg-purple-900/40 text-purple-400 px-3 py-2 rounded-lg flex items-center justify-center gap-1 hover:bg-purple-800/50 transition-colors border border-purple-700/50 transform hover:scale-105"
-          >
-            <Eye size={16} />
-            View
-          </button>
-          <button
-            disabled={product.stock === 0}
-            className="flex-1 bg-green-900/40 text-green-400 px-3 py-2 rounded-lg flex items-center justify-center gap-1 hover:bg-green-800/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-green-700/50 transform hover:scale-105"
-          >
-            <ShoppingCart size={16} />
-            Add to Cart
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  const ProductListItem = ({ product }) => (
-    <div className="bg-gray-800 rounded-xl border border-gray-700 p-4 flex gap-4 hover:shadow-2xl hover:border-purple-500/50 hover:bg-gray-700 transition-all duration-300">
-      <div className="w-24 h-24 flex-shrink-0">
-        {product.images && product.images.length > 0 ? (
-          <img
-            src={product.images[0]}
-            alt={product.name}
-            className="w-full h-full object-cover rounded-lg"
-          />
-        ) : (
-          <div className="w-full h-full bg-gray-700 rounded-lg flex items-center justify-center">
-            <Package className="h-6 w-6 text-gray-500" />
-          </div>
-        )}
-      </div>
-
-      <div className="flex-1">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="font-semibold text-lg text-white">{product.name}</h3>
-          <span className="text-xl font-bold text-purple-400">
-            ${product.price}
-          </span>
-        </div>
-
-        <p className="text-gray-400 text-sm mb-2 line-clamp-2">
-          {product.description || "No description available"}
-        </p>
-
-        <div className="flex items-center gap-4 mb-2">
-          <div className="flex items-center gap-1">
-            {renderStars(calculateAverageRating(product.ratings))}
-            <span className="text-sm text-gray-500">
-              ({product.ratings?.length || 0})
-            </span>
-          </div>
-
-          <span className="text-sm text-gray-400">
-            Store: {product.store?.name}
-          </span>
-
-          <span
-            className={`px-2 py-1 rounded text-sm ${
-              product.stock > 0
-                ? "bg-green-900/40 text-green-400 border border-green-700/50"
-                : "bg-red-900/40 text-red-400 border border-red-700/50"
-            }`}
-          >
-            {product.stock > 0 ? "In Stock" : "Out of Stock"}
-          </span>
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            onClick={() => (window.location.href = `/products/${product._id}`)}
-            className="bg-purple-900/40 text-purple-400 px-4 py-2 rounded-lg flex items-center gap-1 hover:bg-purple-800/50 transition-colors border border-purple-700/50 transform hover:scale-105"
-          >
-            <Eye size={16} />
-            View Details
-          </button>
-          <button
-            disabled={product.stock === 0}
-            className="bg-green-900/40 text-green-400 px-4 py-2 rounded-lg flex items-center gap-1 hover:bg-green-800/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-green-700/50 transform hover:scale-105"
-          >
-            <ShoppingCart size={16} />
-            Add to Cart
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 p-4 pt-32">
-      {/* Subtle gaming pattern in background */}
-      <div className="absolute inset-0 opacity-5 pointer-events-none">
-        <div className="absolute top-20 left-0 w-32 h-32 border-4 border-white rounded-full transform -translate-x-16 -translate-y-16"></div>
-        <div className="absolute bottom-0 right-0 w-32 h-32 border-4 border-white rounded-full translate-x-16 translate-y-16"></div>
-        <div className="absolute top-1/2 left-1/3 w-24 h-24 border-2 border-purple-500 rounded-full transform -translate-x-12 -translate-y-12"></div>
-      </div>
-
+    <div className="bg-gradient-to-br from-gray-900 via-black to-purple-900 p-4 pt-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Header */}
         <div className="mb-8">
@@ -455,7 +284,7 @@ export default function PublicProducts() {
                 ) : (
                   <div className="space-y-4 mb-8">
                     {products.map((product) => (
-                      <ProductListItem key={product._id} product={product} />
+                      <ProductCard key={product._id} product={product} />
                     ))}
                   </div>
                 )}

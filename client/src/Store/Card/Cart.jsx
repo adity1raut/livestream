@@ -1,6 +1,9 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useProduct } from "../../context/ProductContext";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import {
   ShoppingCart,
   Plus,
@@ -15,6 +18,7 @@ import {
 } from "lucide-react";
 
 export default function Cart() {
+  const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const {
     cart,
@@ -26,30 +30,26 @@ export default function Cart() {
     getCartItemCount,
   } = useProduct();
 
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [updating, setUpdating] = useState({});
   const [refreshing, setRefreshing] = useState(false);
 
-  // Clear messages after 3 seconds
-  React.useEffect(() => {
-    if (error || success) {
-      const timer = setTimeout(() => {
-        setError("");
-        setSuccess("");
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [error, success]);
+  const toastConfig = {
+    position: "top-right",
+    autoClose: 3000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    theme: "dark",
+  };
 
   const handleRefreshCart = async () => {
     setRefreshing(true);
-    setError("");
     try {
       await fetchCart();
-      setSuccess("Cart refreshed successfully");
+      toast.success("Cart refreshed successfully", toastConfig);
     } catch (error) {
-      setError("Failed to refresh cart");
+      toast.error("Failed to refresh cart", toastConfig);
     } finally {
       setRefreshing(false);
     }
@@ -59,18 +59,16 @@ export default function Cart() {
     if (newQuantity < 0) return;
 
     setUpdating((prev) => ({ ...prev, [productId]: true }));
-    setError("");
-    setSuccess("");
 
     try {
       const result = await updateCartItem(productId, newQuantity);
       if (result.success) {
-        setSuccess(result.message || "Cart updated successfully");
+        toast.success(result.message || "Cart updated successfully", toastConfig);
       } else {
-        setError(result.message || "Failed to update cart");
+        toast.error(result.message || "Failed to update cart", toastConfig);
       }
     } catch (error) {
-      setError("Error updating cart item");
+      toast.error("Error updating cart item", toastConfig);
       console.error("Update cart error:", error);
     } finally {
       setUpdating((prev) => ({ ...prev, [productId]: false }));
@@ -78,48 +76,41 @@ export default function Cart() {
   };
 
   const handleRemoveItem = async (productId, productName) => {
-    if (!window.confirm(`Remove "${productName}" from cart?`)) return;
-
-    setUpdating((prev) => ({ ...prev, [productId]: true }));
-    setError("");
-    setSuccess("");
-
-    try {
-      const result = await removeFromCart(productId);
-      if (result.success) {
-        setSuccess(result.message || "Item removed from cart");
-      } else {
-        setError(result.message || "Failed to remove item");
+    const confirmRemove = window.confirm(`Remove "${productName}" from cart?`);
+    
+    if (confirmRemove) {
+      setUpdating((prev) => ({ ...prev, [productId]: true }));
+      try {
+        const result = await removeFromCart(productId);
+        if (result.success) {
+          toast.success(result.message || "Item removed from cart", toastConfig);
+        } else {
+          toast.error(result.message || "Failed to remove item", toastConfig);
+        }
+      } catch (error) {
+        toast.error("Error removing item from cart", toastConfig);
+        console.error("Remove item error:", error);
+      } finally {
+        setUpdating((prev) => ({ ...prev, [productId]: false }));
       }
-    } catch (error) {
-      setError("Error removing item from cart");
-      console.error("Remove item error:", error);
-    } finally {
-      setUpdating((prev) => ({ ...prev, [productId]: false }));
     }
   };
 
   const handleClearCart = async () => {
-    if (
-      !window.confirm(
-        "Are you sure you want to clear your entire cart? This action cannot be undone.",
-      )
-    )
-      return;
-
-    setError("");
-    setSuccess("");
-
-    try {
-      const result = await clearCart();
-      if (result.success) {
-        setSuccess(result.message || "Cart cleared successfully");
-      } else {
-        setError(result.message || "Failed to clear cart");
+    const confirmClear = window.confirm("Are you sure you want to clear your entire cart? This action cannot be undone.");
+    
+    if (confirmClear) {
+      try {
+        const result = await clearCart();
+        if (result.success) {
+          toast.success(result.message || "Cart cleared successfully", toastConfig);
+        } else {
+          toast.error(result.message || "Failed to clear cart", toastConfig);
+        }
+      } catch (error) {
+        toast.error("Error clearing cart", toastConfig);
+        console.error("Clear cart error:", error);
       }
-    } catch (error) {
-      setError("Error clearing cart");
-      console.error("Clear cart error:", error);
     }
   };
 
@@ -145,7 +136,7 @@ export default function Cart() {
 
   if (!isAuthenticated) {
     return (
-      <div className="bg-gradient-to-br from-gray-900 via-black to-purple-900 min-h-screen p-4 pt-32">
+      <div className="bg-gradient-to-br from-gray-900 via-black to-purple-900 p-4 pt-32">
         <div className="max-w-4xl mx-auto">
           <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-2xl p-8">
             <ShoppingCart size={64} className="mx-auto text-purple-400 mb-4" />
@@ -157,13 +148,13 @@ export default function Cart() {
             </p>
             <div className="space-x-4">
               <button
-                onClick={() => (window.location.href = "/login")}
+                onClick={() => navigate("/login")}
                 className="bg-purple-700 text-white px-6 py-2 rounded-lg hover:bg-purple-800 transition-colors"
               >
                 Sign In
               </button>
               <button
-                onClick={() => (window.location.href = "/products")}
+                onClick={() => navigate("/products")}
                 className="border border-gray-600 text-purple-300 px-6 py-2 rounded-lg hover:bg-gray-900 transition-colors"
               >
                 Browse Products
@@ -175,31 +166,43 @@ export default function Cart() {
     );
   }
 
-  if (cartLoading && !cart.items?.length) {
-    return (
-      <div className="bg-gradient-to-br from-gray-900 via-black to-purple-900 min-h-screen p-4 pt-32">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="animate-spin mr-2 text-purple-400" size={24} />
-            <span className="text-purple-300">Loading cart...</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="bg-gradient-to-br from-gray-900 via-black to-purple-900 min-h-screen p-4 pt-32">
+      {/* Replace Toaster with ToastContainer */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+        toastStyle={{
+          backgroundColor: '#1f2937',
+          color: '#f3f4f6',
+          border: '1px solid #374151',
+        }}
+      />
+      
       <div className="max-w-6xl mx-auto">
         <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-2xl p-8">
           <div className="flex items-center justify-between mb-6">
+       
             <div className="flex items-center gap-4">
               <button
-                onClick={() => (window.location.href = "/products")}
-                className="p-2 text-purple-300 hover:text-white transition-colors"
+                onClick={() => navigate("/stores")}
+                className="group relative px-4 py-2 bg-gradient-to-r from-gray-700 to-gray-800 text-gray-300 rounded-lg transition-all duration-300 shadow-md hover:shadow-purple-700/30 hover:translate-y-[-1px] overflow-hidden border border-gray-600 hover:border-purple-500"
               >
-                <ArrowLeft size={24} />
+                <span className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-purple-800/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                <span className="relative flex items-center gap-2">
+                  <ArrowLeft size={20} className="text-purple-400 group-hover:text-purple-300 transition-colors" />
+                  <span className="font-medium group-hover:text-white transition-colors">Back to Stores</span>
+                </span>
               </button>
+
               <h1 className="text-3xl font-bold text-white flex items-center gap-2">
                 <ShoppingCart size={32} className="text-purple-400" />
                 Shopping Cart
@@ -210,6 +213,8 @@ export default function Cart() {
                 )}
               </h1>
             </div>
+
+
             <button
               onClick={handleRefreshCart}
               disabled={refreshing}
@@ -219,22 +224,6 @@ export default function Cart() {
               Refresh
             </button>
           </div>
-
-          {/* Success Message */}
-          {success && (
-            <div className="mb-4 p-4 bg-green-900 border border-green-700 text-green-300 rounded-lg flex items-center gap-2">
-              <AlertCircle size={16} />
-              {success}
-            </div>
-          )}
-
-          {/* Error Message */}
-          {error && (
-            <div className="mb-4 p-4 bg-red-900 border border-red-700 text-red-300 rounded-lg flex items-center gap-2">
-              <AlertCircle size={16} />
-              {error}
-            </div>
-          )}
 
           {safeItems.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -432,7 +421,7 @@ export default function Cart() {
 
                   <div className="space-y-3">
                     <button
-                      onClick={() => (window.location.href = "/checkout")}
+                      onClick={() => navigate("/checkout")}
                       disabled={cartLoading || safeItems.length === 0}
                       className="w-full bg-purple-700 text-white py-3 rounded-lg font-semibold hover:bg-purple-800 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -441,7 +430,7 @@ export default function Cart() {
                     </button>
 
                     <button
-                      onClick={() => (window.location.href = "/products")}
+                      onClick={() => navigate("/products")}
                       className="w-full border border-purple-700 text-purple-300 py-3 rounded-lg font-semibold hover:bg-purple-900 transition-colors"
                     >
                       Continue Shopping
@@ -500,16 +489,19 @@ export default function Cart() {
                 </p>
                 <div className="space-y-3">
                   <button
-                    onClick={() => (window.location.href = "/products")}
+                    onClick={() => navigate("/products")}
                     className="bg-purple-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-800 transition-colors"
                   >
                     Start Shopping
                   </button>
                   <div className="text-sm text-purple-300">
                     Or{" "}
-                    <a href="/stores" className="text-purple-400 hover:underline">
+                    <button
+                      onClick={() => navigate("/stores")}
+                      className="text-purple-400 hover:underline"
+                    >
                       browse stores
-                    </a>{" "}
+                    </button>{" "}
                     to discover new products
                   </div>
                 </div>

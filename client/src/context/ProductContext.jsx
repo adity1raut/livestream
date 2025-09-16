@@ -155,18 +155,17 @@ export function ProductProvider({ children }) {
       const res = await axios.post(
         `/api/stores/wishlist/add/${productId}`,
         {},
-        {
-          withCredentials: true,
-        },
+        { withCredentials: true }
       );
 
-      if (res.data.inWishlist) {
-        setWishlist((prev) => [...prev, res.data.product]);
-        return { success: true, message: res.data.message, inWishlist: true };
-      } else {
-        setWishlist((prev) => prev.filter((item) => item._id !== productId));
-        return { success: true, message: res.data.message, inWishlist: false };
-      }
+      // The backend returns only a message and inWishlist, so we need to refetch the wishlist
+      await getUserWishlist(); // Refresh wishlist after toggle
+
+      return {
+        success: true,
+        message: res.data.message,
+        inWishlist: res.data.inWishlist,
+      };
     } catch (error) {
       return {
         success: false,

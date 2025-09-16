@@ -537,15 +537,11 @@ export function ProductProvider({ children }) {
     };
   };
 
-  // Effect to fetch cart when authenticated
   useEffect(() => {
     if (isAuthenticated) {
       fetchCart();
-    } else {
-      setCart({ items: [], totalAmount: 0 });
-      updateCartIcon([]);
     }
-  }, [isAuthenticated]);
+  }, []);
 
   return (
     <ProductContext.Provider

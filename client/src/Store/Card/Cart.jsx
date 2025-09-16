@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useProduct } from "../../context/ProductContext";
 import {
@@ -31,14 +31,8 @@ export default function Cart() {
   const [updating, setUpdating] = useState({});
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchCart();
-    }
-  }, [isAuthenticated, fetchCart]);
-
   // Clear messages after 3 seconds
-  useEffect(() => {
+  React.useEffect(() => {
     if (error || success) {
       const timer = setTimeout(() => {
         setError("");

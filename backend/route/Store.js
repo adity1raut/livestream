@@ -47,17 +47,51 @@ import upload from "../config/multrer.js";
 
 const router = express.Router();
 
-// Store routes
-router.get("/", getAllStores);
-router.get("/:id", getStoreById);
-router.post("/", authenticateToken, upload.single("logo"), createStore);
-router.put("/:id", authenticateToken, upload.single("logo"), updateStore);
-router.delete("/:id", authenticateToken, verifyStoreOwnership, deleteStore);
-router.get("/user/:userId", getUserStore);
-router.get("/:id/products", getStoreProducts);
+// IMPORTANT: Put all specific/static routes BEFORE parameterized routes
+// This prevents "cart", "wishlist", etc. from being treated as store IDs
+
+// Search routes - must come first
+router.get("/search/products", searchProducts);
+router.get("/trending/products", getTrendingProducts);
+
+// Cart routes - must come before /:id routes
+router.get("/cart", authenticateToken, getCart);
+router.put("/cart/update", authenticateToken, updateCartItem);
+router.delete("/cart/remove/:productId", authenticateToken, removeFromCart);
+router.delete("/cart/clear", authenticateToken, clearCart);
+
+// Wishlist routes - must come before /:id routes
+router.post("/wishlist/add/:productId", authenticateToken, addToWishlist);
+router.get("/wishlist", authenticateToken, getUserWishlist);
+
+// Order routes - must come before /:id routes
+router.post("/order/create", authenticateToken, createOrder);
+router.post("/order/verify", authenticateToken, verifyPayment);
+
+// Social routes that don't need storeId - must come before /:id routes
+router.get("/following/stores", authenticateToken, getFollowingStores);
+
+// Current user's store - must come before /:id routes
 router.get("/my/store", authenticateToken, getCurrentUserStore);
 
-// Product routes
+// Product routes that don't need storeId - must come before /:id routes
+router.get("/products/:productId", getProductById);
+router.post("/products/:productId/rating", authenticateToken, addProductRating);
+
+// General store routes
+router.get("/", getAllStores);
+router.post("/", authenticateToken, upload.single("logo"), createStore);
+
+// User-specific store routes
+router.get("/user/:userId", getUserStore);
+
+// Store-specific routes (these can safely use :id or :storeId now)
+router.get("/:id", getStoreById);
+router.put("/:id", authenticateToken, upload.single("logo"), updateStore);
+router.delete("/:id", authenticateToken, verifyStoreOwnership, deleteStore);
+router.get("/:id/products", getStoreProducts);
+
+// Store-specific product routes
 router.post(
   "/:storeId/products",
   authenticateToken,
@@ -78,25 +112,11 @@ router.delete(
   verifyStoreOwnership,
   deleteProduct,
 );
-router.get("/products/:productId", getProductById);
-router.post("/products/:productId/rating", authenticateToken, addProductRating);
 
-// Cart routes - Fixed: addToCart needs storeId parameter
-router.get("/cart", authenticateToken, getCart);
-router.put("/cart/update", authenticateToken, updateCartItem);
-router.delete("/cart/remove/:productId", authenticateToken, removeFromCart);
-router.delete("/cart/clear", authenticateToken, clearCart);
+// Store-specific cart routes
 router.post("/:storeId/cart/add", authenticateToken, addToCart);
 
-// Wishlist routes
-router.post("/wishlist/add/:productId", authenticateToken, addToWishlist);
-router.get("/wishlist", authenticateToken, getUserWishlist);
-
-// Order routes
-router.post("/order/create", authenticateToken, createOrder);
-router.post("/order/verify", authenticateToken, verifyPayment);
-
-// Analytics routes
+// Store-specific analytics routes
 router.get(
   "/:storeId/analytics",
   authenticateToken,
@@ -104,13 +124,8 @@ router.get(
   getStoreAnalytics,
 );
 
-// Social routes
+// Store-specific social routes
 router.post("/:storeId/follow", authenticateToken, followStore);
 router.get("/:storeId/follow-status", authenticateToken, getFollowStatus);
-router.get("/following/stores", authenticateToken, getFollowingStores);
-
-// Search routes
-router.get("/search/products", searchProducts);
-router.get("/trending/products", getTrendingProducts);
 
 export default router;

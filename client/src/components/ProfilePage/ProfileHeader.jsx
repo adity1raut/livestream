@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import { Camera, Edit2, Mail, Calendar, User, Loader2 } from "lucide-react";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const ProfileHeader = ({
   profileData,
@@ -30,12 +31,12 @@ const ProfileHeader = ({
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      alert("File size must be less than 5MB");
+      toast.error("File size must be less than 5MB");
       return;
     }
 
     if (!file.type.startsWith("image/")) {
-      alert("Please select an image file");
+      toast.error("Please select an image file");
       return;
     }
 
@@ -55,16 +56,13 @@ const ProfileHeader = ({
       if (response.data.success) {
         const updatedUser = response.data.data;
         setProfileData(updatedUser);
-        setSuccess("Image uploaded successfully!");
-        setTimeout(() => setSuccess(""), 3000);
+        toast.success("Image uploaded successfully!");
       } else {
-        setError(response.data.message || "Failed to upload image");
-        setTimeout(() => setError(""), 3000);
+        toast.error(response.data.message || "Failed to upload image");
       }
     } catch (error) {
       console.error("Upload failed:", error);
-      setError(error.response?.data?.message || "Failed to upload image");
-      setTimeout(() => setError(""), 3000);
+      toast.error(error.response?.data?.message || "Failed to upload image");
     } finally {
       setUploadingImage(false);
     }
@@ -118,18 +116,19 @@ const ProfileHeader = ({
           ...prev,
           followers: res.data.followersCount,
         }));
+        toast.success(res.data.followed ? "Successfully followed!" : "Successfully unfollowed!");
       }
     } catch (err) {
-      setError("Failed to follow/unfollow");
+      toast.error("Failed to follow/unfollow");
     } finally {
       setFollowLoading(false);
     }
   };
 
   return (
-    <>
+    <div className=" via-black to-purple-900">
       {/* Cover Image Section */}
-      <div className="relative h-80 bg-gradient-to-r from-purple-600 to-pink-600 overflow-hidden">
+      <div className="relative h-80 bg-gradient-to-r from-purple-800 to-purple-900 overflow-hidden">
         {profileData.profile?.coverImage ? (
           <img
             src={profileData.profile.coverImage}
@@ -137,22 +136,22 @@ const ProfileHeader = ({
             className="w-full h-full object-cover opacity-90"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-r from-purple-600 to-pink-600"></div>
+          <div className="w-full h-full bg-gradient-to-r from-purple-800 to-purple-900"></div>
         )}
 
-        <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+        <div className="absolute inset-0 bg-black bg-opacity-30"></div>
 
         {isOwnProfile && (
           <>
             <button
               onClick={() => coverImageRef.current?.click()}
-              className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-all transform hover:scale-105"
+              className="absolute bottom-4 right-4 bg-gray-800/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-gray-700/90 transition-all transform hover:scale-105 border border-gray-600"
               disabled={uploadingImage}
             >
               {uploadingImage ? (
-                <Loader2 className="w-5 h-5 text-gray-700 animate-spin" />
+                <Loader2 className="w-5 h-5 text-purple-400 animate-spin" />
               ) : (
-                <Camera className="w-5 h-5 text-gray-700" />
+                <Camera className="w-5 h-5 text-purple-400" />
               )}
             </button>
             <input
@@ -171,11 +170,11 @@ const ProfileHeader = ({
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative -mt-20">
           {/* Profile Header */}
-          <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+          <div className="bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 p-6 mb-6">
             <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6">
               {/* Profile Image */}
               <div className="relative group">
-                <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-white shadow-xl">
+                <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-purple-500 shadow-xl">
                   {profileData.profile?.profileImage ? (
                     <img
                       src={profileData.profile.profileImage}
@@ -183,7 +182,7 @@ const ProfileHeader = ({
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                    <div className="w-full h-full bg-gradient-to-br from-purple-600 to-purple-700 flex items-center justify-center">
                       <User className="w-12 h-12 text-white" />
                     </div>
                   )}
@@ -192,7 +191,7 @@ const ProfileHeader = ({
                   <>
                     <button
                       onClick={() => profileImageRef.current?.click()}
-                      className="absolute bottom-0 right-0 bg-purple-600 p-2.5 rounded-full shadow-lg hover:bg-purple-700 transition-all transform hover:scale-105"
+                      className="absolute bottom-0 right-0 bg-purple-600 p-2.5 rounded-full shadow-lg hover:bg-purple-700 transition-all transform hover:scale-105 border-2 border-gray-800"
                       disabled={uploadingImage}
                     >
                       {uploadingImage ? (
@@ -213,7 +212,11 @@ const ProfileHeader = ({
                 ) : (
                   <button
                     onClick={handleFollow}
-                    className={`absolute bottom-0 right-0 bg-pink-600 p-2.5 rounded-full shadow-lg text-white font-semibold hover:bg-pink-700 transition-all transform hover:scale-105 ${followLoading ? "opacity-60 cursor-not-allowed" : ""}`}
+                    className={`absolute bottom-0 right-0 px-4 py-2 rounded-full shadow-lg text-white font-semibold transition-all transform hover:scale-105 border-2 border-gray-800 ${
+                      isFollowing 
+                        ? "bg-red-600 hover:bg-red-700" 
+                        : "bg-blue-600 hover:bg-blue-700"
+                    } ${followLoading ? "opacity-60 cursor-not-allowed" : ""}`}
                     disabled={followLoading}
                   >
                     {followLoading ? (
@@ -231,23 +234,26 @@ const ProfileHeader = ({
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4">
                   <div>
-                    <h1 className="text-3xl font-bold text-gray-900 mb-1">
+                    <h1 className="text-3xl font-bold text-white mb-1">
                       {getDisplayName()}
                     </h1>
-                    <p className="text-gray-500 mb-3">
+                    <p className="text-gray-400 mb-3">
                       @{profileData.username}
                     </p>
-                    <p className="text-gray-700 max-w-lg">
+                    <p className="text-gray-300 max-w-lg">
                       {profileData.profile?.bio || "No bio yet"}
                     </p>
                   </div>
                   {isOwnProfile && (
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-medium hover:shadow-lg transition-all transform hover:scale-105 flex items-center gap-2"
+                      className="group relative px-6 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-full font-medium transition-all duration-300 shadow-lg hover:shadow-purple-700/30 hover:translate-y-[-1px] overflow-hidden"
                     >
-                      <Edit2 className="w-4 h-4" />
-                      Edit Profile
+                      <span className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-purple-700/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                      <span className="relative flex items-center gap-2">
+                        <Edit2 className="w-4 h-4" />
+                        Edit Profile
+                      </span>
                     </button>
                   )}
                 </div>
@@ -255,36 +261,36 @@ const ProfileHeader = ({
                 {/* Stats */}
                 <div className="flex flex-wrap gap-6 mt-6 justify-center sm:justify-start">
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-2xl font-bold text-purple-400">
                       {profileData.posts?.length || 0}
                     </p>
-                    <p className="text-gray-500 text-sm">Posts</p>
+                    <p className="text-gray-400 text-sm">Posts</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-2xl font-bold text-blue-400">
                       {followersCount}
                     </p>
-                    <p className="text-gray-500 text-sm">Followers</p>
+                    <p className="text-gray-400 text-sm">Followers</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-2xl font-bold text-green-400">
                       {profileData.following?.length || 0}
                     </p>
-                    <p className="text-gray-500 text-sm">Following</p>
+                    <p className="text-gray-400 text-sm">Following</p>
                   </div>
                 </div>
 
                 {/* Meta Info */}
-                <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-600 justify-center sm:justify-start">
+                <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-400 justify-center sm:justify-start">
                   {profileData.email && (
-                    <span className="flex items-center gap-1">
-                      <Mail className="w-4 h-4" />
+                    <span className="flex items-center gap-1 bg-gray-700/50 px-3 py-1 rounded-full">
+                      <Mail className="w-4 h-4 text-purple-400" />
                       {profileData.email}
                     </span>
                   )}
                   {profileData.createdAt && (
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
+                    <span className="flex items-center gap-1 bg-gray-700/50 px-3 py-1 rounded-full">
+                      <Calendar className="w-4 h-4 text-purple-400" />
                       Joined {formatDate(profileData.createdAt)}
                     </span>
                   )}
@@ -294,7 +300,7 @@ const ProfileHeader = ({
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

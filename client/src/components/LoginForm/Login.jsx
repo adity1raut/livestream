@@ -186,7 +186,7 @@ const LoginForm = () => {
             <div className="text-sm text-gray-500">
               Don't have an account?{" "}
               <a
-                href="/register"
+                href="/signup"
                 className="text-purple-400 hover:text-purple-300 hover:underline transition-colors font-medium"
               >
                 Sign up now

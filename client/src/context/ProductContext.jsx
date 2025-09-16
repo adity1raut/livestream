@@ -21,7 +21,7 @@ export function ProductProvider({ children }) {
   const getAllProducts = async (params = {}) => {
     setLoading(true);
     try {
-      const res = await axios.get("/api/stores/products", { params });
+      const res = await axios.get("/api/stores/products/all", { params });
       setProducts(res.data.products || []);
       return res.data;
     } catch (error) {

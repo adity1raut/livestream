@@ -42,7 +42,13 @@ function App() {
 
           <Routes>
             {/* Public Routes */}
-            <Route path="/" element={<GamingDashboard />} />
+            <Route path="/"
+              element={
+                <ProtectedRoute>
+                  <GamingDashboard />
+                </ProtectedRoute>
+              } />
+
             <Route
               path="/login"
               element={
@@ -140,8 +146,22 @@ function App() {
             />
 
             {/* Product Routes */}
-            <Route path="/products" element={<PublicProducts />} />
-            <Route path="/products/:productId" element={<ProductDetail />} />
+            <Route path="/products"
+              element={
+                <ProtectedRoute>
+                  <PublicProducts />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route path="/products/:productId"
+              element={
+                <ProtectedRoute>
+                  <ProductDetail />
+                </ProtectedRoute>
+              }
+
+            />
             <Route
               path="/add-product"
               element={

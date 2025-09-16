@@ -101,3 +101,36 @@ export async function getTrendingProducts(req, res) {
     res.status(500).json({ error: error.message });
   }
 }
+
+// GET /api/stores/products - Get all products
+export async function getAllProducts(req, res) {
+  try {
+    const {
+      page = 1,
+      limit = 12,
+      sort = "createdAt",
+      order = "desc",
+    } = req.query;
+
+    const sortObj = {};
+    sortObj[sort] = order === "desc" ? -1 : 1;
+
+    const products = await Product.find({ stock: { $gt: 0 } })
+      .populate("store", "name logo owner")
+      .populate("ratings.user", "username profile.name")
+      .sort(sortObj)
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const total = await Product.countDocuments({ stock: { $gt: 0 } });
+
+    res.status(200).json({
+      products,
+      totalPages: Math.ceil(total / limit),
+      currentPage: parseInt(page),
+      total,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}

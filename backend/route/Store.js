@@ -23,6 +23,7 @@ import {
 import {
   getTrendingProducts,
   searchProducts,
+  getAllProducts
 } from "../controllers/Store/search.routes.js";
 import {
   addProduct,
@@ -32,10 +33,10 @@ import {
   updateProduct,
 } from "../controllers/Store/product.routes.js";
 import {
-   createOrder, 
-  verifyPayment, 
-  saveOrderLocation, 
-  getOrderDetails, 
+  createOrder,
+  verifyPayment,
+  saveOrderLocation,
+  getOrderDetails,
   getUserOrders,
   getUserAddresses,
   addDeliveryAddress,
@@ -60,6 +61,7 @@ const router = express.Router();
 // Search routes - must come first
 router.get("/search/products", searchProducts);
 router.get("/trending/products", getTrendingProducts);
+router.get("/products/all", getAllProducts);
 
 // Cart routes - must come before /:id routes
 router.get("/cart", authenticateToken, getCart);

@@ -1,8 +1,8 @@
-// CreatePost.jsx
 import React, { useState, useRef } from "react";
-import { Image, Video, X, User } from "lucide-react";
+import { Image, Video, X, User, PlusCircle, Sparkles } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const CreatePost = ({ onPostCreated }) => {
   const [content, setContent] = useState("");
@@ -15,10 +15,17 @@ const CreatePost = ({ onPostCreated }) => {
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Check file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("File size must be less than 10MB");
+        return;
+      }
+      
       setSelectedFile(file);
       const reader = new FileReader();
       reader.onload = (e) => setPreview(e.target.result);
       reader.readAsDataURL(file);
+      toast.success("Media file selected!");
     }
   };
 
@@ -26,11 +33,15 @@ const CreatePost = ({ onPostCreated }) => {
     setSelectedFile(null);
     setPreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
+    toast.info("Media file removed");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!content.trim()) return;
+    if (!content.trim()) {
+      toast.error("Please write something before posting!");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -49,67 +60,84 @@ const CreatePost = ({ onPostCreated }) => {
         setContent("");
         removeFile();
         if (onPostCreated) onPostCreated(res.data.post);
+        toast.success("Post created successfully! 🎉");
       }
     } catch (error) {
       console.error("Error creating post:", error);
-      alert("Failed to create post");
+      toast.error("Failed to create post. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <form onSubmit={handleSubmit}>
+    <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-2xl overflow-hidden mb-6">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-purple-800 to-purple-900 px-6 py-4 border-b border-gray-700">
+        <div className="flex items-center justify-center">
+          <PlusCircle className="w-5 h-5 text-purple-400 mr-2" />
+          <h2 className="text-lg font-bold text-white">Create New Post</h2>
+          <Sparkles className="w-5 h-5 text-purple-400 ml-2" />
+        </div>
+      </div>
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="p-6">
         <div className="flex items-start space-x-4">
-          <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+          {/* User Avatar */}
+          <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-purple-700 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
             {user?.profile?.profileImage ? (
               <img
                 src={user.profile.profileImage}
                 alt={user.username}
-                className="w-10 h-10 rounded-full object-cover"
+                className="w-12 h-12 rounded-full object-cover border-2 border-purple-500"
               />
             ) : (
-              <User className="w-5 h-5 text-white" />
+              <User className="w-6 h-6 text-white" />
             )}
           </div>
 
           <div className="flex-1">
+            {/* Text Area */}
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="What's on your mind?"
-              className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-              rows="3"
+              placeholder="What's on your mind? Share your thoughts..."
+              className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400 transition-colors"
+              rows="4"
             />
 
+            {/* Media Preview */}
             {preview && (
-              <div className="mt-3 relative">
+              <div className="mt-4 relative">
                 <button
                   type="button"
                   onClick={removeFile}
-                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 z-10"
+                  className="absolute top-3 right-3 bg-red-600 text-white rounded-full p-2 hover:bg-red-700 z-10 transition-colors shadow-lg"
                 >
                   <X className="w-4 h-4" />
                 </button>
-                {selectedFile?.type.startsWith("video/") ? (
-                  <video
-                    src={preview}
-                    className="max-w-full h-48 object-cover rounded-lg"
-                    controls
-                  />
-                ) : (
-                  <img
-                    src={preview}
-                    alt="Preview"
-                    className="max-w-full h-48 object-cover rounded-lg"
-                  />
-                )}
+                <div className="bg-gray-900 rounded-lg p-2 border border-gray-600">
+                  {selectedFile?.type.startsWith("video/") ? (
+                    <video
+                      src={preview}
+                      className="w-full max-h-64 object-cover rounded-lg"
+                      controls
+                    />
+                  ) : (
+                    <img
+                      src={preview}
+                      alt="Preview"
+                      className="w-full max-h-64 object-cover rounded-lg"
+                    />
+                  )}
+                </div>
               </div>
             )}
 
-            <div className="flex justify-between items-center mt-3">
-              <div className="flex space-x-2">
+            {/* Action Buttons */}
+            <div className="flex justify-between items-center mt-4">
+              <div className="flex space-x-3">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -117,31 +145,75 @@ const CreatePost = ({ onPostCreated }) => {
                   onChange={handleFileSelect}
                   className="hidden"
                 />
+                
+                {/* Photo Button */}
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center space-x-1 text-blue-500 hover:text-blue-600 transition-colors"
+                  className="group relative px-4 py-2 bg-gradient-to-r from-blue-900/70 to-blue-800/70 text-blue-100 rounded-lg transition-all duration-300 shadow-md hover:shadow-blue-700/30 hover:translate-y-[-1px] overflow-hidden"
                 >
-                  <Image className="w-5 h-5" />
-                  <span>Photo</span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-blue-800/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  <span className="relative flex items-center gap-2">
+                    <Image className="w-4 h-4 text-blue-300" />
+                    <span className="text-sm font-medium">Photo</span>
+                  </span>
                 </button>
+
+                {/* Video Button */}
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center space-x-1 text-green-500 hover:text-green-600 transition-colors"
+                  className="group relative px-4 py-2 bg-gradient-to-r from-green-900/70 to-green-800/70 text-green-100 rounded-lg transition-all duration-300 shadow-md hover:shadow-green-700/30 hover:translate-y-[-1px] overflow-hidden"
                 >
-                  <Video className="w-5 h-5" />
-                  <span>Video</span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-green-600/20 to-green-800/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  <span className="relative flex items-center gap-2">
+                    <Video className="w-4 h-4 text-green-300" />
+                    <span className="text-sm font-medium">Video</span>
+                  </span>
                 </button>
               </div>
 
+              {/* Post Button */}
               <button
                 type="submit"
                 disabled={!content.trim() || isSubmitting}
-                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                className="group relative px-8 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg transition-all duration-300 shadow-lg hover:shadow-purple-700/30 hover:translate-y-[-1px] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none overflow-hidden"
               >
-                {isSubmitting ? "Posting..." : "Post"}
+                <span className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-purple-700/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                <span className="relative flex items-center gap-2 font-medium">
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>Posting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <PlusCircle className="w-4 h-4" />
+                      <span>Post</span>
+                    </>
+                  )}
+                </span>
               </button>
+            </div>
+
+            {/* Character Count & File Info */}
+            <div className="flex justify-between items-center mt-3 text-sm text-gray-500">
+              <div className="flex items-center gap-4">
+                <span className={`${content.length > 280 ? 'text-red-400' : 'text-gray-400'}`}>
+                  {content.length}/500 characters
+                </span>
+                {selectedFile && (
+                  <span className="text-purple-400">
+                    📎 {selectedFile.name.substring(0, 20)}
+                    {selectedFile.name.length > 20 ? '...' : ''}
+                  </span>
+                )}
+              </div>
+              
+              {/* Tips */}
+              <div className="text-xs text-gray-500">
+                💡 Max file size: 10MB
+              </div>
             </div>
           </div>
         </div>

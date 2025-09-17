@@ -10,6 +10,7 @@ import { User, AlertCircle } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
+import GamingBackground from "../../GamingBackground/GamingBackground";
 
 export default function ProfilePage() {
   const { username: paramUsername } = useParams();
@@ -175,6 +176,9 @@ export default function ProfilePage() {
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-black to-purple-900 min-h-screen">
+
+      <GamingBackground />
+      
       <ToastContainer 
         position="top-right" 
         autoClose={3000}

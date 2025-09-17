@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useStore } from "../../context/StoreContext";
 import { useNavigate } from "react-router-dom";
+import GamingBackground from "../../GamingBackground/GamingBackground";
 
 function StoreDetail({ store, onBack }) {
   const { getStoreProducts } = useStore();
@@ -91,6 +92,7 @@ function StoreDetail({ store, onBack }) {
 
   return (
     <div className=" bg-gradient-to-br from-gray-900 via-black to-purple-900 p-4 pt-20">
+      <GamingBackground />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Back Button */}
         <button

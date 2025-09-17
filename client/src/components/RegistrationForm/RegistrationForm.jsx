@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
+import GamingBackground from "../../GamingBackground/GamingBackground";
 import {
   User,
   Mail,
@@ -615,8 +616,11 @@ const RegistrationForm = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 flex items-center justify-center p-4">
-      <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-2xl p-8 w-full max-w-md relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Gaming Background */}
+      <GamingBackground />
+      
+      <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-2xl p-8 w-full max-w-md relative overflow-hidden z-10">
         {/* Subtle gaming pattern in background */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-0 left-0 w-32 h-32 border-4 border-white rounded-full transform -translate-x-16 -translate-y-16"></div>

@@ -7,6 +7,7 @@ import { MessageCircle, RefreshCw, PlusCircle, User, Heart, ShoppingCart, FileTe
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import GamingBackground from "../../GamingBackground/GamingBackground";
 
 const Feed = () => {
   const [posts, setPosts] = useState([]);
@@ -130,6 +131,7 @@ const Feed = () => {
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-black to-purple-900 min-h-screen p-4 pt-32">
+      <GamingBackground />
       <ToastContainer 
         position="top-right" 
         autoClose={3000}

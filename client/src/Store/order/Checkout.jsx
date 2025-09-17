@@ -5,6 +5,7 @@ import { MapPin, CreditCard, CheckCircle, Loader2, Navigation, ArrowLeft, Store,
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from "react-router-dom";
+import GamingBackground from "../../GamingBackground/GamingBackground";
 
 export function Checkout() {
   const navigate = useNavigate();
@@ -493,6 +494,7 @@ export function Checkout() {
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-black to-purple-900 pb-20 p-4 pt-32">
+      <GamingBackground />
       <ToastContainer
         position="top-right"
         autoClose={3000}

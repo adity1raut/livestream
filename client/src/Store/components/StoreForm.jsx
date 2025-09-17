@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { X, Upload, Store } from "lucide-react";
+import GamingBackground from "../../GamingBackground/GamingBackground";
 
 function StoreForm({
   isOpen,
@@ -63,6 +64,7 @@ function StoreForm({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+      <GamingBackground />
       <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-2xl w-full max-w-md mx-4 overflow-hidden relative">
         <div className="bg-gradient-to-r from-purple-800 to-purple-900 px-6 py-4 border-b border-gray-700 relative">
           <div className="flex items-center justify-between">

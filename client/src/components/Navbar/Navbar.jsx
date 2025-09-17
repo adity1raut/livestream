@@ -24,7 +24,7 @@ import {
 import NotificationBell from "../Notification/NotificationBell";
 
 const Navbar = () => {
-  const { user, isAuthenticated, logout, loading } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -159,14 +159,7 @@ const Navbar = () => {
 
             {/* Desktop Menu */}
             <div className="hidden md:flex md:items-center md:space-x-4">
-              {loading && (
-                <div className="flex items-center space-x-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-500 border-t-transparent"></div>
-                  <span className="text-gray-400 text-sm">Loading...</span>
-                </div>
-              )}
-
-              {!loading && !isAuthenticated && (
+              {!isAuthenticated && (
                 <>
                   <Link
                     to="/login"
@@ -191,7 +184,7 @@ const Navbar = () => {
                 </>
               )}
 
-              {!loading && isAuthenticated && (
+              {isAuthenticated && (
                 <>
                   {/* Dashboard Link */}
                   <Link
@@ -277,7 +270,7 @@ const Navbar = () => {
             </div>
 
             {/* Right Actions */}
-            {!loading && isAuthenticated && (
+            {isAuthenticated && (
               <div className="hidden md:flex items-center space-x-4">
                 {/* User Profile */}
                 <div className="border-l pl-4 border-gray-700">
@@ -302,7 +295,7 @@ const Navbar = () => {
             )}
 
             {/* Login Button for non-authenticated users */}
-            {!loading && !isAuthenticated && (
+            {!isAuthenticated && (
               <div className="hidden md:flex items-center">
                 <Link
                   to="/login"
@@ -358,14 +351,7 @@ const Navbar = () => {
           </div>
 
           <div className="py-2 px-4">
-            {loading && (
-              <div className="flex items-center space-x-2 px-4 py-3">
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-500 border-t-transparent"></div>
-                <span className="text-gray-400 text-sm">Loading...</span>
-              </div>
-            )}
-
-            {!loading && !isAuthenticated && (
+            {!isAuthenticated && (
               <>
                 <Link
                   to="/login"
@@ -386,7 +372,7 @@ const Navbar = () => {
               </>
             )}
 
-            {!loading && isAuthenticated && (
+            {isAuthenticated && (
               <>
                 {/* User Info Section */}
                 <div className="px-4 py-3 border-b border-purple-800 mb-2">
@@ -441,7 +427,7 @@ const Navbar = () => {
             )}
           </div>
 
-          {!loading && !isAuthenticated && (
+          {!isAuthenticated && (
             <div className="border-t border-purple-800 mt-2 pt-4 px-6">
               <Link
                 to="/login"

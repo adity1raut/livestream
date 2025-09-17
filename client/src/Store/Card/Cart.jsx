@@ -16,6 +16,7 @@ import {
   AlertCircle,
   RefreshCw,
 } from "lucide-react";
+import GamingBackground from "../../GamingBackground/GamingBackground";
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -168,6 +169,7 @@ export default function Cart() {
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-black to-purple-900 min-h-screen p-4 pt-32">
+      <GamingBackground />
       {/* Replace Toaster with ToastContainer */}
       <ToastContainer
         position="top-right"

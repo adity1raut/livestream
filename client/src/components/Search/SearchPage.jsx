@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Search } from "lucide-react";
 import PostCard from "../Post/PostCard";
 import axios from "axios";
+import GamingBackground from "../../GamingBackground/GamingBackground"
 
 const SearchPage = () => {
   const [query, setQuery] = useState("");
@@ -36,6 +37,7 @@ const SearchPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
+      <GamingBackground />
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <form onSubmit={handleSearch} className="flex space-x-4">
           <div className="flex-1 relative">

@@ -9,6 +9,7 @@ import {
   Package,
 } from "lucide-react";
 import ProductCard from "../search/ProductCard"; //
+import GamingBackground from "../../GamingBackground/GamingBackground";
 
 export default function PublicProducts() {
   const { stores } = useStore();
@@ -128,6 +129,7 @@ export default function PublicProducts() {
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-black to-purple-900 p-4 pt-32">
+      <GamingBackground />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Header */}
         <div className="mb-8">

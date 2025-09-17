@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Search, ChevronLeft, ChevronRight, Store, Heart, User , ShoppingCart} from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Store, Heart, User, ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../../context/StoreContext";
 import { useAuth } from "../../context/AuthContext";
@@ -7,6 +7,7 @@ import StoreCard from "./StoreCard";
 import StoreDetail from "./StoreDetail";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import GamingBackground from "../../GamingBackground/GamingBackground";
 
 function AllStores() {
   const navigate = useNavigate();
@@ -99,6 +100,7 @@ function AllStores() {
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-black to-purple-900 p-4 pt-32">
+      <GamingBackground />
       <ToastContainer position="top-right" autoClose={3000} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Header */}
@@ -157,7 +159,7 @@ function AllStores() {
                   </span>
                 </button>
 
-                 <button
+                <button
                   onClick={handleMyCartClick}
                   className="group relative px-5 py-2.5 bg-gradient-to-r from-blue-900/70 to-indigo-900/70 text-blue-100 rounded-lg transition-all duration-300 shadow-md hover:shadow-blue-700/30 hover:translate-y-[-2px] overflow-hidden"
                 >

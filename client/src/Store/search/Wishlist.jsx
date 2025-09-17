@@ -5,6 +5,7 @@ import { Heart, ArrowLeft, Store } from "lucide-react";
 import ProductCard from "./ProductCard"; 
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import GamingBackground from "../../GamingBackground/GamingBackground";
 
 export function Wishlist() {
   const navigate = useNavigate();
@@ -49,6 +50,7 @@ export function Wishlist() {
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-black to-purple-900 p-4 pt-32">
+      <GamingBackground />
       <ToastContainer position="top-right" autoClose={3000} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Navigation Buttons */}

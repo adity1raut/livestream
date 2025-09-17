@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { Eye, EyeOff, Lock, Mail, AlertCircle, Gamepad2 } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, AlertCircle, Gamepad2, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import GamingBackground from "../../GamingBackground/GamingBackground";
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -9,7 +10,7 @@ const LoginForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localError, setLocalError] = useState(null);
 
-  const { login, user, loading } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -57,21 +58,13 @@ const LoginForm = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 flex items-center justify-center p-4">
-        <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-xl w-full max-w-md overflow-hidden p-8 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto"></div>
-          <p className="mt-4 text-gray-400">Checking authentication...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 flex items-center justify-center p-4">
-      <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-2xl w-full max-w-md overflow-hidden relative">
-        {/* Subtle gaming pattern in background */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 flex items-center justify-center p-4 overflow-hidden relative">
+      {/* Gaming Background Component */}
+      <GamingBackground />
+
+      <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-2xl w-full max-w-md overflow-hidden relative z-10">
+        {/* Subtle gaming pattern overlay */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-0 left-0 w-32 h-32 border-4 border-white rounded-full transform -translate-x-16 -translate-y-16"></div>
           <div className="absolute bottom-0 right-0 w-32 h-32 border-4 border-white rounded-full translate-x-16 translate-y-16"></div>
@@ -79,8 +72,11 @@ const LoginForm = () => {
 
         <div className="bg-gradient-to-r from-purple-800 to-purple-900 px-8 py-6 border-b border-gray-700 relative">
           <div className="flex items-center justify-center mb-2">
-            <Gamepad2 className="w-6 h-6 text-purple-400 mr-2" />
-            <h2 className="text-2xl font-bold text-white text-center">
+            <div className="relative">
+              <Gamepad2 className="w-6 h-6 text-purple-400 mr-2" />
+              <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-400 rounded-full animate-ping"></div>
+            </div>
+            <h2 className="text-2xl font-bold text-white text-center font-mono">
               GAME PORTAL
             </h2>
           </div>
@@ -163,7 +159,7 @@ const LoginForm = () => {
             <button
               onClick={handleSubmit}
               disabled={isSubmitting || !formData.email || !formData.password}
-              className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 disabled:from-gray-700 disabled:to-gray-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:cursor-not-allowed shadow-lg"
+              className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 disabled:from-gray-700 disabled:to-gray-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:cursor-not-allowed shadow-lg animate-pulse-glow"
             >
               {isSubmitting ? (
                 <>
@@ -171,7 +167,10 @@ const LoginForm = () => {
                   Signing In...
                 </>
               ) : (
-                "Sign In"
+                <>
+                  <Zap className="w-4 h-4" />
+                  Sign In
+                </>
               )}
             </button>
           </div>
@@ -195,6 +194,21 @@ const LoginForm = () => {
           </div>
         </div>
       </div>
+
+      {/* Login-specific styles */}
+      <style jsx>{`
+        @keyframes pulse-glow {
+          0%, 100% { 
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+          }
+          50% { 
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
+          }
+        }
+        .animate-pulse-glow {
+          animation: pulse-glow 2s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 };

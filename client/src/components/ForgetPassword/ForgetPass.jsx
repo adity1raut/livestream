@@ -6,10 +6,10 @@ import {
   EyeOff,
   Timer,
   CheckCircle,
-  AlertCircle,
   ArrowLeft,
   Gamepad2,
 } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 const ForgetPassword = () => {
   const [step, setStep] = useState(1);
@@ -19,12 +19,15 @@ const ForgetPassword = () => {
     newPassword: "",
     confirmPassword: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [buttonLoading, setButtonLoading] = useState({
+    sendOTP: false,
+    resendOTP: false,
+    verifyOTP: false,
+    resetPassword: false,
+  });
 
   useEffect(() => {
     let timer;
@@ -40,19 +43,22 @@ const ForgetPassword = () => {
       ...prev,
       [name]: value,
     }));
-    setError("");
-    setSuccess("");
+  };
+
+  const setButtonLoadingState = (button, isLoading) => {
+    setButtonLoading((prev) => ({
+      ...prev,
+      [button]: isLoading,
+    }));
   };
 
   const sendOTP = async () => {
     if (!formData.identifier.trim()) {
-      setError("Please enter your email or username");
+      toast.error("Please enter your email or username");
       return;
     }
 
-    setLoading(true);
-    setError("");
-    setSuccess("");
+    setButtonLoadingState("sendOTP", true);
 
     try {
       const response = await fetch(`/api/auth/send-reset-otp`, {
@@ -66,23 +72,21 @@ const ForgetPassword = () => {
       const data = await response.json();
 
       if (data.success) {
-        setSuccess("OTP sent successfully to your email");
+        toast.success("🎮 Recovery code sent to your email!");
         setStep(2);
-        setCountdown(120); // 2 minutes countdown
+        setCountdown(120);
       } else {
-        setError(data.message || "Failed to send OTP");
+        toast.error(data.message || "Failed to send OTP");
       }
     } catch (error) {
-      setError("Failed to send OTP. Please check your connection.");
+      toast.error("Failed to send OTP. Please check your connection.");
     } finally {
-      setLoading(false);
+      setButtonLoadingState("sendOTP", false);
     }
   };
 
   const resendOTP = async () => {
-    setLoading(true);
-    setError("");
-    setSuccess("");
+    setButtonLoadingState("resendOTP", true);
 
     try {
       const response = await fetch(`/api/auth/resend-reset-otp`, {
@@ -96,27 +100,25 @@ const ForgetPassword = () => {
       const data = await response.json();
 
       if (data.success) {
-        setSuccess("New OTP sent successfully");
+        toast.success("🔄 New recovery code sent!");
         setCountdown(120);
       } else {
-        setError(data.message || "Failed to resend OTP");
+        toast.error(data.message || "Failed to resend OTP");
       }
     } catch (error) {
-      setError("Failed to resend OTP. Please check your connection.");
+      toast.error("Failed to resend OTP. Please check your connection.");
     } finally {
-      setLoading(false);
+      setButtonLoadingState("resendOTP", false);
     }
   };
 
   const verifyOTP = async () => {
     if (!formData.otp.trim() || formData.otp.length !== 4) {
-      setError("Please enter a valid 4-digit OTP");
+      toast.error("Please enter a valid 4-digit OTP");
       return;
     }
 
-    setLoading(true);
-    setError("");
-    setSuccess("");
+    setButtonLoadingState("verifyOTP", true);
 
     try {
       const response = await fetch(`/api/auth/verify-reset-otp`, {
@@ -133,37 +135,35 @@ const ForgetPassword = () => {
       const data = await response.json();
 
       if (data.success) {
-        setSuccess("OTP verified successfully");
+        toast.success("🔓 Security code verified! Access granted!");
         setStep(3);
       } else {
-        setError(data.message || "Invalid or expired OTP");
+        toast.error(data.message || "Invalid or expired OTP");
       }
     } catch (error) {
-      setError("Failed to verify OTP. Please try again.");
+      toast.error("Failed to verify OTP. Please try again.");
     } finally {
-      setLoading(false);
+      setButtonLoadingState("verifyOTP", false);
     }
   };
 
   const resetPassword = async () => {
     if (!formData.newPassword) {
-      setError("Please enter a new password");
+      toast.error("Please enter a new password");
       return;
     }
 
     if (formData.newPassword.length < 6) {
-      setError("Password must be at least 6 characters long");
+      toast.error("Password must be at least 6 characters long");
       return;
     }
 
     if (formData.newPassword !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
 
-    setLoading(true);
-    setError("");
-    setSuccess("");
+    setButtonLoadingState("resetPassword", true);
 
     try {
       const response = await fetch(`/api/auth/reset-password`, {
@@ -180,15 +180,15 @@ const ForgetPassword = () => {
       const data = await response.json();
 
       if (data.success) {
-        setSuccess("Password reset successfully");
+        toast.success("🎮 Password updated successfully! Welcome back, gamer!");
         setStep(4);
       } else {
-        setError(data.message || "Failed to reset password");
+        toast.error(data.message || "Failed to reset password");
       }
     } catch (error) {
-      setError("Failed to reset password. Please try again.");
+      toast.error("Failed to reset password. Please try again.");
     } finally {
-      setLoading(false);
+      setButtonLoadingState("resetPassword", false);
     }
   };
 
@@ -201,8 +201,6 @@ const ForgetPassword = () => {
       confirmPassword: "",
     });
     setStep(1);
-    setError("");
-    setSuccess("");
     setCountdown(0);
   };
 
@@ -212,13 +210,25 @@ const ForgetPassword = () => {
     }
   };
 
+  const LoadingSpinner = ({ size = "5" }) => (
+    <div
+      className={`animate-spin rounded-full h-${size} w-${size} border-b-2 border-white mr-2`}
+    >
+      <div
+        className={`animate-pulse rounded-full h-${size} w-${size} border-2 border-transparent border-t-purple-300`}
+      ></div>
+    </div>
+  );
+
   const renderStep1 = () => (
     <div className="space-y-6">
       <div className="text-center">
         <div className="mx-auto w-16 h-16 bg-purple-900 rounded-full flex items-center justify-center mb-4 border border-purple-600">
           <Mail className="w-8 h-8 text-purple-400" />
         </div>
-        <h2 className="text-3xl font-bold text-white mb-2">Forgot Password?</h2>
+        <h2 className="text-3xl font-bold text-white mb-2">
+          Forgot Password?
+        </h2>
         <p className="text-gray-400">
           No worries! Enter your email or username and we'll send you an OTP to
           reset your password.
@@ -236,21 +246,29 @@ const ForgetPassword = () => {
             onKeyPress={(e) => handleKeyPress(e, sendOTP)}
             placeholder="Email or Username"
             className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-white placeholder-gray-500"
+            disabled={buttonLoading.sendOTP}
           />
         </div>
 
         <button
           onClick={sendOTP}
-          disabled={loading || !formData.identifier.trim()}
-          className="w-full bg-purple-700 text-white py-3 px-4 rounded-lg hover:bg-purple-600 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all font-medium tracking-wide"
+          disabled={buttonLoading.sendOTP || !formData.identifier.trim()}
+          className={`w-full py-3 px-4 rounded-lg focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all font-medium tracking-wide transform ${
+            buttonLoading.sendOTP
+              ? "bg-purple-800 scale-95 cursor-wait"
+              : "bg-purple-700 hover:bg-purple-600 hover:scale-105 active:scale-95"
+          } text-white`}
         >
-          {loading ? (
+          {buttonLoading.sendOTP ? (
             <>
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-              Sending OTP...
+              <LoadingSpinner />
+              <span className="animate-pulse">Sending OTP...</span>
             </>
           ) : (
-            "Send OTP"
+            <>
+              <Mail className="w-5 h-5 mr-2" />
+              Send OTP
+            </>
           )}
         </button>
       </div>
@@ -297,21 +315,29 @@ const ForgetPassword = () => {
             placeholder="0000"
             maxLength="4"
             className="w-full text-center text-3xl font-mono py-4 bg-gray-800 border-2 border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 tracking-widest transition-all text-white"
+            disabled={buttonLoading.verifyOTP}
           />
         </div>
 
         <button
           onClick={verifyOTP}
-          disabled={loading || formData.otp.length !== 4}
-          className="w-full bg-purple-700 text-white py-3 px-4 rounded-lg hover:bg-purple-600 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all font-medium tracking-wide"
+          disabled={buttonLoading.verifyOTP || formData.otp.length !== 4}
+          className={`w-full py-3 px-4 rounded-lg focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all font-medium tracking-wide transform ${
+            buttonLoading.verifyOTP
+              ? "bg-purple-800 scale-95 cursor-wait"
+              : "bg-purple-700 hover:bg-purple-600 hover:scale-105 active:scale-95"
+          } text-white`}
         >
-          {loading ? (
+          {buttonLoading.verifyOTP ? (
             <>
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-              Verifying...
+              <LoadingSpinner />
+              <span className="animate-pulse">Verifying...</span>
             </>
           ) : (
-            "Verify OTP"
+            <>
+              <CheckCircle className="w-5 h-5 mr-2" />
+              Verify OTP
+            </>
           )}
         </button>
 
@@ -319,10 +345,21 @@ const ForgetPassword = () => {
           <p className="text-gray-400">Didn't receive the code?</p>
           <button
             onClick={resendOTP}
-            disabled={loading || countdown > 0}
-            className="text-purple-400 hover:text-purple-300 disabled:text-gray-600 disabled:cursor-not-allowed font-medium transition-colors"
+            disabled={buttonLoading.resendOTP || countdown > 0}
+            className={`text-purple-400 hover:text-purple-300 disabled:text-gray-600 disabled:cursor-not-allowed font-medium transition-all flex items-center justify-center mx-auto ${
+              buttonLoading.resendOTP ? "animate-pulse" : ""
+            }`}
           >
-            {countdown > 0 ? `Resend in ${countdown}s` : "Resend OTP"}
+            {buttonLoading.resendOTP ? (
+              <>
+                <LoadingSpinner size="4" />
+                Resending...
+              </>
+            ) : countdown > 0 ? (
+              `Resend in ${countdown}s`
+            ) : (
+              "Resend OTP"
+            )}
           </button>
         </div>
       </div>
@@ -395,18 +432,38 @@ const ForgetPassword = () => {
           <p>Password must:</p>
           <ul className="ml-4 space-y-1">
             <li
-              className={`flex items-center ${formData.newPassword.length >= 6 ? "text-green-400" : "text-gray-500"}`}
+              className={`flex items-center ${
+                formData.newPassword.length >= 6
+                  ? "text-green-400"
+                  : "text-gray-500"
+              }`}
             >
               <div
-                className={`w-1 h-1 rounded-full mr-2 ${formData.newPassword.length >= 6 ? "bg-green-400" : "bg-gray-500"}`}
+                className={`w-1 h-1 rounded-full mr-2 ${
+                  formData.newPassword.length >= 6
+                    ? "bg-green-400"
+                    : "bg-gray-500"
+                }`}
               ></div>
               Be at least 6 characters long
             </li>
             <li
-              className={`flex items-center ${formData.newPassword && formData.confirmPassword && formData.newPassword === formData.confirmPassword ? "text-green-400" : "text-gray-500"}`}
+              className={`flex items-center ${
+                formData.newPassword &&
+                formData.confirmPassword &&
+                formData.newPassword === formData.confirmPassword
+                  ? "text-green-400"
+                  : "text-gray-500"
+              }`}
             >
               <div
-                className={`w-1 h-1 rounded-full mr-2 ${formData.newPassword && formData.confirmPassword && formData.newPassword === formData.confirmPassword ? "bg-green-400" : "bg-gray-500"}`}
+                className={`w-1 h-1 rounded-full mr-2 ${
+                  formData.newPassword &&
+                  formData.confirmPassword &&
+                  formData.newPassword === formData.confirmPassword
+                    ? "bg-green-400"
+                    : "bg-gray-500"
+                }`}
               ></div>
               Match the confirmation password
             </li>
@@ -416,17 +473,24 @@ const ForgetPassword = () => {
         <button
           onClick={resetPassword}
           disabled={
-            loading || !formData.newPassword || !formData.confirmPassword
+            buttonLoading.resetPassword || !formData.newPassword || !formData.confirmPassword
           }
-          className="w-full bg-purple-700 text-white py-3 px-4 rounded-lg hover:bg-purple-600 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all font-medium tracking-wide"
+          className={`w-full py-3 px-4 rounded-lg focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all font-medium tracking-wide transform ${
+            buttonLoading.resetPassword
+              ? "bg-purple-800 scale-95 cursor-wait"
+              : "bg-purple-700 hover:bg-purple-600 hover:scale-105 active:scale-95"
+          } text-white`}
         >
-          {loading ? (
+          {buttonLoading.resetPassword ? (
             <>
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-              Updating Password...
+              <LoadingSpinner />
+              <span className="animate-pulse">Updating Password...</span>
             </>
           ) : (
-            "Update Password"
+            <>
+              <Lock className="w-5 h-5 mr-2" />
+              Update Password
+            </>
           )}
         </button>
       </div>
@@ -435,7 +499,7 @@ const ForgetPassword = () => {
 
   const renderStep4 = () => (
     <div className="space-y-6 text-center">
-      <div className="mx-auto w-20 h-20 bg-purple-900 rounded-full flex items-center justify-center animate-pulse border border-purple-600">
+      <div className="mx-auto w-20 h-20 bg-purple-900 rounded-full flex items-center justify-center border border-purple-600">
         <CheckCircle className="w-10 h-10 text-green-400" />
       </div>
 
@@ -517,26 +581,6 @@ const ForgetPassword = () => {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </button>
-          )}
-
-          {/* Error message */}
-          {error && (
-            <div className="mb-6 p-4 bg-red-900 bg-opacity-20 border-l-4 border-red-500 rounded-lg z-10 relative">
-              <div className="flex items-start">
-                <AlertCircle className="w-5 h-5 text-red-400 mt-0.5 mr-3 flex-shrink-0" />
-                <span className="text-red-300 text-sm">{error}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Success message */}
-          {success && (
-            <div className="mb-6 p-4 bg-green-900 bg-opacity-20 border-l-4 border-green-500 rounded-lg z-10 relative">
-              <div className="flex items-start">
-                <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 mr-3 flex-shrink-0" />
-                <span className="text-green-300 text-sm">{success}</span>
-              </div>
-            </div>
           )}
 
           {/* Step content */}

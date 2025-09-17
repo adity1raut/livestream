@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
 import {
   User,
@@ -14,6 +16,10 @@ import {
   Send,
   RefreshCw,
   Gamepad2,
+  ArrowRight,
+  Zap,
+  Trophy,
+  Target,
 } from "lucide-react";
 
 // Toast component
@@ -70,6 +76,9 @@ const useToast = () => {
 };
 
 const RegistrationForm = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     username: "",
@@ -82,11 +91,19 @@ const RegistrationForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [nextStepLoading, setNextStepLoading] = useState(false);
   const [availability, setAvailability] = useState({});
   const [otpSent, setOtpSent] = useState(false);
   const [otpTimer, setOtpTimer] = useState(0);
 
   const { toasts, addToast, removeToast } = useToast();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/profile/me");
+    }
+  }, [isAuthenticated, navigate]);
 
   // Timer for OTP resend
   useEffect(() => {
@@ -163,43 +180,51 @@ const RegistrationForm = () => {
 
   const verifyOTP = async () => {
     try {
-      setLoading(true);
+      setNextStepLoading(true);
       await axios.post("/api/auth/verify-otp", {
         email: formData.email,
         otp: formData.otp,
       });
       addToast("OTP verified successfully", "success");
-      setCurrentStep(3);
+      
+      setTimeout(() => {
+        setCurrentStep(3);
+        setNextStepLoading(false);
+      }, 1000);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
         "OTP verification failed";
       addToast(errorMessage, "error");
-    } finally {
-      setLoading(false);
+      setNextStepLoading(false);
     }
   };
 
   const registerUser = async () => {
     try {
       setLoading(true);
-      const response = await axios.post("/api/auth/register", formData);
-      addToast("Account created successfully!", "success");
-      // Reset form or redirect
-      setTimeout(() => {
-        setCurrentStep(1);
-        setFormData({
-          username: "",
-          email: "",
-          name: "",
-          password: "",
-          confirmPassword: "",
-          otp: "",
-        });
-        setOtpSent(false);
-        setAvailability({});
-      }, 2000);
+      
+      const response = await axios.post("/api/auth/register", {
+        username: formData.username,
+        email: formData.email,
+        name: formData.name,
+        password: formData.password,
+        otp: formData.otp,
+      });
+
+      if (response.data.success) {
+        addToast("Account created successfully!", "success");
+        
+        setTimeout(() => {
+          navigate("/login", { 
+            state: { 
+              message: "Account created successfully! Please log in.",
+              email: formData.email 
+            }
+          });
+        }, 2000);
+      }
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || error.message || "Registration failed";
@@ -209,9 +234,8 @@ const RegistrationForm = () => {
     }
   };
 
-  const nextStep = () => {
+  const nextStep = async () => {
     if (currentStep === 1) {
-      // Validate step 1
       if (!formData.username || !formData.email || !formData.name) {
         addToast("Please fill all required fields", "error");
         return;
@@ -223,7 +247,14 @@ const RegistrationForm = () => {
         addToast("Please check username and email availability", "error");
         return;
       }
-      setCurrentStep(2);
+      
+      setNextStepLoading(true);
+      
+      setTimeout(() => {
+        setCurrentStep(2);
+        setNextStepLoading(false);
+      }, 800);
+      
     } else if (currentStep === 2 && otpSent) {
       verifyOTP();
     }
@@ -240,17 +271,21 @@ const RegistrationForm = () => {
       {[1, 2, 3].map((step) => (
         <React.Fragment key={step}>
           <div
-            className={`w-10 h-10 rounded-full flex items-center justify-center ${
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
               currentStep >= step
-                ? "bg-purple-600 text-white"
+                ? "bg-purple-600 text-white scale-110"
                 : "bg-gray-700 text-gray-400"
             }`}
           >
-            {step}
+            {nextStepLoading && currentStep === step - 1 ? (
+              <Loader className="animate-spin" size={16} />
+            ) : (
+              step
+            )}
           </div>
           {step < 3 && (
             <div
-              className={`w-16 h-1 mx-2 ${
+              className={`w-16 h-1 mx-2 transition-all duration-500 ${
                 currentStep > step ? "bg-purple-600" : "bg-gray-700"
               }`}
             />
@@ -285,7 +320,7 @@ const RegistrationForm = () => {
             name="name"
             value={formData.name}
             onChange={handleInputChange}
-            className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
+            className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500 transition-all"
             placeholder="Enter your full name"
             required
           />
@@ -308,7 +343,7 @@ const RegistrationForm = () => {
             value={formData.username}
             onChange={handleInputChange}
             onBlur={() => checkAvailability("username")}
-            className="w-full pl-10 pr-12 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
+            className="w-full pl-10 pr-12 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500 transition-all"
             placeholder="Choose a username"
             required
           />
@@ -342,7 +377,7 @@ const RegistrationForm = () => {
             value={formData.email}
             onChange={handleInputChange}
             onBlur={() => checkAvailability("email")}
-            className="w-full pl-10 pr-12 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
+            className="w-full pl-10 pr-12 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500 transition-all"
             placeholder="Enter your email"
             required
           />
@@ -363,13 +398,24 @@ const RegistrationForm = () => {
       <button
         onClick={nextStep}
         disabled={
+          nextStepLoading ||
           loading ||
           availability.username !== "available" ||
           availability.email !== "available"
         }
-        className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all font-medium tracking-wide"
+        className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all font-medium tracking-wide transform hover:scale-105 active:scale-95"
       >
-        Next Step
+        {nextStepLoading ? (
+          <>
+            <Loader className="animate-spin" size={20} />
+            <span>Processing...</span>
+          </>
+        ) : (
+          <>
+            <span>Next Step</span>
+            <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+          </>
+        )}
       </button>
     </div>
   );
@@ -390,7 +436,7 @@ const RegistrationForm = () => {
           <button
             onClick={sendOTP}
             disabled={loading}
-            className="bg-purple-600 text-white py-3 px-6 rounded-lg hover:bg-purple-700 disabled:opacity-50 flex items-center justify-center gap-2 mx-auto transition-all"
+            className="bg-purple-600 text-white py-3 px-6 rounded-lg hover:bg-purple-700 disabled:opacity-50 flex items-center justify-center gap-2 mx-auto transition-all transform hover:scale-105 active:scale-95"
           >
             {loading ? (
               <Loader className="animate-spin" size={20} />
@@ -415,7 +461,7 @@ const RegistrationForm = () => {
               name="otp"
               value={formData.otp}
               onChange={handleInputChange}
-              className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center text-lg tracking-wider text-white"
+              className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center text-lg tracking-wider text-white transition-all"
               placeholder="000000"
               maxLength="6"
             />
@@ -439,15 +485,20 @@ const RegistrationForm = () => {
 
           <button
             onClick={nextStep}
-            disabled={loading || formData.otp.length !== 6}
-            className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
+            disabled={nextStepLoading || loading || formData.otp.length !== 6}
+            className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all transform hover:scale-105 active:scale-95"
           >
-            {loading ? (
-              <Loader className="animate-spin" size={20} />
+            {nextStepLoading ? (
+              <>
+                <Loader className="animate-spin" size={20} />
+                <span>Verifying...</span>
+              </>
             ) : (
-              <Check size={20} />
+              <>
+                <Check size={20} />
+                <span>Verify OTP</span>
+              </>
             )}
-            Verify OTP
           </button>
         </div>
       )}
@@ -478,7 +529,7 @@ const RegistrationForm = () => {
             name="password"
             value={formData.password}
             onChange={handleInputChange}
-            className="w-full pl-10 pr-12 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
+            className="w-full pl-10 pr-12 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500 transition-all"
             placeholder="Create a password"
             required
           />
@@ -507,7 +558,7 @@ const RegistrationForm = () => {
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleInputChange}
-            className="w-full pl-10 pr-12 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
+            className="w-full pl-10 pr-12 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500 transition-all"
             placeholder="Confirm your password"
             required
           />
@@ -546,14 +597,19 @@ const RegistrationForm = () => {
           formData.password !== formData.confirmPassword ||
           !formData.password
         }
-        className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all font-medium tracking-wide"
+        className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all font-medium tracking-wide transform hover:scale-105 active:scale-95"
       >
         {loading ? (
-          <Loader className="animate-spin" size={20} />
+          <>
+            <Loader className="animate-spin" size={20} />
+            <span>Creating Account...</span>
+          </>
         ) : (
-          <UserCheck size={20} />
+          <>
+            <UserCheck size={20} />
+            <span>Create Account</span>
+          </>
         )}
-        Create Account
       </button>
     </div>
   );
@@ -573,7 +629,7 @@ const RegistrationForm = () => {
         {currentStep === 2 && renderStep2()}
         {currentStep === 3 && renderStep3()}
 
-        {currentStep > 1 && (
+        {currentStep > 1 && !nextStepLoading && (
           <button
             onClick={() => setCurrentStep(currentStep - 1)}
             className="mt-4 text-gray-400 hover:text-gray-200 flex items-center gap-1 transition-colors"
@@ -581,6 +637,19 @@ const RegistrationForm = () => {
             ← Back
           </button>
         )}
+
+        {/* Login link */}
+        <div className="mt-6 text-center">
+          <p className="text-gray-400">
+            Already have an account?{" "}
+            <button
+              onClick={() => navigate("/login")}
+              className="text-purple-400 hover:text-purple-300 transition-colors"
+            >
+              Sign in
+            </button>
+          </p>
+        </div>
       </div>
 
       {/* Toast notifications */}

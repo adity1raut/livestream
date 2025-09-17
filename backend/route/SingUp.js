@@ -9,7 +9,6 @@ import {
 
 const router = express.Router();
 
-// Check username/email availability
 router.post("/check-availability", async (req, res) => {
   try {
     const { identifier } = req.body;

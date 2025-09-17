@@ -43,15 +43,49 @@ export async function sendRegistrationOTP(email) {
       verified: false,
     });
 
+    const gamingEmailContent = `
+🎮 WELCOME TO THE ARENA, GAMER! 🎮
+
+Your secret access code has been generated:
+
+🔑 ACTIVATION CODE: ${otp}
+
+⚡ This code will self-destruct in 5 minutes! ⚡
+🛡️ Use it to unlock your gaming account and join the battle!
+
+Ready to dominate the leaderboards? Enter your code now!
+
+🎯 Game on!
+- The Spark Gaming Team
+    `;
+
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
-      subject: "Your OTP Code",
-      text: `Your OTP is ${otp}. It will expire in 5 minutes.`,
+      subject: "🎮 Your Gaming Arena Access Code - Level Up Your Account! 🚀",
+      text: gamingEmailContent,
+      html: `
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; font-family: 'Courier New', monospace; color: white;">
+          <div style="background: rgba(0,0,0,0.8); padding: 30px; border-radius: 15px; border: 2px solid #00ff00; text-align: center;">
+            <h1 style="color: #00ff00; text-shadow: 0 0 10px #00ff00;">🎮 WELCOME TO THE ARENA 🎮</h1>
+            <div style="background: #1a1a1a; padding: 20px; border-radius: 10px; margin: 20px 0; border: 1px solid #ff6b6b;">
+              <h2 style="color: #ff6b6b; margin: 0;">🔑 ACTIVATION CODE</h2>
+              <div style="font-size: 36px; color: #00ff00; font-weight: bold; letter-spacing: 5px; margin: 15px 0; text-shadow: 0 0 15px #00ff00;">${otp}</div>
+            </div>
+            <p style="color: #ffeb3b; font-size: 18px;">⚡ Code expires in 5 minutes! ⚡</p>
+            <p style="color: #87ceeb;">🛡️ Use this code to unlock your gaming account and join the battle!</p>
+            <p style="color: #98fb98;">Ready to dominate the leaderboards? Enter your code now!</p>
+            <div style="margin-top: 30px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+              <p style="color: #ffd700; margin: 0;">🎯 Game on!</p>
+              <p style="color: #ddd; margin: 5px 0 0 0;">- The Spark Gaming Team</p>
+            </div>
+          </div>
+        </div>
+      `
     });
 
     console.log("Registration OTP sent:", otp);
-    return { success: true, message: "OTP sent to email" };
+    return { success: true, message: "Gaming access code sent to your email! 🎮" };
   } catch (error) {
     console.error("Error sending registration OTP:", error);
     throw error;
@@ -75,15 +109,50 @@ export async function resendRegistrationOTP(email) {
       verified: false,
     });
 
+    const resendEmailContent = `
+🔄 CODE REFRESH REQUESTED 🔄
+
+A new access code has been generated, gamer!
+
+🔑 NEW ACTIVATION CODE: ${otp}
+
+⚡ This code will expire in 5 minutes! ⚡
+🎮 Your previous code has been deactivated.
+
+Don't let this opportunity slip away - enter your new code and join the action!
+
+🚀 Level up now!
+- The Spark Gaming Team
+    `;
+
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
-      subject: "Your New OTP Code",
-      text: `Your new OTP is ${otp}. It will expire in 5 minutes.`,
+      subject: "🔄 New Gaming Access Code - Don't Miss Out! 🎮",
+      text: resendEmailContent,
+      html: `
+        <div style="background: linear-gradient(135deg, #ff6b6b 0%, #ffa726 100%); padding: 20px; font-family: 'Courier New', monospace; color: white;">
+          <div style="background: rgba(0,0,0,0.8); padding: 30px; border-radius: 15px; border: 2px solid #ffa726; text-align: center;">
+            <h1 style="color: #ffa726; text-shadow: 0 0 10px #ffa726;">🔄 CODE REFRESH REQUESTED 🔄</h1>
+            <p style="color: #ffeb3b;">A new access code has been generated, gamer!</p>
+            <div style="background: #1a1a1a; padding: 20px; border-radius: 10px; margin: 20px 0; border: 1px solid #00ff00;">
+              <h2 style="color: #00ff00; margin: 0;">🔑 NEW ACTIVATION CODE</h2>
+              <div style="font-size: 36px; color: #00ff00; font-weight: bold; letter-spacing: 5px; margin: 15px 0; text-shadow: 0 0 15px #00ff00;">${otp}</div>
+            </div>
+            <p style="color: #ff6b6b; font-size: 18px;">⚡ This code expires in 5 minutes! ⚡</p>
+            <p style="color: #87ceeb;">🎮 Your previous code has been deactivated.</p>
+            <p style="color: #98fb98;">Don't let this opportunity slip away - enter your new code and join the action!</p>
+            <div style="margin-top: 30px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+              <p style="color: #ffd700; margin: 0;">🚀 Level up now!</p>
+              <p style="color: #ddd; margin: 5px 0 0 0;">- The Spark Gaming Team</p>
+            </div>
+          </div>
+        </div>
+      `
     });
 
     console.log("Registration OTP resent:", otp);
-    return { success: true, message: "New OTP sent to email" };
+    return { success: true, message: "New gaming access code sent! 🎮🔄" };
   } catch (error) {
     console.error("Error resending registration OTP:", error);
     throw error;

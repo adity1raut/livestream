@@ -97,52 +97,56 @@ const StreamChat = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md h-96 flex flex-col">
+    <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl h-96 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="p-3 border-b bg-gray-50 rounded-t-lg">
-        <h3 className="font-semibold flex items-center justify-between">
+      <div className="bg-gradient-to-r from-purple-800 to-purple-900 px-4 py-3 border-b border-gray-700">
+        <h3 className="font-semibold flex items-center justify-between text-white">
           <span className="flex items-center gap-2">
-            <MessageCircle size={20} />
-            Live Chat
+            <MessageCircle size={20} className="text-purple-300" />
+            <span className="text-lg">Live Chat</span>
           </span>
-          <span className="text-sm text-gray-500 font-normal">
+          <span className="text-sm text-purple-200 font-normal bg-purple-900/50 px-3 py-1 rounded-full">
             {chatMessages.length} messages
           </span>
         </h3>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-900/50">
         {chatMessages.length === 0 ? (
-          <div className="text-center text-gray-500 py-8">
-            <MessageCircle size={32} className="mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No messages yet</p>
-            <p className="text-xs">Be the first to say something!</p>
+          <div className="text-center text-gray-400 py-8">
+            <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+              <MessageCircle size={32} className="mx-auto mb-3 text-gray-600" />
+              <p className="text-sm text-gray-300 mb-1">No messages yet</p>
+              <p className="text-xs text-gray-500">Be the first to say something!</p>
+            </div>
           </div>
         ) : (
           chatMessages.map((msg, index) => (
             <div
               key={msg._id || index}
-              className={`flex gap-2 ${msg.isTemp ? "opacity-70" : ""}`}
+              className={`flex gap-3 p-2 rounded-lg transition-all duration-200 hover:bg-gray-800/30 ${
+                msg.isTemp ? "opacity-70" : ""
+              }`}
             >
               <img
                 src={getUserAvatar(msg.sender)}
                 alt="Avatar"
-                className="w-6 h-6 rounded-full flex-shrink-0 mt-0.5"
+                className="w-8 h-8 rounded-full flex-shrink-0 mt-0.5 border-2 border-gray-600"
                 onError={(e) => {
                   e.target.src = "/default-avatar.png";
                 }}
               />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-medium text-sm text-blue-600 truncate">
+                  <span className="font-medium text-sm text-purple-400 truncate">
                     {getUserDisplayName(msg.sender)}
                   </span>
-                  <span className="text-xs text-gray-500 flex-shrink-0">
+                  <span className="text-xs text-gray-500 flex-shrink-0 bg-gray-800 px-2 py-0.5 rounded">
                     {formatTime(msg.createdAt)}
                   </span>
                 </div>
-                <p className="text-sm text-gray-800 break-words">
+                <p className="text-sm text-gray-200 break-words leading-relaxed">
                   {msg.message}
                 </p>
               </div>
@@ -153,9 +157,9 @@ const StreamChat = ({
       </div>
 
       {/* Input */}
-      <div className="p-3 border-t bg-gray-50 rounded-b-lg">
+      <div className="bg-gray-800 border-t border-gray-700 p-4">
         {isLive ? (
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <div className="flex-1 relative">
               <input
                 ref={inputRef}
@@ -164,43 +168,48 @@ const StreamChat = ({
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Type a message..."
-                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                className="w-full px-4 py-3 pr-12 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400 text-sm transition-colors"
                 maxLength={500}
                 disabled={loading}
               />
               <button
                 type="button"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-purple-400 transition-colors"
                 onClick={() => {
                   // You could add emoji picker here
                   inputRef.current?.focus();
                 }}
               >
-                <Smile size={16} />
+                <Smile size={18} />
               </button>
             </div>
             <button
               type="button"
               onClick={handleSendMessage}
               disabled={!message.trim() || loading}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="group relative px-6 py-3 bg-gradient-to-r from-purple-800 to-purple-900 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-purple-700/30 overflow-hidden"
             >
-              {loading ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Send size={16} />
-              )}
+              <span className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-purple-800/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+              <span className="relative">
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Send size={18} />
+                )}
+              </span>
             </button>
           </div>
         ) : (
-          <div className="text-center text-gray-500 py-2">
-            <p className="text-sm">Stream has ended. Chat is disabled.</p>
+          <div className="text-center bg-gray-700/50 rounded-lg border border-gray-600 py-4">
+            <p className="text-sm text-gray-400">Stream has ended. Chat is disabled.</p>
           </div>
         )}
 
         {message.length > 450 && (
-          <div className="text-xs text-gray-500 mt-1">
-            {message.length}/500 characters
+          <div className="text-xs text-gray-500 mt-2 text-right">
+            <span className={`${message.length > 480 ? 'text-red-400' : 'text-yellow-400'}`}>
+              {message.length}/500 characters
+            </span>
           </div>
         )}
       </div>

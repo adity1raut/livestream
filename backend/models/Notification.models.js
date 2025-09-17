@@ -12,6 +12,8 @@ const NotificationSchema = new mongoose.Schema({
       "MESSAGE",
       "ORDER_UPDATE",
       "STREAM_START",
+      "STREAM_END",
+      "STREAM_VIEWER",
       "GENERAL",
     ],
     required: true,

@@ -23,7 +23,7 @@ const Feed = () => {
     try {
       if (pageNum > 1) setLoadingMore(true);
 
-      const res = await axios.get(`/api/posts/feed?page=${pageNum}&limit=10`, {
+      const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/posts/feed?page=${pageNum}&limit=10`, {
         withCredentials: true,
       });
 

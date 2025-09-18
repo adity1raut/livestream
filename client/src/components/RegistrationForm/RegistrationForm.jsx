@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 import GamingBackground from "../../GamingBackground/GamingBackground";
 import {
   User,
@@ -132,7 +134,7 @@ const RegistrationForm = () => {
 
     try {
       setAvailability((prev) => ({ ...prev, [field]: "checking" }));
-      await axios.post("/api/auth/check-availability", {
+      await axios.post(`${backendUrl}/api/auth/check-availability`, {
         identifier: formData[field],
       });
       setAvailability((prev) => ({ ...prev, [field]: "available" }));
@@ -149,7 +151,7 @@ const RegistrationForm = () => {
   const sendOTP = async () => {
     try {
       setLoading(true);
-      await axios.post("/api/auth/send-otp", { email: formData.email });
+  await axios.post(`${backendUrl}/api/auth/send-otp`, { email: formData.email });
       setOtpSent(true);
       setOtpTimer(300); // 5 minutes
       addToast("OTP sent to your email", "success");
@@ -165,7 +167,7 @@ const RegistrationForm = () => {
   const resendOTP = async () => {
     try {
       setLoading(true);
-      await axios.post("/api/auth/resend-otp", { email: formData.email });
+  await axios.post(`${backendUrl}/api/auth/resend-otp`, { email: formData.email });
       setOtpTimer(300);
       addToast("New OTP sent to your email", "success");
     } catch (error) {
@@ -182,7 +184,7 @@ const RegistrationForm = () => {
   const verifyOTP = async () => {
     try {
       setNextStepLoading(true);
-      await axios.post("/api/auth/verify-otp", {
+      await axios.post(`${backendUrl}/api/auth/verify-otp`, {
         email: formData.email,
         otp: formData.otp,
       });
@@ -209,7 +211,7 @@ const RegistrationForm = () => {
     }
     setLoading(true);
     try {
-      const res = await axios.post("/api/auth/register", {
+      const res = await axios.post(`${backendUrl}/api/auth/register`, {
         username: formData.username,
         email: formData.email,
         name: formData.name,

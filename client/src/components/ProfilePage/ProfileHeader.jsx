@@ -1,6 +1,8 @@
 import React, { useRef } from "react";
 import { Camera, Edit2, Mail, Calendar, User, Loader2 } from "lucide-react";
 import axios from "axios";
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 import { toast } from "react-toastify";
 
 const ProfileHeader = ({
@@ -48,7 +50,7 @@ const ProfileHeader = ({
         [type === "profile" ? "profileImage" : "coverImage"]: base64,
       };
 
-      const response = await axios.put("/api/auth/profile", updateData, {
+      const response = await axios.put(`${backendUrl}/api/auth/profile`, updateData, {
         withCredentials: true,
         headers: { "Content-Type": "application/json" },
       });
@@ -105,7 +107,7 @@ const ProfileHeader = ({
     setFollowLoading(true);
     try {
       const res = await axios.post(
-        `/api/auth/profile/${profileData.username}/follow`,
+        `${backendUrl}/api/auth/profile/${profileData.username}/follow`,
         {},
         { withCredentials: true },
       );

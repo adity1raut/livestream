@@ -4,6 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import CreateStreamModal from "./CreateStreamModal";
 import StreamAnalytics from "./StreamAnalytics";
 import axios from "axios";
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 import {
   Play,
   Plus,
@@ -37,7 +39,7 @@ const StreamsList = () => {
   // Fetch live streams
   const fetchLiveStreams = async () => {
     try {
-      const response = await axios.get("/api/stream/live");
+      const response = await axios.get(`${backendUrl}/api/stream/live`);
       setStreams(response.data);
     } catch (error) {
       console.error("Error fetching live streams:", error);
@@ -50,7 +52,7 @@ const StreamsList = () => {
     if (!isAuthenticated) return;
 
     try {
-      const response = await axios.get("/api/stream/user/my-streams", {
+      const response = await axios.get(`${backendUrl}/api/stream/user/my-streams`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setMyStreams(response.data);
@@ -115,7 +117,7 @@ const StreamsList = () => {
 
     try {
       await axios.put(
-        `/api/stream/${streamId}/end`,
+        `${backendUrl}/api/stream/${streamId}/end`,
         {},
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },

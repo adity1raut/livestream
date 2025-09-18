@@ -9,7 +9,7 @@ const useChat = (socket) => {
   // Fetch conversations
   const fetchConversations = async () => {
     try {
-      const response = await axios.get("/api/chat/conversations", {
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/chat/conversations`, {
         withCredentials: true,
       });
       if (response.data.success) {
@@ -24,7 +24,7 @@ const useChat = (socket) => {
   const fetchMessages = async (conversationId) => {
     try {
       const response = await axios.get(
-        `/api/chat/conversations/${conversationId}/messages`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/chat/conversations/${conversationId}/messages`,
         {
           withCredentials: true,
         },
@@ -41,7 +41,7 @@ const useChat = (socket) => {
   const startConversation = async (userId) => {
     try {
       const response = await axios.post(
-        "/api/chat/conversations",
+        `${import.meta.env.VITE_BACKEND_URL}/api/chat/conversations`,
         { userId },
         { withCredentials: true },
       );

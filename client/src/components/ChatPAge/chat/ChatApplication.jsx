@@ -23,7 +23,7 @@ const ChatApplication = () => {
 
   // Socket initialization
   useEffect(() => {
-    const newSocket = io("http://localhost:5000", {
+    const newSocket = io(import.meta.env.VITE_BACKEND_URL, {
       withCredentials: true,
       auth: {
         token: document.cookie
@@ -150,7 +150,7 @@ const ChatApplication = () => {
   // Fetch all conversations
   const fetchConversations = async () => {
     try {
-      const response = await axios.get("/api/chat/conversations", {
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/chat/conversations`, {
         withCredentials: true,
       });
       if (response.data.success) {
@@ -170,7 +170,7 @@ const ChatApplication = () => {
 
     setLoading(true);
     try {
-      const response = await axios.get("/api/chat/search", {
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/chat/search`, {
         params: { query, type: searchType },
         withCredentials: true,
       });
@@ -198,7 +198,7 @@ const ChatApplication = () => {
   const startConversation = async (userId) => {
     try {
       const response = await axios.post(
-        "/api/chat/conversations",
+        `${import.meta.env.VITE_BACKEND_URL}/api/chat/conversations`,
         { userId },
         { withCredentials: true },
       );
@@ -218,7 +218,7 @@ const ChatApplication = () => {
   const fetchMessages = async (conversationId) => {
     try {
       const response = await axios.get(
-        `/api/chat/conversations/${conversationId}/messages`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/chat/conversations/${conversationId}/messages`,
         {
           withCredentials: true,
         },

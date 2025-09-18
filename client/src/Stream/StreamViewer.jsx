@@ -14,6 +14,8 @@ import StreamPlayer from "./StreamPlayer";
 import StreamChat from "./StreamChat";
 import axios from "axios";
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 const StreamViewer = ({ stream: initialStream, onBack }) => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -31,7 +33,7 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get(`/api/stream/${streamId}`, {
+      const response = await axios.get(`${backendUrl}/api/stream/${streamId}`, {
         headers: isAuthenticated
           ? { Authorization: `Bearer ${localStorage.getItem("token")}` }
           : {},
@@ -66,7 +68,7 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
 
     try {
       const response = await axios.post(
-        `/api/stream/${stream._id}/join`,
+        `${backendUrl}/api/stream/${stream._id}/join`,
         {},
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -87,7 +89,7 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
 
     try {
       const response = await axios.post(
-        `/api/stream/${stream._id}/leave`,
+        `${backendUrl}/api/stream/${stream._id}/leave`,
         {},
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -114,7 +116,7 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
       // This would be your follow/unfollow API endpoint
       const endpoint = isFollowing ? "unfollow" : "follow";
       const response = await axios.post(
-        `/api/users/${stream.host._id}/${endpoint}`,
+        `${backendUrl}/api/users/${stream.host._id}/${endpoint}`,
         {},
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -215,7 +217,7 @@ const StreamViewer = ({ stream: initialStream, onBack }) => {
 
     const interval = setInterval(async () => {
       try {
-        const response = await axios.get(`/api/stream/${stream._id}`, {
+        const response = await axios.get(`${backendUrl}/api/stream/${stream._id}`, {
           headers: isAuthenticated
             ? { Authorization: `Bearer ${localStorage.getItem("token")}` }
             : {},

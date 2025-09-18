@@ -10,6 +10,8 @@ import { User, AlertCircle } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 import GamingBackground from "../../GamingBackground/GamingBackground";
 
 export default function ProfilePage() {
@@ -43,8 +45,8 @@ export default function ProfilePage() {
       setError("");
 
       const endpoint = isOwnProfile
-        ? "/api/auth/profile/"
-        : `/api/auth/profile/${username}`;
+        ? `${backendUrl}/api/auth/profile/`
+        : `${backendUrl}/api/auth/profile/${username}`;
       const response = await axios.get(endpoint, { withCredentials: true });
 
       if (response.data.success) {

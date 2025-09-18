@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { X } from "lucide-react";
 import axios from "axios";
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 const CreateStreamModal = ({ isOpen, onClose, onStreamCreated }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -12,7 +14,7 @@ const CreateStreamModal = ({ isOpen, onClose, onStreamCreated }) => {
 
     setLoading(true);
     try {
-      const response = await axios.post("/api/stream/create", {
+      const response = await axios.post(`${backendUrl}/api/stream/create`, {
         title: title.trim(),
         description: description.trim(),
       });

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useStore } from "../../context/StoreContext";
 import axios from "axios";
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 import {
   Search,
   Filter,
@@ -47,7 +49,7 @@ export default function PublicProducts() {
 
       const allProducts = [];
       if (selectedStore) {
-        const res = await axios.get(`/api/stores/${selectedStore}/products`, {
+        const res = await axios.get(`${backendUrl}/api/stores/${selectedStore}/products`, {
           params,
         });
         if (res.data.products) {
@@ -55,7 +57,7 @@ export default function PublicProducts() {
         }
       } else {
         const storePromises = stores.map((store) =>
-          axios.get(`/api/stores/${store._id}/products`, { params }),
+          axios.get(`${backendUrl}/api/stores/${store._id}/products`, { params }),
         );
         const storeResponses = await Promise.all(storePromises);
         storeResponses.forEach((res) => {

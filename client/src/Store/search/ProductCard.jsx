@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import axios from "axios";
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 import { useAuth } from "../../context/AuthContext";
 
 function ProductCard({ product, onWishlistToggle }) {
@@ -75,7 +77,7 @@ function ProductCard({ product, onWishlistToggle }) {
             try {
               setIsAddingToCart(true);
               const res = await axios.post(
-                "/api/stores/cart/add",
+                `${backendUrl}/api/stores/cart/add`,
                 {
                   productId: product._id,
                   quantity: 1,

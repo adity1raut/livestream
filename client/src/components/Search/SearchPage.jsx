@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Search } from "lucide-react";
 import PostCard from "../Post/PostCard";
 import axios from "axios";
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 import GamingBackground from "../../GamingBackground/GamingBackground"
 
 const SearchPage = () => {
@@ -19,7 +21,7 @@ const SearchPage = () => {
 
     try {
       const response = await axios.get(
-        `/api/posts/search/${encodeURIComponent(query)}`,
+        `${backendUrl}/api/posts/search/${encodeURIComponent(query)}`,
         {
           withCredentials: true,
         },

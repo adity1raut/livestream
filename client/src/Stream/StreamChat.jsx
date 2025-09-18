@@ -3,6 +3,8 @@ import { MessageCircle, Send, Smile } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 const StreamChat = ({
   streamId,
   messages = [],
@@ -46,7 +48,7 @@ const StreamChat = ({
     setLoading(true);
 
     try {
-      const response = await axios.post(`/api/stream/${streamId}/chat`, {
+      const response = await axios.post(`${backendUrl}/api/stream/${streamId}/chat`, {
         message: currentMessage,
       });
 

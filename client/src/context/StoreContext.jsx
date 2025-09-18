@@ -4,6 +4,8 @@ import { useAuth } from "./AuthContext";
 
 const StoreContext = createContext();
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 export function StoreProvider({ children }) {
   const { isAuthenticated } = useAuth();
   const [stores, setStores] = useState([]);
@@ -25,7 +27,7 @@ export function StoreProvider({ children }) {
   const getAllStores = async (params = {}) => {
     setLoading(true);
     try {
-      const res = await axios.get("/api/stores", { params });
+  const res = await axios.get(`${backendUrl}/api/stores`, { params });
       setStores(res.data.stores || []);
       return res.data;
     } catch (error) {
@@ -39,7 +41,7 @@ export function StoreProvider({ children }) {
 
   const getStoreById = async (id) => {
     try {
-      const res = await axios.get(`/api/stores/${id}`);
+  const res = await axios.get(`${backendUrl}/api/stores/${id}`);
       return res.data;
     } catch (error) {
       console.error("Error fetching store:", error);
@@ -74,7 +76,7 @@ export function StoreProvider({ children }) {
         apiData.logoBase64 = await convertImageToBase64(storeData.logo);
       }
 
-      const res = await axios.post("/api/stores", apiData, {
+      const res = await axios.post(`${backendUrl}/api/stores`, apiData, {
         withCredentials: true,
         headers: { "Content-Type": "application/json" },
       });
@@ -110,7 +112,7 @@ export function StoreProvider({ children }) {
         apiData.logoBase64 = await convertImageToBase64(storeData.logo);
       }
 
-      const res = await axios.put(`/api/stores/${id}`, apiData, {
+      const res = await axios.put(`${backendUrl}/api/stores/${id}`, apiData, {
         withCredentials: true,
         headers: { "Content-Type": "application/json" },
       });
@@ -133,7 +135,7 @@ export function StoreProvider({ children }) {
   const deleteStore = async (id) => {
     try {
       setLoading(true);
-      await axios.delete(`/api/stores/${id}`, { withCredentials: true });
+  await axios.delete(`${backendUrl}/api/stores/${id}`, { withCredentials: true });
       setUserStore(null);
       return { success: true };
     } catch (error) {
@@ -151,7 +153,7 @@ export function StoreProvider({ children }) {
 
   const getCurrentUserStore = async () => {
     try {
-      const res = await axios.get("/api/stores/my/store", {
+      const res = await axios.get(`${backendUrl}/api/stores/my/store`, {
         withCredentials: true,
       });
       setUserStore(res.data);
@@ -168,7 +170,7 @@ export function StoreProvider({ children }) {
 
   const getUserStore = async (userId) => {
     try {
-      const res = await axios.get(`/api/stores/user/${userId}`);
+  const res = await axios.get(`${backendUrl}/api/stores/user/${userId}`);
       return { success: true, data: res.data };
     } catch (error) {
       console.error("Error fetching user store:", error);
@@ -179,7 +181,7 @@ export function StoreProvider({ children }) {
 
   const getStoreProducts = async (id, params = {}) => {
     try {
-      const res = await axios.get(`/api/stores/${id}/products`, { params });
+  const res = await axios.get(`${backendUrl}/api/stores/${id}/products`, { params });
       return { success: true, data: res.data };
     } catch (error) {
       console.error("Error fetching store products:", error);
@@ -195,7 +197,7 @@ export function StoreProvider({ children }) {
     }
     setLoading(true);
     try {
-      const res = await axios.get(`/api/stores/${storeId}/analytics`, {
+      const res = await axios.get(`${backendUrl}/api/stores/${storeId}/analytics`, {
         withCredentials: true,
       });
       return { success: true, data: res.data };
@@ -215,7 +217,7 @@ export function StoreProvider({ children }) {
     }
     try {
       const res = await axios.post(
-        `/api/stores/${storeId}/follow`,
+        `${backendUrl}/api/stores/${storeId}/follow`,
         {},
         {
           withCredentials: true,
@@ -239,7 +241,7 @@ export function StoreProvider({ children }) {
   const getFollowStatus = async (storeId) => {
     if (!isAuthenticated) return { following: false };
     try {
-      const res = await axios.get(`/api/stores/${storeId}/follow-status`, {
+      const res = await axios.get(`${backendUrl}/api/stores/${storeId}/follow-status`, {
         withCredentials: true,
       });
       return { success: true, data: res.data };
@@ -253,7 +255,7 @@ export function StoreProvider({ children }) {
   const getFollowingStores = async () => {
     if (!isAuthenticated) return { success: true, data: [] };
     try {
-      const res = await axios.get("/api/stores/following/stores", {
+      const res = await axios.get(`${backendUrl}/api/stores/following/stores`, {
         withCredentials: true,
       });
       setFollowedStores(res.data.map((store) => store._id));
@@ -270,7 +272,7 @@ export function StoreProvider({ children }) {
   // Search Functions
   const searchProducts = async (params = {}) => {
     try {
-      const res = await axios.get("/api/stores/search/products", { params });
+  const res = await axios.get(`${backendUrl}/api/stores/search/products`, { params });
       return { success: true, data: res.data };
     } catch (error) {
       console.error("Error searching products:", error);
@@ -281,7 +283,7 @@ export function StoreProvider({ children }) {
 
   const getTrendingProducts = async (params = {}) => {
     try {
-      const res = await axios.get("/api/stores/trending/products", { params });
+  const res = await axios.get(`${backendUrl}/api/stores/trending/products`, { params });
       return { success: true, data: res.data };
     } catch (error) {
       console.error("Error fetching trending products:", error);

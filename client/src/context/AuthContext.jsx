@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
@@ -10,7 +12,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get("/api/auth/profile", {
+        const res = await axios.get(`${backendUrl}/api/auth/profile`, {
           withCredentials: true,
         });
         if (res.data.success) {
@@ -30,12 +32,12 @@ export function AuthProvider({ children }) {
   const login = async (identifier, password) => {
     try {
       const res = await axios.post(
-        "/api/auth/login",
+        `${backendUrl}/api/auth/login`,
         { identifier, password },
         { withCredentials: true },
       );
       if (res.status === 200) {
-        const profileRes = await axios.get("/api/auth/profile", {
+        const profileRes = await axios.get(`${backendUrl}/api/auth/profile`, {
           withCredentials: true,
         });
         if (profileRes.data.success) {
@@ -53,7 +55,7 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
-      await axios.post("/api/auth/logout", {}, { withCredentials: true });
+  await axios.post(`${backendUrl}/api/auth/logout`, {}, { withCredentials: true });
       setUser(null);
     } catch (error) {
       console.error("Logout error:", error);
@@ -62,7 +64,7 @@ export function AuthProvider({ children }) {
 
   const updateProfile = async (formData) => {
     try {
-      const res = await axios.put("/api/auth/profile", formData, {
+      const res = await axios.put(`${backendUrl}/api/auth/profile`, formData, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });

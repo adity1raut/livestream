@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import axios from "axios";
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 const StreamAnalytics = ({ streamId, isOpen, onClose }) => {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -20,7 +22,7 @@ const StreamAnalytics = ({ streamId, isOpen, onClose }) => {
     setError(null);
 
     try {
-      const response = await axios.get(`/api/stream/${streamId}/analytics`);
+  const response = await axios.get(`${backendUrl}/api/stream/${streamId}/analytics`);
       if (response.status === 200) {
         setAnalytics(response.data);
       }

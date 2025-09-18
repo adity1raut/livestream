@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { X, Loader2 } from "lucide-react";
 import axios from "axios";
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 const EditProfileModal = ({
   profileData,
   isEditing,
@@ -29,7 +31,7 @@ const EditProfileModal = ({
         bio: editForm.bio.trim(),
       };
 
-      const response = await axios.put("/api/auth/profile", updateData, {
+      const response = await axios.put(`${backendUrl}/api/auth/profile`, updateData, {
         withCredentials: true,
         headers: { "Content-Type": "application/json" },
       });

@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "./AuthContext";
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 const NotificationContext = createContext();
 
 export function NotificationProvider({ children }) {
@@ -26,7 +28,7 @@ export function NotificationProvider({ children }) {
     setLoading(true);
     try {
       const res = await axios.get(
-        `/api/notifications?page=${page}&limit=${limit}`,
+        `${backendUrl}/api/notifications?page=${page}&limit=${limit}`,
         {
           withCredentials: true,
         },
@@ -49,7 +51,7 @@ export function NotificationProvider({ children }) {
     if (!isAuthenticated) return;
 
     try {
-      const res = await axios.get("/api/notifications/unread-count", {
+      const res = await axios.get(`${backendUrl}/api/notifications/unread-count`, {
         withCredentials: true,
       });
 
@@ -65,7 +67,7 @@ export function NotificationProvider({ children }) {
   const markAsRead = async (notificationId) => {
     try {
       const res = await axios.put(
-        `/api/notifications/${notificationId}/read`,
+        `${backendUrl}/api/notifications/${notificationId}/read`,
         {},
         {
           withCredentials: true,
@@ -89,7 +91,7 @@ export function NotificationProvider({ children }) {
   const markAllAsRead = async () => {
     try {
       const res = await axios.put(
-        "/api/notifications/read-all",
+        `${backendUrl}/api/notifications/read-all`,
         {},
         {
           withCredentials: true,
@@ -111,7 +113,7 @@ export function NotificationProvider({ children }) {
   const deleteNotification = async (notificationId) => {
     try {
       const res = await axios.put(
-        `/api/notifications/${notificationId}`,
+        `${backendUrl}/api/notifications/${notificationId}`,
         {},
         {
           withCredentials: true,

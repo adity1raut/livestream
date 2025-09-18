@@ -1,5 +1,7 @@
 import React from "react";
 import axios from "axios";
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 import { Grid, Users, User, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -14,7 +16,7 @@ function UserPostsList({ username }) {
       setLoading(true);
       setError("");
       try {
-        const res = await axios.get(`/api/auth/profile/${username}/posts`, {
+        const res = await axios.get(`${backendUrl}/api/auth/profile/${username}/posts`, {
           withCredentials: true,
         });
         if (res.data.success) {
@@ -124,7 +126,7 @@ function FollowersList({ username }) {
       setLoading(true);
       setError("");
       try {
-        const res = await axios.get(`/api/auth/profile/${username}/followers`, {
+        const res = await axios.get(`${backendUrl}/api/auth/profile/${username}/followers`, {
           withCredentials: true,
         });
         if (res.data.success) {
@@ -222,7 +224,7 @@ function FollowingList({ username }) {
       setLoading(true);
       setError("");
       try {
-        const res = await axios.get(`/api/auth/profile/${username}/following`, {
+        const res = await axios.get(`${backendUrl}/api/auth/profile/${username}/following`, {
           withCredentials: true,
         });
         if (res.data.success) {

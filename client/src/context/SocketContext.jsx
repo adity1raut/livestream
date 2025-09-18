@@ -5,6 +5,8 @@ import axios from "axios";
 
 const SocketContext = createContext();
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 export const useSocket = () => {
   const context = useContext(SocketContext);
   if (!context) {
@@ -26,7 +28,7 @@ export const SocketProvider = ({ children }) => {
     const fetchNotifications = async () => {
       if (isAuthenticated && user) {
         try {
-          const res = await axios.get("/api/notifications", {
+          const res = await axios.get(`${backendUrl}/api/notifications`, {
             withCredentials: true,
           });
           if (res.data.success) {
@@ -54,7 +56,7 @@ export const SocketProvider = ({ children }) => {
           .find((c) => c.trim().startsWith("token="))
           ?.split("=")[1];
 
-        newSocket = io("http://localhost:5000", {
+        newSocket = io(backendUrl, {
           auth: { token },
           withCredentials: true,
         });
@@ -155,7 +157,7 @@ export const SocketProvider = ({ children }) => {
     // Also update on server via API
     try {
       await axios.patch(
-        `/api/notifications/${notificationId}/read`,
+        `${backendUrl}/api/notifications/${notificationId}/read`,
         {},
         {
           withCredentials: true,
@@ -172,7 +174,7 @@ export const SocketProvider = ({ children }) => {
 
     try {
       await axios.patch(
-        "/api/notifications/read-all",
+        `${backendUrl}/api/notifications/read-all`,
         {},
         {
           withCredentials: true,

@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "./AuthContext";
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 const ProductContext = createContext();
 
 export function ProductProvider({ children }) {
@@ -21,7 +23,7 @@ export function ProductProvider({ children }) {
   const getAllProducts = async (params = {}) => {
     setLoading(true);
     try {
-      const res = await axios.get("/api/stores/products/all", { params });
+  const res = await axios.get(`${backendUrl}/api/stores/products/all`, { params });
       setProducts(res.data.products || []);
       return res.data;
     } catch (error) {
@@ -34,7 +36,7 @@ export function ProductProvider({ children }) {
 
   const getProductById = async (id) => {
     try {
-      const res = await axios.get(`/api/stores/products/${id}`);
+  const res = await axios.get(`${backendUrl}/api/stores/products/${id}`);
       return res.data;
     } catch (error) {
       console.error("Error fetching product:", error);
@@ -45,7 +47,7 @@ export function ProductProvider({ children }) {
   const addProduct = async (storeId, formData) => {
     try {
       const res = await axios.post(
-        `/api/stores/${storeId}/products`,
+        `${backendUrl}/api/stores/${storeId}/products`,
         formData,
         {
           withCredentials: true,
@@ -64,7 +66,7 @@ export function ProductProvider({ children }) {
   const updateProduct = async (storeId, productId, formData) => {
     try {
       const res = await axios.put(
-        `/api/stores/${storeId}/products/${productId}`,
+        `${backendUrl}/api/stores/${storeId}/products/${productId}`,
         formData,
         {
           withCredentials: true,
@@ -82,7 +84,7 @@ export function ProductProvider({ children }) {
 
   const deleteProduct = async (storeId, productId) => {
     try {
-      await axios.delete(`/api/stores/${storeId}/products/${productId}`, {
+      await axios.delete(`${backendUrl}/api/stores/${storeId}/products/${productId}`, {
         withCredentials: true,
       });
       return { success: true };
@@ -96,7 +98,7 @@ export function ProductProvider({ children }) {
 
   const getStoreProducts = async (storeId, params = {}) => {
     try {
-      const res = await axios.get(`/api/stores/${storeId}/products`, {
+      const res = await axios.get(`${backendUrl}/api/stores/${storeId}/products`, {
         params,
       });
       return res.data;
@@ -109,7 +111,7 @@ export function ProductProvider({ children }) {
   const addProductRating = async (productId, rating, review) => {
     try {
       const res = await axios.post(
-        `/api/stores/products/${productId}/rating`,
+        `${backendUrl}/api/stores/products/${productId}/rating`,
         { rating, review },
         { withCredentials: true },
       );
@@ -126,7 +128,7 @@ export function ProductProvider({ children }) {
   const searchProducts = async (params = {}) => {
     setSearchLoading(true);
     try {
-      const res = await axios.get("/api/stores/search/products", { params });
+  const res = await axios.get(`${backendUrl}/api/stores/search/products`, { params });
       setProducts(res.data.products || []);
       return res.data;
     } catch (error) {
@@ -140,7 +142,7 @@ export function ProductProvider({ children }) {
   const getTrendingProducts = async (limit = 20) => {
     setLoading(true);
     try {
-      const res = await axios.get("/api/stores/trending/products", {
+      const res = await axios.get(`${backendUrl}/api/stores/trending/products`, {
         params: { limit },
       });
       return res.data;
@@ -156,7 +158,7 @@ export function ProductProvider({ children }) {
   const toggleWishlist = async (productId) => {
     try {
       const res = await axios.post(
-        `/api/stores/wishlist/add/${productId}`,
+        `${backendUrl}/api/stores/wishlist/add/${productId}`,
         {},
         { withCredentials: true }
       );
@@ -180,7 +182,7 @@ export function ProductProvider({ children }) {
   const getUserWishlist = async (page = 1, limit = 12) => {
     setLoading(true);
     try {
-      const res = await axios.get("/api/stores/wishlist", {
+      const res = await axios.get(`${backendUrl}/api/stores/wishlist`, {
         params: { page, limit },
         withCredentials: true,
       });
@@ -203,7 +205,7 @@ export function ProductProvider({ children }) {
 
     setAddressLoading(true);
     try {
-      const res = await axios.get("/api/stores/order/addresses", {
+      const res = await axios.get(`${backendUrl}/api/stores/order/addresses`, {
         withCredentials: true,
       });
       
@@ -230,7 +232,7 @@ export function ProductProvider({ children }) {
 
     setAddressLoading(true);
     try {
-      const res = await axios.post("/api/stores/order/addresses", addressData, {
+      const res = await axios.post(`${backendUrl}/api/stores/order/addresses`, addressData, {
         withCredentials: true,
       });
 
@@ -261,7 +263,7 @@ export function ProductProvider({ children }) {
     setAddressLoading(true);
     try {
       const res = await axios.put(
-        `/api/stores/order/addresses/${addressId}`,
+        `${backendUrl}/api/stores/order/addresses/${addressId}`,
         addressData,
         { withCredentials: true }
       );
@@ -292,7 +294,7 @@ export function ProductProvider({ children }) {
 
     setAddressLoading(true);
     try {
-      const res = await axios.delete(`/api/stores/order/addresses/${addressId}`, {
+      const res = await axios.delete(`${backendUrl}/api/stores/order/addresses/${addressId}`, {
         withCredentials: true,
       });
 
@@ -333,7 +335,7 @@ export function ProductProvider({ children }) {
         payload.newAddress = newAddress;
       }
 
-      const res = await axios.post("/api/stores/order/create", payload, {
+      const res = await axios.post(`${backendUrl}/api/stores/order/create`, payload, {
         withCredentials: true,
       });
 
@@ -351,7 +353,7 @@ export function ProductProvider({ children }) {
   const verifyPayment = async (paymentData) => {
     setOrderLoading(true);
     try {
-      const res = await axios.post("/api/stores/order/verify", paymentData, {
+      const res = await axios.post(`${backendUrl}/api/stores/order/verify`, paymentData, {
         withCredentials: true,
       });
 
@@ -373,7 +375,7 @@ export function ProductProvider({ children }) {
   const saveOrderLocation = async (orderId, locationData) => {
     try {
       const res = await axios.post(
-        `/api/stores/order/${orderId}/location`,
+        `${backendUrl}/api/stores/order/${orderId}/location`,
         locationData,
         { withCredentials: true }
       );
@@ -394,7 +396,7 @@ export function ProductProvider({ children }) {
   const getOrderDetails = async (orderId) => {
     setLoading(true);
     try {
-      const res = await axios.get(`/api/stores/order/${orderId}`, {
+      const res = await axios.get(`${backendUrl}/api/stores/order/${orderId}`, {
         withCredentials: true,
       });
       return {
@@ -416,7 +418,7 @@ export function ProductProvider({ children }) {
     setLoading(true);
     try {
       const { page = 1, limit = 10, status } = params;
-      const res = await axios.get("/api/stores/orders", {
+      const res = await axios.get(`${backendUrl}/api/stores/orders`, {
         params: { page, limit, status },
         withCredentials: true,
       });
@@ -442,7 +444,7 @@ export function ProductProvider({ children }) {
   const getStoreAnalytics = async (storeId) => {
     setLoading(true);
     try {
-      const res = await axios.get(`/api/stores/${storeId}/analytics`, {
+      const res = await axios.get(`${backendUrl}/api/stores/${storeId}/analytics`, {
         withCredentials: true,
       });
       return res.data;
@@ -487,7 +489,7 @@ export function ProductProvider({ children }) {
 
     setCartLoading(true);
     try {
-      const response = await axios.get("/api/stores/cart", {
+      const response = await axios.get(`${backendUrl}/api/stores/cart`, {
         withCredentials: true,
         timeout: 10000, // Add timeout for better UX
       });
@@ -557,7 +559,7 @@ export function ProductProvider({ children }) {
     setCartLoading(true);
     try {
       const response = await axios.post(
-        `/api/stores/${storeId}/cart/add`,
+        `${backendUrl}/api/stores/${storeId}/cart/add`,
         { productId, quantity },
         { withCredentials: true },
       );
@@ -601,7 +603,7 @@ export function ProductProvider({ children }) {
     setCartLoading(true);
     try {
       const response = await axios.put(
-        "/api/stores/cart/update",
+        `${backendUrl}/api/stores/cart/update`,
         { productId, quantity },
         { withCredentials: true },
       );
@@ -645,7 +647,7 @@ export function ProductProvider({ children }) {
     setCartLoading(true);
     try {
       const response = await axios.delete(
-        `/api/stores/cart/remove/${productId}`,
+        `${backendUrl}/api/stores/cart/remove/${productId}`,
         {
           withCredentials: true,
         },
@@ -682,7 +684,7 @@ export function ProductProvider({ children }) {
 
     setCartLoading(true);
     try {
-      const response = await axios.delete("/api/stores/cart/clear", {
+      const response = await axios.delete(`${backendUrl}/api/stores/cart/clear`, {
         withCredentials: true,
       });
 

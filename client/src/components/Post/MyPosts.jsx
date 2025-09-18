@@ -34,7 +34,7 @@ const MyPosts = () => {
     setLoading(true);
     setError("");
     try {
-      const res = await axios.get(`/api/posts/user/${user.username}`, {
+      const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/posts/user/${user.username}`, {
         withCredentials: true,
       });
       if (res.data.success) {

@@ -51,7 +51,7 @@ const CreatePost = ({ onPostCreated }) => {
         formData.append("media", selectedFile);
       }
 
-      const res = await axios.post("/api/posts/create", formData, {
+        const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/posts/create`, formData, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });

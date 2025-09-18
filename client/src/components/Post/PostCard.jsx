@@ -52,7 +52,7 @@ const Post = ({ post, onUpdate, onDelete }) => {
   const handleLike = async () => {
     try {
       const res = await axios.post(
-        `/api/posts/${post._id}/like`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/posts/${post._id}/like`,
         {},
         {
           withCredentials: true,
@@ -79,7 +79,7 @@ const Post = ({ post, onUpdate, onDelete }) => {
 
     try {
       const res = await axios.post(
-        `/api/posts/${post._id}/comment`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/posts/${post._id}/comment`,
         { text: newComment },
         { withCredentials: true },
       );
@@ -131,7 +131,7 @@ const Post = ({ post, onUpdate, onDelete }) => {
     const performDelete = async () => {
       setIsDeleting(true);
       try {
-        const res = await axios.delete(`/api/posts/${post._id}`, {
+        const res = await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/posts/${post._id}`, {
           withCredentials: true,
         });
 

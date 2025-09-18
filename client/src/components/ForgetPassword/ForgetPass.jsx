@@ -61,22 +61,18 @@ const ForgetPassword = () => {
     setButtonLoadingState("sendOTP", true);
 
     try {
-      const response = await fetch(`/api/auth/send-reset-otp`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ identifier: formData.identifier }),
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/auth/send-reset-otp`,
+        { identifier: formData.identifier },
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (res.data.success) {
         toast.success("🎮 Recovery code sent to your email!");
         setStep(2);
         setCountdown(120);
       } else {
-        toast.error(data.message || "Failed to send OTP");
+        toast.error(res.data.message || "Failed to send OTP");
       }
     } catch (error) {
       toast.error("Failed to send OTP. Please check your connection.");
@@ -89,21 +85,17 @@ const ForgetPassword = () => {
     setButtonLoadingState("resendOTP", true);
 
     try {
-      const response = await fetch(`/api/auth/resend-reset-otp`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ identifier: formData.identifier }),
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/auth/resend-reset-otp`,
+        { identifier: formData.identifier },
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (res.data.success) {
         toast.success("🔄 New recovery code sent!");
         setCountdown(120);
       } else {
-        toast.error(data.message || "Failed to resend OTP");
+        toast.error(res.data.message || "Failed to resend OTP");
       }
     } catch (error) {
       toast.error("Failed to resend OTP. Please check your connection.");
@@ -121,24 +113,20 @@ const ForgetPassword = () => {
     setButtonLoadingState("verifyOTP", true);
 
     try {
-      const response = await fetch(`/api/auth/verify-reset-otp`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/auth/verify-reset-otp`,
+        {
           identifier: formData.identifier,
           otp: formData.otp,
-        }),
-      });
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (res.data.success) {
         toast.success("🔓 Security code verified! Access granted!");
         setStep(3);
       } else {
-        toast.error(data.message || "Invalid or expired OTP");
+        toast.error(res.data.message || "Invalid or expired OTP");
       }
     } catch (error) {
       toast.error("Failed to verify OTP. Please try again.");
@@ -166,24 +154,20 @@ const ForgetPassword = () => {
     setButtonLoadingState("resetPassword", true);
 
     try {
-      const response = await fetch(`/api/auth/reset-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/auth/reset-password`,
+        {
           identifier: formData.identifier,
           newPassword: formData.newPassword,
-        }),
-      });
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (res.data.success) {
         toast.success("🎮 Password updated successfully! Welcome back, gamer!");
         setStep(4);
       } else {
-        toast.error(data.message || "Failed to reset password");
+        toast.error(res.data.message || "Failed to reset password");
       }
     } catch (error) {
       toast.error("Failed to reset password. Please try again.");

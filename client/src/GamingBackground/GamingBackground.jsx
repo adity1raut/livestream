@@ -40,16 +40,16 @@ const GamingBackground = () => {
         </div>
 
         {/* Floating Gaming Icons */}
-        {[...Array(12)].map((_, i) => (
+        {[...Array(24)].map((_, i) => (
           <div
             key={`icon-${i}`}
             className="absolute text-purple-400/30 animate-float"
             style={{
               left: `${Math.random() * 90}%`,
               top: `${Math.random() * 90}%`,
-              fontSize: `${12 + Math.random() * 8}px`,
+              fontSize: `${10 + Math.random() * 12}px`,
               animationDelay: `${Math.random() * 4}s`,
-              animationDuration: `${4 + Math.random() * 2}s`
+              animationDuration: `${3 + Math.random() * 3}s`
             }}
           >
             {i % 4 === 0 && <Gamepad2 />}
@@ -57,6 +57,20 @@ const GamingBackground = () => {
             {i % 4 === 2 && <Shield />}
             {i % 4 === 3 && <Sword />}
           </div>
+        ))}
+
+        {/* Twinkling Stars */}
+        {[...Array(50)].map((_, i) => (
+          <div
+            key={`star-${i}`}
+            className="absolute w-1 h-1 bg-white rounded-full animate-twinkle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${2 + Math.random() * 2}s`
+            }}
+          />
         ))}
 
         {/* Hexagon Pattern */}
@@ -75,6 +89,7 @@ const GamingBackground = () => {
           ))}
         </div>
 
+     
         {/* Data Stream Effect */}
         <div className="absolute right-4 top-0 bottom-0 w-1 overflow-hidden">
           {[...Array(10)].map((_, i) => (
@@ -92,6 +107,34 @@ const GamingBackground = () => {
 
       {/* Gaming Background Styles */}
       <style jsx>{`
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.3; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.2); }
+        }
+        .animate-twinkle {
+          animation: twinkle 2s ease-in-out infinite;
+        }
+        
+        @keyframes arrow-flow {
+          0% {
+            transform: translateY(100px);
+            opacity: 0;
+          }
+          20% {
+            opacity: 1;
+          }
+          80% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(-100px);
+            opacity: 0;
+          }
+        }
+        .animate-arrow-flow {
+          animation: arrow-flow 2s linear infinite;
+        }
+        
         @keyframes data-stream {
           0% {
             transform: translateY(-100%);

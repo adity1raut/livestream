@@ -36,9 +36,7 @@ build/
 *.swp
 *.swo
 
-# Package-lock or yarn.lock for specific environments (optional)
-package-lock.json
-yarn.lock
+
 
 # .npmrc or other config files
 .npmrc

@@ -67,6 +67,7 @@ router.post("/verify-otp", async (req, res) => {
 // Register user
 router.post("/register", async (req, res) => {
   try {
+    console.log("Register payload:", req.body); // Add this line
     const userData = req.body;
     const result = await registerUser(userData);
     res.status(201).json(result);

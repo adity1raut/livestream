@@ -203,18 +203,22 @@ const RegistrationForm = () => {
   };
 
   const registerUser = async () => {
+    if (formData.password !== formData.confirmPassword) {
+      addToast("Passwords do not match", "error");
+      return;
+    }
+    setLoading(true);
     try {
-      setLoading(true);
-      
-      const response = await axios.post("/api/auth/register", {
+      const res = await axios.post("/api/auth/register", {
         username: formData.username,
         email: formData.email,
         name: formData.name,
-        password: formData.password,
         otp: formData.otp,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
       });
 
-      if (response.data.success) {
+      if (res.data.success) {
         addToast("Account created successfully!", "success");
         
         setTimeout(() => {

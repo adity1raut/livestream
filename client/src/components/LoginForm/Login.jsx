@@ -158,7 +158,6 @@ const LoginForm = () => {
 
             <button
               onClick={handleSubmit}
-              disabled={isSubmitting || !formData.email || !formData.password}
               className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 disabled:from-gray-700 disabled:to-gray-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:cursor-not-allowed shadow-lg animate-pulse-glow"
             >
               {isSubmitting ? (

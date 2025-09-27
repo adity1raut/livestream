@@ -144,7 +144,7 @@ const Navbar = () => {
                       scrolled ? "text-xl" : "text-2xl"
                     }`}
                   >
-                    GAME PORTAL
+                      PLAYHUB
                   </span>
                   <div
                     className={`text-xs text-gray-400 transition-opacity duration-300 ${

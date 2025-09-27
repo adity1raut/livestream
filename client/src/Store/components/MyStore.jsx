@@ -189,8 +189,11 @@ function MyStore() {
   }
 
   return (
-    <div className=" bg-gradient-to-br from-gray-900 via-black to-purple-900 p-4 pt-24">
-      <GamingBackground />
+    <div className="bg-gradient-to-br from-gray-900 via-black to-purple-900 p-4 pt-24 relative overflow-hidden">
+      {/* GamingBackground as true background layer */}
+      <div className="absolute inset-0 w-full h-full -z-10 pointer-events-none">
+        <GamingBackground />
+      </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Header */}
         <div className="mb-8">

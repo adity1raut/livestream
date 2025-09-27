@@ -20,7 +20,7 @@ import GamingBackground from "../../GamingBackground/GamingBackground";
 
 export default function Cart() {
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
   const {
     cart,
     cartLoading,
@@ -134,6 +134,18 @@ export default function Cart() {
     ? safeCart.items.filter((item) => item.product)
     : [];
   const totalItems = getCartItemCount();
+
+  // Show loading spinner while auth status is loading
+  if (loading) {
+    return (
+      <div className="bg-gradient-to-br from-gray-900 via-black to-purple-900 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="animate-spin mx-auto text-purple-400" size={48} />
+          <p className="text-purple-300 mt-4 text-lg">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (

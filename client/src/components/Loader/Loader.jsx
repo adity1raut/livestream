@@ -1,9 +1,70 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Gamepad2, Zap, Trophy, Target, Cpu, Shield, Sword } from 'lucide-react';
 
 const Loader = () => {
   const [loadingText, setLoadingText] = useState("INITIALIZING GAME");
   const [progress, setProgress] = useState(0);
+
+  // Fixed positions for floating icons
+  const floatingIcons = useMemo(() => 
+    Array(12).fill().map((_, i) => ({
+      id: i,
+      left: (i * 23.7) % 90,
+      top: (i * 17.3 + 5) % 90,
+      fontSize: 12 + (i * 2) % 8,
+      animationDelay: (i * 0.8) % 4,
+      animationDuration: 4 + (i * 0.3) % 2,
+      iconType: i % 4
+    })), []
+  );
+
+  // Fixed positions for hexagons
+  const hexagons = useMemo(() => 
+    Array(20).fill().map((_, i) => ({
+      id: i,
+      left: (i * 13.5) % 90,
+      top: (i * 19.7) % 90,
+      animationDelay: (i * 0.4) % 3,
+      animationDuration: 8 + (i * 0.7) % 4
+    })), []
+  );
+
+  // Nebula effect elements - same as GamingBackground
+  const nebulaElements = useMemo(() => ({
+    large: Array(5).fill().map((_, i) => ({
+      id: i,
+      width: 200 + (i * 50) % 300,
+      height: 150 + (i * 40) % 200,
+      left: (20 + i * 15) % 80,
+      top: (10 + i * 18) % 80,
+      color1: [120 + (i * 30) % 135, 50 + (i * 20) % 100, 200 + (i * 10) % 55],
+      color2: [80 + (i * 25) % 100, 30 + (i * 15) % 80, 150 + (i * 20) % 105],
+      delay: i * 2,
+      duration: 15 + (i * 3) % 10
+    })),
+    medium: Array(8).fill().map((_, i) => ({
+      id: i,
+      width: 100 + (i * 25) % 150,
+      height: 80 + (i * 20) % 120,
+      left: (i * 12) % 90,
+      top: (5 + i * 11) % 90,
+      color1: [200 + (i * 15) % 55, 100 + (i * 18) % 100, 200 + (i * 12) % 55],
+      color2: [150 + (i * 20) % 105, 80 + (i * 16) % 80, 180 + (i * 14) % 75],
+      delay: i * 1.5,
+      duration: 12 + (i * 2) % 8
+    })),
+    small: Array(12).fill().map((_, i) => ({
+      id: i,
+      width: 40 + (i * 10) % 80,
+      height: 30 + (i * 8) % 60,
+      left: (i * 8) % 95,
+      top: (3 + i * 7) % 95,
+      color1: [180 + (i * 12) % 75, 120 + (i * 14) % 80, 220 + (i * 8) % 35],
+      color2: [100 + (i * 18) % 100, 60 + (i * 16) % 100, 180 + (i * 10) % 75],
+      delay: i * 1,
+      duration: 8 + (i * 1.5) % 6
+    }))
+  }), []);
 
   useEffect(() => {
     const texts = [
@@ -34,10 +95,87 @@ const Loader = () => {
     };
   }, []);
 
+  const renderIcon = (iconType) => {
+    switch(iconType) {
+      case 0: return <Gamepad2 />;
+      case 1: return <Zap />;
+      case 2: return <Shield />;
+      case 3: return <Sword />;
+      default: return <Gamepad2 />;
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-black to-purple-900 flex items-center justify-center z-50 overflow-hidden">
       {/* Gaming Background Effects */}
       <div className="absolute inset-0">
+        
+        {/* Nebula Effect */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Large Nebula Clouds */}
+          {nebulaElements.large.map((nebula) => (
+            <div
+              key={`nebula-large-${nebula.id}`}
+              className="absolute rounded-full animate-nebula-drift"
+              style={{
+                width: `${nebula.width}px`,
+                height: `${nebula.height}px`,
+                left: `${nebula.left}%`,
+                top: `${nebula.top}%`,
+                background: `radial-gradient(ellipse at center, 
+                  rgba(${nebula.color1[0]}, ${nebula.color1[1]}, ${nebula.color1[2]}, 0.3) 0%,
+                  rgba(${nebula.color2[0]}, ${nebula.color2[1]}, ${nebula.color2[2]}, 0.2) 40%,
+                  transparent 70%)`,
+                filter: 'blur(40px)',
+                animationDelay: `${nebula.delay}s`,
+                animationDuration: `${nebula.duration}s`
+              }}
+            />
+          ))}
+          
+          {/* Medium Nebula Clouds */}
+          {nebulaElements.medium.map((nebula) => (
+            <div
+              key={`nebula-medium-${nebula.id}`}
+              className="absolute rounded-full animate-nebula-float"
+              style={{
+                width: `${nebula.width}px`,
+                height: `${nebula.height}px`,
+                left: `${nebula.left}%`,
+                top: `${nebula.top}%`,
+                background: `radial-gradient(ellipse at center, 
+                  rgba(${nebula.color1[0]}, ${nebula.color1[1]}, ${nebula.color1[2]}, 0.25) 0%,
+                  rgba(${nebula.color2[0]}, ${nebula.color2[1]}, ${nebula.color2[2]}, 0.15) 50%,
+                  transparent 80%)`,
+                filter: 'blur(25px)',
+                animationDelay: `${nebula.delay}s`,
+                animationDuration: `${nebula.duration}s`
+              }}
+            />
+          ))}
+          
+          {/* Small Nebula Wisps */}
+          {nebulaElements.small.map((nebula) => (
+            <div
+              key={`nebula-small-${nebula.id}`}
+              className="absolute rounded-full animate-nebula-wisp"
+              style={{
+                width: `${nebula.width}px`,
+                height: `${nebula.height}px`,
+                left: `${nebula.left}%`,
+                top: `${nebula.top}%`,
+                background: `radial-gradient(ellipse at center, 
+                  rgba(${nebula.color1[0]}, ${nebula.color1[1]}, ${nebula.color1[2]}, 0.2) 0%,
+                  rgba(${nebula.color2[0]}, ${nebula.color2[1]}, ${nebula.color2[2]}, 0.1) 60%,
+                  transparent 90%)`,
+                filter: 'blur(15px)',
+                animationDelay: `${nebula.delay}s`,
+                animationDuration: `${nebula.duration}s`
+              }}
+            />
+          ))}
+        </div>
+
         {/* Circuit Pattern Background */}
         <div className="absolute inset-0 opacity-20">
           {/* Horizontal lines */}
@@ -72,36 +210,33 @@ const Loader = () => {
         </div>
 
         {/* Floating Gaming Icons */}
-        {[...Array(12)].map((_, i) => (
+        {floatingIcons.map((icon) => (
           <div
-            key={`icon-${i}`}
+            key={`icon-${icon.id}`}
             className="absolute text-purple-400/30 animate-float"
             style={{
-              left: `${Math.random() * 90}%`,
-              top: `${Math.random() * 90}%`,
-              fontSize: `${12 + Math.random() * 8}px`,
-              animationDelay: `${Math.random() * 4}s`,
-              animationDuration: `${4 + Math.random() * 2}s`
+              left: `${icon.left}%`,
+              top: `${icon.top}%`,
+              fontSize: `${icon.fontSize}px`,
+              animationDelay: `${icon.animationDelay}s`,
+              animationDuration: `${icon.animationDuration}s`
             }}
           >
-            {i % 4 === 0 && <Gamepad2 />}
-            {i % 4 === 1 && <Zap />}
-            {i % 4 === 2 && <Shield />}
-            {i % 4 === 3 && <Sword />}
+            {renderIcon(icon.iconType)}
           </div>
         ))}
 
         {/* Hexagon Pattern */}
         <div className="absolute inset-0 opacity-10">
-          {[...Array(20)].map((_, i) => (
+          {hexagons.map((hex) => (
             <div
-              key={`hex-${i}`}
+              key={`hex-${hex.id}`}
               className="absolute w-8 h-8 border border-purple-400 transform rotate-45 animate-spin-slow"
               style={{
-                left: `${Math.random() * 90}%`,
-                top: `${Math.random() * 90}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${8 + Math.random() * 4}s`
+                left: `${hex.left}%`,
+                top: `${hex.top}%`,
+                animationDelay: `${hex.animationDelay}s`,
+                animationDuration: `${hex.animationDuration}s`
               }}
             />
           ))}
@@ -153,7 +288,7 @@ const Loader = () => {
         {/* Game Title */}
         <div>
           <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-gray-200 to-purple-400 animate-text-glow drop-shadow-2xl font-mono">
-            ADITYA
+            PLAYHUB
           </h1>
           <p className="text-2xl text-gray-200 mt-2 tracking-wider font-light drop-shadow-lg">
             LOADING
@@ -263,12 +398,58 @@ const Loader = () => {
           animation: scan 2s ease-in-out infinite;
         }
         
-        @keyframes glitch {
-          0%, 98%, 100% { opacity: 0; }
-          99% { opacity: 1; }
+        @keyframes nebula-drift {
+          0%, 100% { 
+            transform: translate(0px, 0px) scale(1);
+            opacity: 0.6;
+          }
+          25% { 
+            transform: translate(20px, -15px) scale(1.1);
+            opacity: 0.8;
+          }
+          50% { 
+            transform: translate(-10px, -25px) scale(0.9);
+            opacity: 0.7;
+          }
+          75% { 
+            transform: translate(-20px, 10px) scale(1.05);
+            opacity: 0.9;
+          }
         }
-        .animate-glitch {
-          animation: glitch 4s infinite;
+        .animate-nebula-drift {
+          animation: nebula-drift 20s ease-in-out infinite;
+        }
+        
+        @keyframes nebula-float {
+          0%, 100% { 
+            transform: translate(0px, 0px) scale(1) rotate(0deg);
+            opacity: 0.5;
+          }
+          33% { 
+            transform: translate(15px, -20px) scale(1.2) rotate(1deg);
+            opacity: 0.7;
+          }
+          66% { 
+            transform: translate(-15px, 15px) scale(0.8) rotate(-1deg);
+            opacity: 0.6;
+          }
+        }
+        .animate-nebula-float {
+          animation: nebula-float 15s ease-in-out infinite;
+        }
+        
+        @keyframes nebula-wisp {
+          0%, 100% { 
+            transform: translate(0px, 0px) scale(1) rotate(0deg);
+            opacity: 0.4;
+          }
+          50% { 
+            transform: translate(25px, -30px) scale(1.3) rotate(2deg);
+            opacity: 0.6;
+          }
+        }
+        .animate-nebula-wisp {
+          animation: nebula-wisp 10s ease-in-out infinite;
         }
         
         @keyframes data-stream {
